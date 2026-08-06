@@ -1,4 +1,5 @@
 using CronogramaTrabajo.Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CronogramaTrabajo.Web.Data;
 
@@ -6,7 +7,7 @@ public static class DbInitializer
 {
     public static void Seed(CronogramaContext context)
     {
-        context.Database.EnsureCreated();
+        context.Database.Migrate();
 
         if (context.Tareas.Any())
         {
