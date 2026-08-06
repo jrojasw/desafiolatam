@@ -25,13 +25,19 @@
 
             <div class="mb-3">
                 <label asp-for="Contrasena" class="form-label"></label>
-                <input asp-for="Contrasena" class="form-control" />
+                <div class="input-group">
+                    <input asp-for="Contrasena" class="form-control" />
+                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="Contrasena">👁</button>
+                </div>
                 <span asp-validation-for="Contrasena" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="ConfirmarContrasena" class="form-label"></label>
-                <input asp-for="ConfirmarContrasena" class="form-control" />
+                <div class="input-group">
+                    <input asp-for="ConfirmarContrasena" class="form-control" />
+                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="ConfirmarContrasena">👁</button>
+                </div>
                 <span asp-validation-for="ConfirmarContrasena" class="text-danger"></span>
             </div>
 
