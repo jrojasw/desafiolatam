@@ -1,4 +1,8 @@
 using CronogramaTrabajo.Web.Data;
+using CronogramaTrabajo.Web.Models;
+using CronogramaTrabajo.Web.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,11 +14,41 @@ if (!string.IsNullOrEmpty(port))
 }
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AuthorizeFilter());
+});
 
 builder.Services.AddDbContext<CronogramaContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("CronogramaContext")
         ?? "Data Source=cronograma.db"));
+
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedEmail = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+    })
+    .AddEntityFrameworkStores<CronogramaContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Cuenta/IniciarSesion";
+    options.AccessDeniedPath = "/Cuenta/IniciarSesion";
+    options.LogoutPath = "/Cuenta/CerrarSesion";
+});
+
+if (!string.IsNullOrWhiteSpace(builder.Configuration["Resend:ApiKey"]))
+{
+    builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailSender, DevEmailSender>();
+}
 
 var app = builder.Build();
 
@@ -27,6 +61,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

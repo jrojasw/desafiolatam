@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Confirmar correo";
+    var exito = ViewBag.Exito as bool? ?? false;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        @if (exito)
+        {
+            <h1 class="h3 mb-3">Correo confirmado ✅</h1>
+            <p>Tu cuenta ya está activa. Ya puedes iniciar sesión.</p>
+        }
+        else
+        {
+            <h1 class="h3 mb-3">No pudimos confirmar tu correo ❌</h1>
+            <p>El enlace es inválido o ya expiró. Intenta registrarte de nuevo o pide un nuevo enlace desde la pantalla de inicio de sesión.</p>
+        }
+        <a asp-action="IniciarSesion" class="btn btn-primary mt-3">Ir a iniciar sesión</a>
+    </div>
+</div>
