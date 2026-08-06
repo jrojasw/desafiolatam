@@ -1,0 +1,16 @@
+# .NET build output
+bin/
+obj/
+
+# SQLite database (generado en runtime)
+*.db
+*.db-shm
+*.db-wal
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+
+# Logs
+*.log

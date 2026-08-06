@@ -1,0 +1,64 @@
+@model Tarea
+
+@{
+    ViewData["Title"] = "Nueva tarea";
+}
+
+<h1 class="h3 mb-4">Nueva tarea</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Titulo" class="form-label"></label>
+                <input asp-for="Titulo" class="form-control" />
+                <span asp-validation-for="Titulo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Descripcion" class="form-label"></label>
+                <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Responsable" class="form-label"></label>
+                <input asp-for="Responsable" class="form-control" />
+                <span asp-validation-for="Responsable" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col mb-3">
+                    <label asp-for="FechaInicio" class="form-label"></label>
+                    <input asp-for="FechaInicio" class="form-control" />
+                    <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                </div>
+                <div class="col mb-3">
+                    <label asp-for="FechaFin" class="form-label"></label>
+                    <input asp-for="FechaFin" class="form-control" />
+                    <span asp-validation-for="FechaFin" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col mb-3">
+                    <label asp-for="Estado" class="form-label"></label>
+                    <select asp-for="Estado" asp-items="Html.GetEnumSelectList<EstadoTarea>()" class="form-select"></select>
+                </div>
+                <div class="col mb-3">
+                    <label asp-for="Prioridad" class="form-label"></label>
+                    <select asp-for="Prioridad" asp-items="Html.GetEnumSelectList<Prioridad>()" class="form-select"></select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,30 @@
+@model Tarea
+
+@{
+    ViewData["Title"] = "Detalle de tarea";
+}
+
+<h1 class="h3 mb-4">@Model.Titulo</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Descripción</dt>
+    <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Descripcion) ? "—" : Model.Descripcion)</dd>
+
+    <dt class="col-sm-3">Responsable</dt>
+    <dd class="col-sm-9">@Model.Responsable</dd>
+
+    <dt class="col-sm-3">Fecha de inicio</dt>
+    <dd class="col-sm-9">@Model.FechaInicio.ToString("dd-MM-yyyy")</dd>
+
+    <dt class="col-sm-3">Fecha de término</dt>
+    <dd class="col-sm-9">@Model.FechaFin.ToString("dd-MM-yyyy")</dd>
+
+    <dt class="col-sm-3">Prioridad</dt>
+    <dd class="col-sm-9"><span class="badge @Model.Prioridad.ClaseBadgePrioridad()">@Model.Prioridad.TextoAmigable()</span></dd>
+
+    <dt class="col-sm-3">Estado</dt>
+    <dd class="col-sm-9"><span class="badge @Model.Estado.ClaseBadge()">@Model.Estado.TextoAmigable()</span></dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+<a asp-action="Index" class="btn btn-outline-secondary">Volver al listado</a>
