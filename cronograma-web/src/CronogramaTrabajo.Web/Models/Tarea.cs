@@ -36,6 +36,15 @@ public class Tarea : IValidatableObject
     [Display(Name = "Prioridad")]
     public Prioridad Prioridad { get; set; } = Prioridad.Media;
 
+    public bool Eliminada { get; set; }
+
+    [Display(Name = "Fecha de eliminación")]
+    public DateTime? FechaEliminacion { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Eliminada por")]
+    public string? EliminadaPor { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (FechaFin < FechaInicio)

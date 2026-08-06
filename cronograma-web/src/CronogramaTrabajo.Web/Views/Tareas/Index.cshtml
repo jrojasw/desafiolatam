@@ -56,7 +56,10 @@ else
                         <td class="text-end">
                             <a asp-action="Details" asp-route-id="@tarea.Id" class="btn btn-sm btn-outline-secondary">Ver</a>
                             <a asp-action="Edit" asp-route-id="@tarea.Id" class="btn btn-sm btn-outline-primary">Editar</a>
-                            <a asp-action="Delete" asp-route-id="@tarea.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                            @if (User.IsInRole(IdentitySeeder.RolAdministrador))
+                            {
+                                <a asp-action="Delete" asp-route-id="@tarea.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                            }
                         </td>
                     </tr>
                 }

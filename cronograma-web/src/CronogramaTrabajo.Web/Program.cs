@@ -37,7 +37,7 @@ builder.Services
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Cuenta/IniciarSesion";
-    options.AccessDeniedPath = "/Cuenta/IniciarSesion";
+    options.AccessDeniedPath = "/Cuenta/AccesoDenegado";
     options.LogoutPath = "/Cuenta/CerrarSesion";
 });
 
@@ -72,6 +72,10 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CronogramaContext>();
     DbInitializer.Seed(context);
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    await IdentitySeeder.SeedAsync(roleManager, userManager, app.Configuration);
 }
 
 app.Run();

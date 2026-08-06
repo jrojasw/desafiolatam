@@ -1,3 +1,4 @@
+using CronogramaTrabajo.Web.Data;
 using CronogramaTrabajo.Web.Models;
 using CronogramaTrabajo.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,17 +12,20 @@ public class CuentaController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailSender _emailSender;
     private readonly IConfiguration _configuration;
 
     public CuentaController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
+        RoleManager<IdentityRole> roleManager,
         IEmailSender emailSender,
         IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
         _emailSender = emailSender;
         _configuration = configuration;
     }
@@ -65,6 +69,17 @@ public class CuentaController : Controller
             return View(modelo);
         }
 
+        var adminEmail = _configuration["AccessControl:AdminEmail"];
+        if (!string.IsNullOrWhiteSpace(adminEmail) &&
+            correo.Equals(adminEmail.Trim().ToLowerInvariant(), StringComparison.OrdinalIgnoreCase))
+        {
+            if (!await _roleManager.RoleExistsAsync(IdentitySeeder.RolAdministrador))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(IdentitySeeder.RolAdministrador));
+            }
+            await _userManager.AddToRoleAsync(usuario, IdentitySeeder.RolAdministrador);
+        }
+
         await EnviarCorreoConfirmacionAsync(usuario);
 
         return RedirectToAction(nameof(RevisaTuCorreo));
@@ -72,6 +87,9 @@ public class CuentaController : Controller
 
     [HttpGet]
     public IActionResult RevisaTuCorreo() => View();
+
+    [HttpGet]
+    public IActionResult AccesoDenegado() => View();
 
     [HttpGet]
     public async Task<IActionResult> ConfirmarCorreo(string userId, string token)

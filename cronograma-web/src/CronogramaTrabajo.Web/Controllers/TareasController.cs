@@ -1,5 +1,6 @@
 using CronogramaTrabajo.Web.Data;
 using CronogramaTrabajo.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,7 @@ public class TareasController : Controller
     // GET: Tareas
     public async Task<IActionResult> Index(EstadoTarea? estado)
     {
-        var query = _context.Tareas.AsQueryable();
+        var query = _context.Tareas.Where(t => !t.Eliminada);
 
         if (estado.HasValue)
         {
@@ -41,7 +42,7 @@ public class TareasController : Controller
             return NotFound();
         }
 
-        var tarea = await _context.Tareas.FirstOrDefaultAsync(t => t.Id == id);
+        var tarea = await _context.Tareas.FirstOrDefaultAsync(t => t.Id == id && !t.Eliminada);
         if (tarea is null)
         {
             return NotFound();
@@ -81,7 +82,7 @@ public class TareasController : Controller
             return NotFound();
         }
 
-        var tarea = await _context.Tareas.FindAsync(id);
+        var tarea = await _context.Tareas.FirstOrDefaultAsync(t => t.Id == id && !t.Eliminada);
         if (tarea is null)
         {
             return NotFound();
@@ -106,7 +107,20 @@ public class TareasController : Controller
         {
             try
             {
-                _context.Update(tarea);
+                var tareaExistente = await _context.Tareas.FindAsync(id);
+                if (tareaExistente is null || tareaExistente.Eliminada)
+                {
+                    return NotFound();
+                }
+
+                tareaExistente.Titulo = tarea.Titulo;
+                tareaExistente.Descripcion = tarea.Descripcion;
+                tareaExistente.Responsable = tarea.Responsable;
+                tareaExistente.FechaInicio = tarea.FechaInicio;
+                tareaExistente.FechaFin = tarea.FechaFin;
+                tareaExistente.Estado = tarea.Estado;
+                tareaExistente.Prioridad = tarea.Prioridad;
+
                 await _context.SaveChangesAsync();
                 TempData["Mensaje"] = "Tarea actualizada correctamente.";
             }
@@ -126,6 +140,7 @@ public class TareasController : Controller
     }
 
     // GET: Tareas/Delete/5
+    [Authorize(Roles = IdentitySeeder.RolAdministrador)]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id is null)
@@ -133,7 +148,7 @@ public class TareasController : Controller
             return NotFound();
         }
 
-        var tarea = await _context.Tareas.FirstOrDefaultAsync(t => t.Id == id);
+        var tarea = await _context.Tareas.FirstOrDefaultAsync(t => t.Id == id && !t.Eliminada);
         if (tarea is null)
         {
             return NotFound();
@@ -145,17 +160,51 @@ public class TareasController : Controller
     // POST: Tareas/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = IdentitySeeder.RolAdministrador)]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var tarea = await _context.Tareas.FindAsync(id);
-        if (tarea is not null)
+        if (tarea is not null && !tarea.Eliminada)
         {
-            _context.Tareas.Remove(tarea);
+            tarea.Eliminada = true;
+            tarea.FechaEliminacion = DateTime.UtcNow;
+            tarea.EliminadaPor = User.Identity?.Name;
             await _context.SaveChangesAsync();
-            TempData["Mensaje"] = "Tarea eliminada correctamente.";
+            TempData["Mensaje"] = "Tarea movida a la papelera.";
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    // GET: Tareas/Eliminadas (papelera, solo admin)
+    [Authorize(Roles = IdentitySeeder.RolAdministrador)]
+    public async Task<IActionResult> Eliminadas()
+    {
+        var tareas = await _context.Tareas
+            .Where(t => t.Eliminada)
+            .OrderByDescending(t => t.FechaEliminacion)
+            .ToListAsync();
+
+        return View(tareas);
+    }
+
+    // POST: Tareas/Recuperar/5 (solo admin)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = IdentitySeeder.RolAdministrador)]
+    public async Task<IActionResult> Recuperar(int id)
+    {
+        var tarea = await _context.Tareas.FindAsync(id);
+        if (tarea is not null && tarea.Eliminada)
+        {
+            tarea.Eliminada = false;
+            tarea.FechaEliminacion = null;
+            tarea.EliminadaPor = null;
+            await _context.SaveChangesAsync();
+            TempData["Mensaje"] = "Tarea recuperada correctamente.";
+        }
+
+        return RedirectToAction(nameof(Eliminadas));
     }
 
     // GET: Tareas/Calendario
@@ -167,7 +216,7 @@ public class TareasController : Controller
     // GET: Tareas/Eventos  (JSON para el calendario)
     public async Task<IActionResult> Eventos()
     {
-        var tareas = await _context.Tareas.ToListAsync();
+        var tareas = await _context.Tareas.Where(t => !t.Eliminada).ToListAsync();
 
         var eventos = tareas.Select(t => new
         {
