@@ -182,6 +182,85 @@ public class CuentaController : Controller
         return RedirectToAction(nameof(IniciarSesion));
     }
 
+    [HttpGet]
+    public IActionResult OlvideContrasena() => View(new OlvideContrasenaViewModel());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> OlvideContrasena(OlvideContrasenaViewModel modelo)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+
+        var usuario = await _userManager.FindByEmailAsync(modelo.Correo.Trim().ToLowerInvariant());
+
+        // Siempre mostramos el mismo mensaje exista o no la cuenta, para no revelar
+        // qué correos están registrados.
+        if (usuario is not null && await _userManager.IsEmailConfirmedAsync(usuario))
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
+            var enlace = Url.Action(nameof(RestablecerContrasena), "Cuenta",
+                new { userId = usuario.Id, token }, protocol: Request.Scheme);
+
+            var cuerpo = $@"
+                <p>Hola {usuario.NombreCompleto},</p>
+                <p>Recibimos una solicitud para restablecer tu contraseña del Cronograma de Trabajo. Haz clic en el siguiente enlace para crear una nueva:</p>
+                <p><a href=""{enlace}"">Restablecer mi contraseña</a></p>
+                <p>Si no solicitaste esto, puedes ignorar este mensaje — tu contraseña actual sigue siendo válida.</p>";
+
+            await _emailSender.SendEmailAsync(usuario.Email!, "Restablece tu contraseña - Cronograma de Trabajo", cuerpo);
+        }
+
+        return RedirectToAction(nameof(RevisaTuCorreoRestablecer));
+    }
+
+    [HttpGet]
+    public IActionResult RevisaTuCorreoRestablecer() => View();
+
+    [HttpGet]
+    public IActionResult RestablecerContrasena(string userId, string token)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        {
+            return RedirectToAction(nameof(IniciarSesion));
+        }
+
+        return View(new RestablecerContrasenaViewModel { UserId = userId, Token = token });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RestablecerContrasena(RestablecerContrasenaViewModel modelo)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+
+        var usuario = await _userManager.FindByIdAsync(modelo.UserId);
+        if (usuario is null)
+        {
+            return RedirectToAction(nameof(RestablecerContrasenaExitosa));
+        }
+
+        var resultado = await _userManager.ResetPasswordAsync(usuario, modelo.Token, modelo.NuevaContrasena);
+        if (!resultado.Succeeded)
+        {
+            foreach (var error in resultado.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(modelo);
+        }
+
+        return RedirectToAction(nameof(RestablecerContrasenaExitosa));
+    }
+
+    [HttpGet]
+    public IActionResult RestablecerContrasenaExitosa() => View();
+
     private async Task EnviarCorreoConfirmacionAsync(ApplicationUser usuario)
     {
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(usuario);
