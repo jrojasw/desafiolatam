@@ -8,7 +8,10 @@
 
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <h1 class="h3 mb-4">Iniciar sesión</h1>
+        <div class="text-center mb-4">
+            <img src="~/img/logo-cpynos.png" alt="CPY NOS" style="height: 80px;" />
+        </div>
+        <h1 class="h3 mb-4 text-center">Iniciar sesión</h1>
 
         <form asp-action="IniciarSesion" asp-route-returnUrl="@returnUrl" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
@@ -33,7 +36,7 @@
                 <label asp-for="Recordarme" class="form-check-label"></label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Entrar</button>
+            <button type="submit" class="btn btn-acento w-100">Entrar</button>
         </form>
 
         @if (!string.IsNullOrEmpty(correoParaReenviar))

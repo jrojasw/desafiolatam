@@ -1,3 +1,62 @@
+:root {
+  --marca-azul: #2CA8DE;
+  --marca-azul-oscuro: #1E87B8;
+  --marca-naranja: #E87033;
+  --marca-naranja-oscuro: #C85A22;
+
+  --bs-primary: var(--marca-azul);
+  --bs-primary-rgb: 44, 168, 222;
+  --bs-link-color: var(--marca-azul);
+  --bs-link-color-rgb: 44, 168, 222;
+  --bs-link-hover-color: var(--marca-azul-oscuro);
+  --bs-link-hover-color-rgb: 30, 135, 184;
+}
+
+.navbar.bg-primary {
+  background-color: var(--marca-azul) !important;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--marca-azul);
+  --bs-btn-border-color: var(--marca-azul);
+  --bs-btn-hover-bg: var(--marca-azul-oscuro);
+  --bs-btn-hover-border-color: var(--marca-azul-oscuro);
+  --bs-btn-active-bg: var(--marca-azul-oscuro);
+  --bs-btn-active-border-color: var(--marca-azul-oscuro);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--marca-azul);
+  --bs-btn-border-color: var(--marca-azul);
+  --bs-btn-hover-bg: var(--marca-azul);
+  --bs-btn-hover-border-color: var(--marca-azul);
+  --bs-btn-active-bg: var(--marca-azul);
+  --bs-btn-active-border-color: var(--marca-azul);
+}
+
+.nav-pills .nav-link.active {
+  background-color: var(--marca-azul);
+}
+
+.btn-acento {
+  background-color: var(--marca-naranja);
+  border-color: var(--marca-naranja);
+  color: #fff;
+}
+
+.btn-acento:hover,
+.btn-acento:active,
+.btn-acento:focus {
+  background-color: var(--marca-naranja-oscuro) !important;
+  border-color: var(--marca-naranja-oscuro) !important;
+  color: #fff !important;
+}
+
+.logo-marca {
+  height: 36px;
+  width: auto;
+}
+
 html {
   font-size: 14px;
 }
