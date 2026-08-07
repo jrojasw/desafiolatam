@@ -1,6 +1,8 @@
 using CronogramaTrabajo.Web.Data;
 using CronogramaTrabajo.Web.Models;
 using CronogramaTrabajo.Web.Services;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,9 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddDbContext<CronogramaContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("CronogramaContext")
         ?? "Data Source=cronograma.db"));
+
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<CronogramaContext>();
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -52,6 +57,20 @@ else
 
 var app = builder.Build();
 
+// Aplica migraciones y siembra datos ANTES de configurar el pipeline: algunos
+// middlewares (autenticación, antifalsificación) pueden intentar leer la
+// tabla de llaves de DataProtection apenas se registran, así que la base de
+// datos debe existir primero.
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CronogramaContext>();
+    DbInitializer.Seed(context);
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    await IdentitySeeder.SeedAsync(roleManager, userManager, app.Configuration);
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -67,15 +86,5 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Tareas}/{action=Index}/{id?}");
-
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<CronogramaContext>();
-    DbInitializer.Seed(context);
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    await IdentitySeeder.SeedAsync(roleManager, userManager, app.Configuration);
-}
 
 app.Run();
