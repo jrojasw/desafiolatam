@@ -1,0 +1,44 @@
+@model RestablecerContrasenaViewModel
+
+@{
+    ViewData["Title"] = "Restablecer contraseña";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mb-4">
+            <img src="~/img/logo-cpynos.png" alt="CPY NOS" style="height: 80px;" />
+        </div>
+        <h1 class="h3 mb-4 text-center">Crea una nueva contraseña</h1>
+
+        <form asp-action="RestablecerContrasena" method="post">
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="Token" />
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="NuevaContrasena" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="NuevaContrasena" class="form-control" autofocus />
+                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="NuevaContrasena">👁</button>
+                </div>
+                <span asp-validation-for="NuevaContrasena" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmarNuevaContrasena" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="ConfirmarNuevaContrasena" class="form-control" />
+                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="ConfirmarNuevaContrasena">👁</button>
+                </div>
+                <span asp-validation-for="ConfirmarNuevaContrasena" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-acento w-100">Cambiar contraseña</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

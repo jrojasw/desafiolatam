@@ -1,0 +1,32 @@
+@model Tarea
+
+@{
+    ViewData["Title"] = "Eliminar tarea";
+}
+
+<h1 class="h3 mb-4">Eliminar tarea</h1>
+
+<div class="alert alert-warning">¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Título</dt>
+    <dd class="col-sm-9">@Model.Titulo</dd>
+
+    <dt class="col-sm-3">Responsable</dt>
+    <dd class="col-sm-9">@Model.Responsable</dd>
+
+    <dt class="col-sm-3">Fecha de inicio</dt>
+    <dd class="col-sm-9">@Model.FechaInicio.ToString("dd-MM-yyyy")</dd>
+
+    <dt class="col-sm-3">Fecha de término</dt>
+    <dd class="col-sm-9">@Model.FechaFin.ToString("dd-MM-yyyy")</dd>
+
+    <dt class="col-sm-3">Estado</dt>
+    <dd class="col-sm-9"><span class="badge @Model.Estado.ClaseBadge()">@Model.Estado.TextoAmigable()</span></dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>

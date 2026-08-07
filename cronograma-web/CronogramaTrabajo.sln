@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{40ACE1D7-1232-4DB5-A539-E4B513C7C7AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CronogramaTrabajo.Web", "src\CronogramaTrabajo.Web\CronogramaTrabajo.Web.csproj", "{74988F0D-0B09-4A50-A737-8DB0B8E0965A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{74988F0D-0B09-4A50-A737-8DB0B8E0965A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74988F0D-0B09-4A50-A737-8DB0B8E0965A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74988F0D-0B09-4A50-A737-8DB0B8E0965A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74988F0D-0B09-4A50-A737-8DB0B8E0965A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{74988F0D-0B09-4A50-A737-8DB0B8E0965A} = {40ACE1D7-1232-4DB5-A539-E4B513C7C7AC}
+	EndGlobalSection
+EndGlobal

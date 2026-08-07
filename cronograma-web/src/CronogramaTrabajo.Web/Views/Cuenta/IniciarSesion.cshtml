@@ -1,0 +1,61 @@
+@model IniciarSesionViewModel
+
+@{
+    ViewData["Title"] = "Iniciar sesión";
+    var returnUrl = ViewBag.ReturnUrl as string;
+    var correoParaReenviar = ViewBag.CorreoParaReenviar as string;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mb-4">
+            <img src="~/img/logo-cpynos.png" alt="CPY NOS" style="height: 80px;" />
+        </div>
+        <h1 class="h3 mb-4 text-center">Iniciar sesión</h1>
+
+        <form asp-action="IniciarSesion" asp-route-returnUrl="@returnUrl" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Correo" class="form-label"></label>
+                <input asp-for="Correo" class="form-control" autofocus />
+                <span asp-validation-for="Correo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Contrasena" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="Contrasena" class="form-control" />
+                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="Contrasena">👁</button>
+                </div>
+                <span asp-validation-for="Contrasena" class="text-danger"></span>
+                <div class="text-end mt-1">
+                    <a asp-action="OlvideContrasena" class="small">¿Olvidaste tu contraseña?</a>
+                </div>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input asp-for="Recordarme" class="form-check-input" />
+                <label asp-for="Recordarme" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-acento w-100">Entrar</button>
+        </form>
+
+        @if (!string.IsNullOrEmpty(correoParaReenviar))
+        {
+            <form asp-action="ReenviarConfirmacion" method="post" class="mt-3 text-center">
+                <input type="hidden" name="correo" value="@correoParaReenviar" />
+                <button type="submit" class="btn btn-link p-0">Reenviar correo de confirmación</button>
+            </form>
+        }
+
+        <p class="mt-3 text-center">
+            ¿No tienes cuenta? <a asp-action="Registrar">Regístrate</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

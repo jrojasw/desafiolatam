@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Calendario";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Calendario de tareas</h1>
+    <a asp-action="Index" class="btn btn-outline-primary">Ver listado</a>
+</div>
+
+<div class="mb-3 d-flex flex-wrap gap-3">
+    <span><span class="badge" style="background-color:#6c757d">&nbsp;</span> Pendiente</span>
+    <span><span class="badge" style="background-color:#0d6efd">&nbsp;</span> En progreso</span>
+    <span><span class="badge" style="background-color:#198754">&nbsp;</span> Completada</span>
+    <span><span class="badge" style="background-color:#dc3545">&nbsp;</span> Atrasada</span>
+    <span><span class="badge" style="background-color:#adb5bd">&nbsp;</span> Cancelada</span>
+</div>
+
+<div id="calendario"></div>
+
+@section Scripts {
+    <script src="~/lib/fullcalendar/fullcalendar.min.js"></script>
+    <script src="~/lib/fullcalendar/es.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendario');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'es',
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek,listMonth'
+                },
+                height: 'auto',
+                events: '@Url.Action("Eventos", "Tareas")'
+            });
+            calendar.render();
+        });
+    </script>
+}
