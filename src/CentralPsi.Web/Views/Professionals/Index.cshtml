@@ -1,0 +1,43 @@
+@model CentralPsi.Web.Models.ViewModels.ProfessionalListViewModel
+@{
+    ViewData["Title"] = "Nuestros profesionales";
+}
+
+<section class="cp-section">
+    <div class="container">
+        <h1 class="cp-section-title">Nuestros profesionales</h1>
+        <p class="cp-section-subtitle">
+            Todos los psicólogos y psicólogas publicados en CentralPsi validaron su certificado ante la
+            Superintendencia de Salud antes de aparecer en este listado.
+        </p>
+
+        @if (Model.Professionals.Count == 0)
+        {
+            <p class="text-muted">Aún no hay profesionales publicados. ¡Vuelve pronto!</p>
+        }
+        else
+        {
+            <div class="row gy-4">
+                @foreach (var professional in Model.Professionals)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="cp-card">
+                            <img src="@(string.IsNullOrEmpty(professional.ProfilePhotoPath) ? Url.Content("~/images/seed/avatar-placeholder.svg") : Url.Content(professional.ProfilePhotoPath))"
+                                 class="cp-professional-photo" alt="@professional.FullName" />
+                            <div class="p-3">
+                                <h5 class="mb-1">@professional.FullName</h5>
+                                @if (!string.IsNullOrWhiteSpace(professional.Specialty))
+                                {
+                                    <div class="text-muted small mb-1">@professional.Specialty</div>
+                                }
+                                <div class="small mb-2"><strong>Orientación:</strong> @professional.Orientation</div>
+                                <p class="small text-muted mb-3">@(professional.Experience.Length > 140 ? professional.Experience[..140] + "…" : professional.Experience)</p>
+                                <a asp-action="Details" asp-route-id="@professional.Id" class="btn cp-btn-primary w-100">Ver perfil y agendar</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

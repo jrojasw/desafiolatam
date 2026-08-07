@@ -1,0 +1,38 @@
+@model List<NewsArticle>
+@{
+    ViewData["Title"] = "Noticias";
+}
+
+<a asp-action="Create" class="btn cp-btn-primary mb-3">+ Nueva noticia</a>
+
+<div class="table-responsive">
+    <table class="table cp-admin-table align-middle bg-white">
+        <thead><tr><th>Título</th><th>Categoría</th><th>Publicada</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var article in Model)
+            {
+                <tr>
+                    <td>@article.Title</td>
+                    <td>@article.Category</td>
+                    <td>@article.PublishedAtUtc.ToLocalTime().ToString("dd-MM-yyyy")</td>
+                    <td>
+                        @if (article.IsActive)
+                        {
+                            <span class="cp-status-pill cp-status-verified">Activa</span>
+                        }
+                        else
+                        {
+                            <span class="cp-status-pill cp-status-inactive">Inactiva</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@article.Id" class="btn btn-sm cp-btn-outline">Editar</a>
+                        <form asp-action="Delete" asp-route-id="@article.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta noticia?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,38 @@
+@model List<SlideImage>
+@{
+    ViewData["Title"] = "Slider de inicio";
+}
+
+<a asp-action="Create" class="btn cp-btn-primary mb-3">+ Nuevo slide</a>
+
+<div class="table-responsive">
+    <table class="table cp-admin-table align-middle bg-white">
+        <thead><tr><th>Imagen</th><th>Título</th><th>Orden</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var slide in Model)
+            {
+                <tr>
+                    <td><img src="@Url.Content(slide.ImagePath)" style="width:90px;height:50px;object-fit:cover;border-radius:.4rem;" /></td>
+                    <td>@slide.Title</td>
+                    <td>@slide.SortOrder</td>
+                    <td>
+                        @if (slide.IsActive)
+                        {
+                            <span class="cp-status-pill cp-status-verified">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="cp-status-pill cp-status-inactive">Inactivo</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@slide.Id" class="btn btn-sm cp-btn-outline">Editar</a>
+                        <form asp-action="Delete" asp-route-id="@slide.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este slide?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,13 @@
+## .NET
+bin/
+obj/
+*.user
+
+## Local secrets / private uploads
+src/CentralPsi.Web/App_Data/
+src/CentralPsi.Web/wwwroot/uploads/
+
+## IDE
+.vs/
+.vscode/
+*.swp

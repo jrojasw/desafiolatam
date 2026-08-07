@@ -1,0 +1,44 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Resumen";
+}
+
+<div class="row gy-3">
+    <div class="col-md-4 col-lg-2">
+        <div class="cp-form-card text-center">
+            <div class="display-6 fw-bold">@Model.PendingProfessionals</div>
+            <div class="text-muted small">Profesionales pendientes</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="cp-form-card text-center">
+            <div class="display-6 fw-bold">@Model.VerifiedProfessionals</div>
+            <div class="text-muted small">Profesionales publicados</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="cp-form-card text-center">
+            <div class="display-6 fw-bold">@Model.UpcomingAppointments</div>
+            <div class="text-muted small">Citas confirmadas próximas</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="cp-form-card text-center">
+            <div class="display-6 fw-bold">@Model.PendingRefunds</div>
+            <div class="text-muted small">Reembolsos pendientes</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="cp-form-card text-center">
+            <div class="display-6 fw-bold">$@Model.RevenueThisMonth.ToString("N0")</div>
+            <div class="text-muted small">Ingresos del mes (CLP)</div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    @if (Model.PendingProfessionals > 0)
+    {
+        <a asp-controller="Professionals" asp-action="Index" asp-route-status="PendingVerification" class="btn cp-btn-primary">Revisar profesionales pendientes</a>
+    }
+</div>

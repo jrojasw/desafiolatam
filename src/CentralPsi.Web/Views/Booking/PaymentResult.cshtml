@@ -1,0 +1,37 @@
+@using CentralPsi.Web.Models.Entities
+@inject CentralPsi.Web.Services.ITimeZoneService TimeZoneService
+@{
+    ViewData["Title"] = "Resultado del pago";
+    var aborted = ViewData["Aborted"] is true;
+    var approved = ViewData["Approved"] is true;
+    var appointment = ViewData["Appointment"] as Appointment;
+    var professional = ViewData["Professional"] as Professional;
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<section class="cp-section text-center">
+    <div class="container" style="max-width:640px;">
+        @if (aborted)
+        {
+            <h1 class="cp-section-title">Pago no completado</h1>
+            <p class="cp-section-subtitle">Cancelaste el proceso de pago en Webpay. Tu hora no quedó reservada; puedes intentarlo nuevamente cuando quieras.</p>
+            <a asp-controller="Professionals" asp-action="Index" class="btn cp-btn-primary btn-lg">Volver a profesionales</a>
+        }
+        else if (approved && appointment is not null && professional is not null)
+        {
+            <h1 class="cp-section-title">¡Pago exitoso!</h1>
+            <p class="cp-section-subtitle">
+                Tu hora con <strong>@professional.FullName</strong> quedó confirmada para el
+                @TimeZoneService.ToLocal(appointment.ScheduledStartUtc).ToString("dddd d 'de' MMMM, HH:mm 'hrs'", culture).
+                Te enviamos el detalle y el enlace de la sesión a @appointment.PatientEmail.
+            </p>
+            <a asp-controller="Home" asp-action="Index" class="btn cp-btn-primary btn-lg">Volver al inicio</a>
+        }
+        else
+        {
+            <h1 class="cp-section-title">El pago no fue aprobado</h1>
+            <p class="cp-section-subtitle">Tu banco rechazó la transacción. No se realizó ningún cobro. Puedes intentarlo nuevamente.</p>
+            <a asp-controller="Professionals" asp-action="Index" class="btn cp-btn-primary btn-lg">Volver a intentar</a>
+        }
+    </div>
+</section>

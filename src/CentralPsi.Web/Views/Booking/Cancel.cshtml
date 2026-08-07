@@ -1,0 +1,45 @@
+@model CentralPsi.Web.Models.ViewModels.CancellationViewModel
+@using CentralPsi.Web.Models.Entities
+@{
+    ViewData["Title"] = "Cancelar hora";
+    var culture = new System.Globalization.CultureInfo("es-CL");
+    var tierText = Model.ProjectedTier switch
+    {
+        RefundTier.Full100 => "100% del valor pagado",
+        RefundTier.Partial50 => "50% del valor pagado",
+        _ => "revisión manual (sin reembolso automático)"
+    };
+}
+
+<section class="cp-section">
+    <div class="container" style="max-width:680px;">
+        <h1 class="cp-section-title">Cancelar mi hora</h1>
+
+        <div class="cp-form-card">
+            <p><strong>Profesional:</strong> @Model.Professional.FullName</p>
+            <p><strong>Fecha y hora:</strong> @Model.StartLocal.ToString("dddd d 'de' MMMM 'de' yyyy, HH:mm 'hrs'", culture)</p>
+            <p><strong>Estado actual:</strong> @Model.Appointment.Status</p>
+
+            @if (Model.AlreadyCancelled)
+            {
+                <div class="alert alert-info">Esta hora ya fue cancelada anteriormente.</div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    Según nuestra política de reembolsos, si cancelas ahora corresponde un reembolso del
+                    <strong>@tierText</strong> (aprox. $@Model.ProjectedAmount.ToString("N0") CLP), procesado
+                    manualmente dentro de un máximo de 4 días hábiles.
+                </div>
+
+                <form asp-action="CancelConfirm" asp-route-token="@Model.Appointment.CancellationToken" method="post">
+                    <div class="mb-3">
+                        <label asp-for="Reason" class="form-label"></label>
+                        <textarea name="reason" class="form-control" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-lg">Confirmar cancelación</button>
+                </form>
+            }
+        </div>
+    </div>
+</section>

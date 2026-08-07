@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" width="900" height="900">
+  <defs>
+    <linearGradient id="gm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dff2ef"/>
+      <stop offset="100%" stop-color="#bfe3dd"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="900" rx="24" fill="url(#gm)"/>
+  <circle cx="450" cy="330" r="140" fill="#2f6f6a" opacity="0.9"/>
+  <circle cx="450" cy="330" r="90" fill="#ffffff" opacity="0.9"/>
+  <path d="M 300 620 Q 450 520 600 620 L 600 760 Q 450 700 300 760 Z" fill="#2f6f6a" opacity="0.85"/>
+  <text x="450" y="850" font-family="Segoe UI, Arial, sans-serif" font-size="34" fill="#1f4744" font-weight="600" text-anchor="middle">Cuidar tu mente también es salud</text>
+</svg>

@@ -1,0 +1,58 @@
+@model CentralPsi.Web.Models.ViewModels.BookingStartViewModel
+@{
+    ViewData["Title"] = "Confirma tu hora";
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<section class="cp-section">
+    <div class="container" style="max-width:720px;">
+        <h1 class="cp-section-title">Confirma tu hora</h1>
+
+        <div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
+            <strong>@Model.ProfessionalName</strong><br />
+            @Model.StartLocal.ToString("dddd d 'de' MMMM 'de' yyyy, HH:mm 'hrs'", culture) (hora de Chile)<br />
+            Valor de la sesión: <strong>$@Model.Amount.ToString("N0")</strong> CLP
+        </div>
+
+        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+        <form asp-action="Confirm" method="post" class="cp-form-card">
+            <input type="hidden" asp-for="ProfessionalId" />
+            <input type="hidden" asp-for="StartUtc" />
+
+            <div class="mb-3">
+                <label asp-for="PatientFullName" class="form-label"></label>
+                <input asp-for="PatientFullName" class="form-control" />
+                <span asp-validation-for="PatientFullName" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PatientEmail" class="form-label"></label>
+                <input asp-for="PatientEmail" class="form-control" />
+                <span asp-validation-for="PatientEmail" class="text-danger small"></span>
+                <div class="form-text">Aquí llegará el enlace de tu sesión y la confirmación del pago.</div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PatientPhone" class="form-label"></label>
+                <input asp-for="PatientPhone" class="form-control" />
+                <span asp-validation-for="PatientPhone" class="text-danger small"></span>
+            </div>
+
+            <div class="form-check my-4">
+                <input asp-for="TermsAccepted" class="form-check-input" />
+                <label asp-for="TermsAccepted" class="form-check-label small">
+                    He leído y acepto los <a asp-controller="Home" asp-action="Terms" target="_blank">términos y condiciones</a>,
+                    la política de reembolsos y entiendo que CentralPsi actúa únicamente como agendador entre el
+                    paciente y el profesional, sin mantener contrato de prestación de servicios con ninguna de las
+                    partes ni almacenar información clínica.
+                </label>
+                <div><span asp-validation-for="TermsAccepted" class="text-danger small"></span></div>
+            </div>
+
+            <button type="submit" class="btn cp-btn-primary btn-lg w-100">Continuar al pago</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

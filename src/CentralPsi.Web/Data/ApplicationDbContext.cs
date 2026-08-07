@@ -1,0 +1,78 @@
+using CentralPsi.Web.Models.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace CentralPsi.Web.Data;
+
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
+    {
+    }
+
+    public DbSet<Professional> Professionals => Set<Professional>();
+    public DbSet<ProfessionalAvailability> ProfessionalAvailabilities => Set<ProfessionalAvailability>();
+    public DbSet<Appointment> Appointments => Set<Appointment>();
+    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<CancellationRequest> CancellationRequests => Set<CancellationRequest>();
+    public DbSet<SlideImage> SlideImages => Set<SlideImage>();
+    public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<Professional>(e =>
+        {
+            e.HasIndex(p => p.Email).IsUnique();
+            e.HasIndex(p => p.CertificateValidationCode);
+            e.Property(p => p.Status).HasConversion<string>();
+            e.HasMany(p => p.Availabilities)
+                .WithOne(a => a.Professional)
+                .HasForeignKey(a => a.ProfessionalId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(p => p.Appointments)
+                .WithOne(a => a.Professional)
+                .HasForeignKey(a => a.ProfessionalId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Appointment>(e =>
+        {
+            e.Property(a => a.Status).HasConversion<string>();
+            e.HasIndex(a => new { a.ProfessionalId, a.ScheduledStartUtc });
+            e.HasIndex(a => a.CancellationToken).IsUnique();
+            e.HasIndex(a => a.PatientAttendanceToken).IsUnique();
+            e.HasIndex(a => a.ProfessionalAttendanceToken).IsUnique();
+            e.HasOne(a => a.Payment)
+                .WithOne(p => p.Appointment)
+                .HasForeignKey<Payment>(p => p.AppointmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(a => a.CancellationRequest)
+                .WithOne(c => c.Appointment)
+                .HasForeignKey<CancellationRequest>(c => c.AppointmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Payment>(e =>
+        {
+            e.Property(p => p.Status).HasConversion<string>();
+            e.Property(p => p.Amount).HasPrecision(10, 2);
+        });
+
+        builder.Entity<Appointment>().Property(a => a.Amount).HasPrecision(10, 2);
+
+        builder.Entity<CancellationRequest>(e =>
+        {
+            e.Property(c => c.RefundTier).HasConversion<string>();
+            e.Property(c => c.Status).HasConversion<string>();
+            e.Property(c => c.RefundAmount).HasPrecision(10, 2);
+        });
+
+        builder.Entity<NewsArticle>(e =>
+        {
+            e.Property(n => n.Category).HasConversion<string>();
+        });
+    }
+}

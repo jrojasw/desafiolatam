@@ -1,0 +1,71 @@
+@model CentralPsi.Web.Models.ViewModels.InternalCalendarViewModel
+@using CentralPsi.Web.Models.Entities
+@{
+    ViewData["Title"] = "Calendario interno de citas";
+    Layout = null;
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body style="padding:2rem;background:var(--cp-bg);">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">Calendario interno de citas</h3>
+            <form asp-action="Index" method="get" class="d-flex gap-2 align-items-center">
+                <label class="small mb-0">Desde</label>
+                <input type="date" name="from" value="@Model.FromLocal.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+                <label class="small mb-0">Hasta</label>
+                <input type="date" name="to" value="@Model.ToLocal.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+                <button type="submit" class="btn btn-sm cp-btn-primary">Filtrar</button>
+            </form>
+        </div>
+
+        <div class="table-responsive bg-white rounded p-2">
+            <table class="table cp-admin-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Fecha</th><th>Hora</th><th>Profesional</th><th>Paciente</th>
+                        <th>Contacto paciente</th><th>Estado cita</th><th>Pago</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr>
+                            <td>@row.StartLocal.ToString("dd-MM-yyyy", culture)</td>
+                            <td>@row.StartLocal.ToString("HH:mm")</td>
+                            <td>@row.Professional.FullName</td>
+                            <td>@row.Appointment.PatientFullName</td>
+                            <td>@row.Appointment.PatientEmail<br />@row.Appointment.PatientPhone</td>
+                            <td>@row.Appointment.Status</td>
+                            <td>
+                                @if (row.IsPaid)
+                                {
+                                    <span class="cp-status-pill cp-status-verified">Pagado</span>
+                                }
+                                else
+                                {
+                                    <span class="cp-status-pill cp-status-pending">Sin pago</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (Model.Rows.Count == 0)
+            {
+                <p class="text-muted p-3">No hay citas en el rango seleccionado.</p>
+            }
+        </div>
+    </div>
+</body>
+</html>

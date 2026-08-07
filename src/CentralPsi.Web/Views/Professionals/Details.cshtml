@@ -1,0 +1,72 @@
+@model CentralPsi.Web.Models.ViewModels.ProfessionalDetailsViewModel
+@{
+    ViewData["Title"] = Model.Professional.FullName;
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<section class="cp-section">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-lg-4">
+                <img src="@(string.IsNullOrEmpty(Model.Professional.ProfilePhotoPath) ? Url.Content("~/images/seed/avatar-placeholder.svg") : Url.Content(Model.Professional.ProfilePhotoPath))"
+                     class="w-100 mb-3" style="border-radius:1rem;object-fit:cover;max-height:340px;" alt="@Model.Professional.FullName" />
+                <h2>@Model.Professional.FullName</h2>
+                @if (!string.IsNullOrWhiteSpace(Model.Professional.Specialty))
+                {
+                    <p class="text-muted mb-1">@Model.Professional.Specialty</p>
+                }
+                <p class="mb-1"><strong>Orientación:</strong> @Model.Professional.Orientation</p>
+                <p>@Model.Professional.Experience</p>
+                <div class="cp-crisis-notice" style="background:#eef6f5;color:var(--cp-primary-dark);">
+                    Valor de la sesión: <strong>$29.750 CLP</strong>. Pago seguro con Webpay Plus.
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="cp-form-card">
+                    <h4 class="mb-3">Elige un horario disponible</h4>
+                    @if (Model.SlotGroups.Count == 0)
+                    {
+                        <p class="text-muted">Este profesional no tiene horarios disponibles por el momento.</p>
+                    }
+                    else
+                    {
+                        <form asp-controller="Booking" asp-action="Start" method="get">
+                            <input type="hidden" name="professionalId" value="@Model.Professional.Id" />
+                            <input type="hidden" id="selectedSlot" name="startUtc" value="" />
+
+                            @foreach (var group in Model.SlotGroups)
+                            {
+                                <div class="mb-3">
+                                    <div class="fw-bold text-capitalize mb-2">@group.DateLocal.ToString("dddd d 'de' MMMM", culture)</div>
+                                    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 g-2">
+                                        @foreach (var slot in group.Slots)
+                                        {
+                                            <div class="col">
+                                                <button type="button" class="cp-slot-btn w-100 slot-option" data-value="@slot.StartUtc.ToString("O")">@slot.DisplayTime</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <button type="submit" class="btn cp-btn-primary btn-lg mt-3" id="continueBtn" disabled>Continuar con la reserva</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.slot-option').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.slot-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('selectedSlot').value = btn.getAttribute('data-value');
+                document.getElementById('continueBtn').disabled = false;
+            });
+        });
+    </script>
+}

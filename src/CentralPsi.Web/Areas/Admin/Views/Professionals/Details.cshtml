@@ -1,0 +1,101 @@
+@model Professional
+@{
+    ViewData["Title"] = Model.FullName;
+    var dayNames = new Dictionary<DayOfWeek, string>
+    {
+        [DayOfWeek.Monday] = "Lunes", [DayOfWeek.Tuesday] = "Martes", [DayOfWeek.Wednesday] = "Miércoles",
+        [DayOfWeek.Thursday] = "Jueves", [DayOfWeek.Friday] = "Viernes", [DayOfWeek.Saturday] = "Sábado", [DayOfWeek.Sunday] = "Domingo",
+    };
+}
+
+<div class="row gy-4">
+    <div class="col-lg-7">
+        <div class="cp-form-card">
+            <h5>Datos personales</h5>
+            <p><strong>Nombre:</strong> @Model.FullName</p>
+            <p><strong>RUT:</strong> @Model.Rut</p>
+            <p><strong>Correo:</strong> @Model.Email</p>
+            <p><strong>Teléfono:</strong> @Model.Phone</p>
+            <p><strong>Especialidad:</strong> @Model.Specialty</p>
+            <p><strong>Orientación:</strong> @Model.Orientation</p>
+            <p><strong>Experiencia:</strong><br />@Model.Experience</p>
+
+            <hr />
+            <h5>Horario de atención</h5>
+            @if (Model.Availabilities.Count == 0)
+            {
+                <p class="text-muted">Sin horarios cargados.</p>
+            }
+            else
+            {
+                <ul>
+                    @foreach (var a in Model.Availabilities.OrderBy(a => a.DayOfWeek))
+                    {
+                        <li>@dayNames[a.DayOfWeek]: @a.StartTime.ToString(@"hh\:mm") - @a.EndTime.ToString(@"hh\:mm")</li>
+                    }
+                </ul>
+            }
+
+            <hr />
+            <h5>Documentos</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="cedula-frente">Cédula (frente)</a>
+                <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="cedula-reverso">Cédula (reverso)</a>
+                <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="certificado">Certificado Minsal</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="cp-form-card">
+            <h5>Validación del certificado</h5>
+            <p><strong>Código de validación:</strong> @Model.CertificateValidationCode</p>
+            <p><strong>Estado actual:</strong> @Model.Status</p>
+            @if (Model.CertificateVerifiedAt is not null)
+            {
+                <p><strong>Última verificación:</strong> @Model.CertificateVerifiedAt.Value.ToLocalTime()</p>
+            }
+            @if (!string.IsNullOrEmpty(Model.CertificateVerificationNotes))
+            {
+                <div class="alert alert-secondary small">@Model.CertificateVerificationNotes</div>
+            }
+            <p class="text-muted small">
+                Verifica manualmente en
+                <a href="https://emisorcertificados.superdesalud.gob.cl/ValidacionCertificados/?id=@Model.CertificateValidationCode" target="_blank">
+                    la Superintendencia de Salud
+                </a> antes de aprobar si el resultado automático fue inconcluso.
+            </p>
+
+            <div class="d-flex flex-column gap-2 mt-3">
+                @if (Model.Status != ProfessionalStatus.Verified)
+                {
+                    <form asp-action="Approve" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn cp-btn-primary w-100">Aprobar y publicar</button>
+                    </form>
+                }
+                @if (Model.Status == ProfessionalStatus.PendingVerification)
+                {
+                    <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                        <input type="text" name="reason" class="form-control mb-2" placeholder="Motivo del rechazo (opcional)" />
+                        <button type="submit" class="btn btn-outline-danger w-100">Rechazar</button>
+                    </form>
+                }
+                @if (Model.Status == ProfessionalStatus.Verified)
+                {
+                    <form asp-action="Deactivate" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Retirar a este profesional del listado público?');">
+                        <button type="submit" class="btn btn-outline-secondary w-100">Desactivar (dejó de atender)</button>
+                    </form>
+                }
+                @if (Model.Status == ProfessionalStatus.Inactive)
+                {
+                    <form asp-action="Reactivate" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn cp-btn-primary w-100">Reactivar</button>
+                    </form>
+                }
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar definitivamente este profesional? Solo es posible si no tiene citas asociadas.');">
+                    <button type="submit" class="btn btn-outline-danger w-100">Eliminar definitivamente</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

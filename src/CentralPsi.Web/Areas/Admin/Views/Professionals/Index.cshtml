@@ -1,0 +1,43 @@
+@model List<Professional>
+@{
+    ViewData["Title"] = "Profesionales";
+    var current = ViewData["StatusFilter"] as ProfessionalStatus?;
+}
+
+<div class="mb-3 d-flex gap-2 flex-wrap">
+    <a asp-action="Index" class="btn btn-sm @(current is null ? "cp-btn-primary" : "cp-btn-outline")">Todos</a>
+    <a asp-action="Index" asp-route-status="PendingVerification" class="btn btn-sm @(current == ProfessionalStatus.PendingVerification ? "cp-btn-primary" : "cp-btn-outline")">Pendientes</a>
+    <a asp-action="Index" asp-route-status="Verified" class="btn btn-sm @(current == ProfessionalStatus.Verified ? "cp-btn-primary" : "cp-btn-outline")">Publicados</a>
+    <a asp-action="Index" asp-route-status="Rejected" class="btn btn-sm @(current == ProfessionalStatus.Rejected ? "cp-btn-primary" : "cp-btn-outline")">Rechazados</a>
+    <a asp-action="Index" asp-route-status="Inactive" class="btn btn-sm @(current == ProfessionalStatus.Inactive ? "cp-btn-primary" : "cp-btn-outline")">Inactivos</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table cp-admin-table align-middle bg-white">
+        <thead><tr><th>Nombre</th><th>Correo</th><th>Especialidad</th><th>Estado</th><th>Inscrito</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                var pillClass = p.Status switch
+                {
+                    ProfessionalStatus.Verified => "cp-status-verified",
+                    ProfessionalStatus.PendingVerification => "cp-status-pending",
+                    ProfessionalStatus.Rejected => "cp-status-rejected",
+                    _ => "cp-status-inactive"
+                };
+                <tr>
+                    <td>@p.FullName</td>
+                    <td>@p.Email</td>
+                    <td>@p.Specialty</td>
+                    <td><span class="cp-status-pill @pillClass">@p.Status</span></td>
+                    <td>@p.CreatedAt.ToLocalTime().ToString("dd-MM-yyyy")</td>
+                    <td class="text-end"><a asp-action="Details" asp-route-id="@p.Id" class="btn btn-sm cp-btn-outline">Ver ficha</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted">No hay profesionales en este filtro.</p>
+    }
+</div>

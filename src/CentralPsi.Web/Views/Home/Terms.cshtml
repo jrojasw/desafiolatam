@@ -1,0 +1,72 @@
+@{
+    ViewData["Title"] = "Términos y condiciones";
+}
+
+<section class="cp-section">
+    <div class="container" style="max-width:860px;">
+        <h1 class="cp-section-title">Términos y condiciones de uso y pago</h1>
+        <p class="text-muted">Última actualización: @DateTime.Now.ToString("MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-CL"))</p>
+
+        <h4 class="mt-4">1. Qué es CentralPsi</h4>
+        <p>
+            CentralPsi es una plataforma de agendamiento online (un <strong>"box virtual"</strong>) que conecta a
+            personas que buscan atención psicológica con profesionales de la psicología independientes, verificados
+            ante la Superintendencia de Salud. <strong>CentralPsi no presta servicios de salud</strong>, no emplea a
+            los profesionales publicados y no mantiene ningún contrato de prestación de servicios de salud con el
+            paciente ni con el profesional. La relación clínica y profesional se establece exclusivamente entre el
+            paciente y el psicólogo/a que atiende la sesión.
+        </p>
+
+        <h4 class="mt-4">2. Valor de la sesión y medio de pago</h4>
+        <p>
+            El valor de cada sesión agendada a través de CentralPsi es de <strong>$29.750 CLP</strong>, pagadero al
+            momento de agendar mediante Webpay Plus (Transbank). El pago debe completarse para que la hora quede
+            confirmada; de lo contrario, el cupo queda liberado.
+        </p>
+
+        <h4 id="reembolsos" class="mt-4">3. Política de cancelación y reembolso</h4>
+        <p>El reembolso, cuando corresponde, se procesa siempre de forma <strong>manual</strong> (transferencia bancaria) dentro de un plazo máximo de <strong>4 días hábiles</strong> desde que la solicitud es recibida, conforme a los siguientes tramos:</p>
+        <ul>
+            <li><strong>Cancelación con 12 horas o más de anticipación:</strong> reembolso del 100% del valor pagado.</li>
+            <li><strong>Cancelación entre 12 y 0 horas antes de la sesión:</strong> reembolso del 50% del valor pagado.</li>
+            <li><strong>Inasistencia o cancelación una vez iniciada/pasada la hora agendada:</strong> no da derecho a reembolso automático; el caso queda sujeto a revisión manual por nuestro equipo.</li>
+        </ul>
+        <p>
+            Para solicitar un reembolso, utiliza el enlace de cancelación incluido en tu correo de confirmación.
+            Nuestro equipo procesará la solicitud y se contactará contigo desde
+            <a href="mailto:reembolsos@centralpsi.cl">reembolsos@centralpsi.cl</a> para coordinar la devolución a tu
+            cuenta bancaria.
+        </p>
+
+        <h4 class="mt-4">4. Verificación de la sesión</h4>
+        <p>
+            Con el único fin de respaldar el pago realizado, tanto el paciente como el profesional recibirán, una
+            vez finalizado el horario agendado, un correo para confirmar si la sesión se realizó con normalidad.
+            Esta confirmación queda registrada como respaldo administrativo del pago y no constituye almacenamiento
+            de información clínica.
+        </p>
+
+        <h4 id="privacidad" class="mt-4">5. Privacidad y datos personales</h4>
+        <p>
+            CentralPsi <strong>no almacena documentos ni información personal sensible de los pacientes</strong>
+            (fichas clínicas, diagnósticos, notas de sesión, etc.). Solo recopilamos los datos mínimos necesarios
+            para agendar la hora (nombre, correo y teléfono de contacto) y el respaldo del pago. Los antecedentes
+            profesionales de los psicólogos y psicólogas (cédula de identidad y certificado del Ministerio de
+            Salud) se solicitan únicamente para validar su idoneidad profesional y se resguardan de forma
+            restringida, sin publicarse en el sitio.
+        </p>
+
+        <h4 class="mt-4">6. Aceptación</h4>
+        <p>
+            Al marcar la casilla de aceptación antes de pagar tu sesión, declaras haber leído y aceptado
+            íntegramente estos términos y condiciones, incluyendo la política de reembolsos y la naturaleza de
+            CentralPsi como intermediario de agendamiento.
+        </p>
+
+        <h4 class="mt-4">7. Contacto</h4>
+        <p>
+            Consultas generales: <a href="mailto:admin@centralpsi.cl">admin@centralpsi.cl</a><br />
+            Reembolsos: <a href="mailto:reembolsos@centralpsi.cl">reembolsos@centralpsi.cl</a>
+        </p>
+    </div>
+</section>

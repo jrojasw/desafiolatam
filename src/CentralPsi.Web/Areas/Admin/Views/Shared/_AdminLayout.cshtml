@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Panel CentralPsi</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/logo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="cp-admin-shell">
+        <aside class="cp-admin-sidebar">
+            <div class="cp-admin-brand">
+                <img src="~/images/logo.svg" alt="CentralPsi" height="34" />
+                <span>Panel admin</span>
+            </div>
+            <nav class="nav flex-column">
+                <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Resumen</a>
+                <a class="nav-link" asp-area="Admin" asp-controller="Professionals" asp-action="Index">Profesionales</a>
+                <a class="nav-link" asp-area="Admin" asp-controller="Slides" asp-action="Index">Slider de inicio</a>
+                <a class="nav-link" asp-area="Admin" asp-controller="News" asp-action="Index">Noticias</a>
+                <a class="nav-link" asp-area="Admin" asp-controller="Account" asp-action="ChangePassword">Cambiar contraseña</a>
+            </nav>
+            <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="mt-4">
+                <button type="submit" class="btn btn-outline-light btn-sm w-100">Cerrar sesión</button>
+            </form>
+            <a href="/" class="cp-admin-back-link">← Volver al sitio público</a>
+        </aside>
+        <main class="cp-admin-content">
+            @if (TempData["SuccessMessage"] is string successMessage)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @successMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] is string errorMessage)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @errorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            }
+            <h3 class="mb-4">@ViewData["Title"]</h3>
+            @RenderBody()
+        </main>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

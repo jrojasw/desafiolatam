@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Contacto";
+}
+
+<section class="cp-section">
+    <div class="container">
+        <h1 class="cp-section-title">Contacto</h1>
+        <p class="cp-section-subtitle">¿Tienes dudas sobre tu reserva, tu pago o quieres inscribirte como profesional? Escríbenos.</p>
+        <div class="row gy-4">
+            <div class="col-lg-6">
+                <div class="cp-form-card">
+                    <h5>Consultas generales</h5>
+                    <p>Para dudas sobre agendamiento, uso de la plataforma o soporte técnico:</p>
+                    <p><a href="mailto:admin@centralpsi.cl">admin@centralpsi.cl</a></p>
+
+                    <h5 class="mt-4">Reembolsos</h5>
+                    <p>Si cancelaste una sesión y necesitas gestionar tu reembolso, escribe indicando tus datos bancarios a:</p>
+                    <p><a href="mailto:reembolsos@centralpsi.cl">reembolsos@centralpsi.cl</a></p>
+
+                    <h5 class="mt-4">¿Eres psicólogo/a?</h5>
+                    <p>Puedes inscribirte de forma gratuita en nuestro listado de profesionales.</p>
+                    <a asp-controller="Professionals" asp-action="Register" class="btn cp-btn-primary">Inscribirme como profesional</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="cp-crisis-notice" style="background:#fdf1e6;color:#7a4a1c;">
+                    <strong>¿Estás en una crisis o riesgo vital?</strong> CentralPsi no es un servicio de urgencia
+                    ni reemplaza la atención médica de emergencia. Si tú u otra persona están en riesgo, llama
+                    inmediatamente a <strong>Salud Responde 600 360 7777</strong> (opción salud mental), a la
+                    <strong>Línea Libre 1515</strong>, o dirígete al servicio de urgencia más cercano.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

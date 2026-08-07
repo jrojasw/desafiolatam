@@ -1,0 +1,38 @@
+@model SlideFormViewModel
+@{
+    ViewData["Title"] = Model.Id is null ? "Nuevo slide" : "Editar slide";
+}
+
+<div class="cp-form-card" style="max-width:600px;">
+    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+    <form asp-action="Save" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+        @if (!string.IsNullOrEmpty(Model.CurrentImagePath))
+        {
+            <img src="@Url.Content(Model.CurrentImagePath)" class="mb-3" style="max-width:100%;border-radius:.6rem;" />
+        }
+        <div class="mb-3">
+            <label asp-for="Image" class="form-label"></label>
+            <input asp-for="Image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+            <span asp-validation-for="Image" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Subtitle" class="form-label"></label>
+            <input asp-for="Subtitle" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="SortOrder" class="form-label"></label>
+            <input asp-for="SortOrder" type="number" class="form-control" style="max-width:120px;" />
+        </div>
+        <div class="form-check mb-3">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label"></label>
+        </div>
+        <button type="submit" class="btn cp-btn-primary">Guardar</button>
+        <a asp-action="Index" class="btn cp-btn-outline">Cancelar</a>
+    </form>
+</div>

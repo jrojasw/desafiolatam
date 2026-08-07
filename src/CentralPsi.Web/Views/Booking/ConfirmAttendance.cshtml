@@ -1,0 +1,30 @@
+@model CentralPsi.Web.Models.ViewModels.AttendanceConfirmationViewModel
+@{
+    ViewData["Title"] = "Confirmar sesión";
+}
+
+<section class="cp-section">
+    <div class="container" style="max-width:640px;">
+        <h1 class="cp-section-title">¿Se realizó tu sesión?</h1>
+        <p class="cp-section-subtitle">
+            Esta confirmación solo se usa como respaldo administrativo del pago realizado a través de CentralPsi.
+        </p>
+
+        <div class="cp-form-card">
+            <p><strong>Profesional:</strong> @Model.Professional.FullName</p>
+            <p><strong>Rol que confirma:</strong> @Model.Role</p>
+
+            @if (Model.AlreadyAnswered)
+            {
+                <div class="alert alert-info">Ya registramos tu respuesta. ¡Gracias!</div>
+            }
+            else
+            {
+                <form asp-action="ConfirmAttendanceSubmit" method="post" class="d-flex gap-3">
+                    <button type="submit" name="sessionHappened" value="true" class="btn cp-btn-primary btn-lg">Sí, se realizó</button>
+                    <button type="submit" name="sessionHappened" value="false" class="btn btn-outline-danger btn-lg">No se realizó</button>
+                </form>
+            }
+        </div>
+    </div>
+</section>

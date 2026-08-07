@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CentralPsi</title>
+    <meta name="description" content="CentralPsi conecta pacientes con psicólogos verificados por el Ministerio de Salud. Agenda tu hora online de forma simple y segura." />
+    <link rel="icon" type="image/svg+xml" href="~/images/logo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header class="cp-header">
+        <nav class="navbar navbar-expand-lg cp-navbar">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index" title="Inicio">
+                    <img src="~/images/logo.svg" alt="CentralPsi" height="42" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#cpNavbar" aria-controls="cpNavbar" aria-expanded="false" aria-label="Abrir menú">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="cpNavbar">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Professionals" asp-action="Index">Agenda tu hora</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Professionals" asp-action="Index">Profesionales</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a></li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn cp-btn-primary btn-sm" asp-area="" asp-controller="Professionals" asp-action="Register">Soy psicólogo/a</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @successMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @errorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        </div>
+    }
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="cp-footer">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-4">
+                    <img src="~/images/logo.svg" alt="CentralPsi" height="38" class="mb-3 cp-footer-logo" />
+                    <p class="cp-footer-text">
+                        CentralPsi es un espacio de agendamiento online (box virtual) que conecta a personas con
+                        psicólogos y psicólogas verificados ante el Ministerio de Salud. No prestamos servicios de
+                        salud directamente ni almacenamos antecedentes clínicos de pacientes.
+                    </p>
+                    <div class="cp-footer-social">
+                        <a href="#" aria-label="Instagram">IG</a>
+                        <a href="#" aria-label="Facebook">FB</a>
+                        <a href="#" aria-label="LinkedIn">IN</a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h6>Navegación</h6>
+                    <ul class="list-unstyled cp-footer-links">
+                        <li><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+                        <li><a asp-controller="Professionals" asp-action="Index">Profesionales</a></li>
+                        <li><a asp-controller="Professionals" asp-action="Register">Inscribirme como psicólogo/a</a></li>
+                        <li><a asp-controller="Home" asp-action="Contact">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <h6>Legal</h6>
+                    <ul class="list-unstyled cp-footer-links">
+                        <li><a asp-controller="Home" asp-action="Terms">Términos y condiciones</a></li>
+                        <li><a asp-controller="Home" asp-action="Terms" asp-fragment="reembolsos">Política de reembolsos</a></li>
+                        <li><a asp-controller="Home" asp-action="Terms" asp-fragment="privacidad">Política de privacidad</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h6>Contacto</h6>
+                    <ul class="list-unstyled cp-footer-links">
+                        <li>Consultas: <a href="mailto:admin@centralpsi.cl">admin@centralpsi.cl</a></li>
+                        <li>Reembolsos: <a href="mailto:reembolsos@centralpsi.cl">reembolsos@centralpsi.cl</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="cp-footer-divider" />
+            <div class="cp-crisis-notice">
+                <strong>¿Estás en una crisis o riesgo vital?</strong> CentralPsi no es un servicio de urgencia.
+                Llama a <strong>Salud Responde 600 360 7777</strong> (opción salud mental) o a la
+                <strong>Línea Libre 1515</strong>, disponibles las 24 horas en Chile.
+            </div>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
+                <span class="cp-copyright">&copy; @DateTime.Now.Year CentralPsi. Todos los derechos reservados.</span>
+                <span class="cp-copyright">Valor de la sesión: $29.750 CLP</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

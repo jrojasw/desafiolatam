@@ -1,0 +1,93 @@
+using CentralPsi.Web.Models.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace CentralPsi.Web.Data.Seed;
+
+public static class DataSeeder
+{
+    public const string AdminRole = "Admin";
+
+    public static async Task SeedAsync(IServiceProvider services)
+    {
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync();
+
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        if (!await roleManager.RoleExistsAsync(AdminRole))
+        {
+            await roleManager.CreateAsync(new IdentityRole(AdminRole));
+        }
+
+        var config = services.GetRequiredService<IConfiguration>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var adminEmail = config["Seed:AdminEmail"] ?? "admin@centralpsi.cl";
+        var adminPassword = config["Seed:AdminPassword"] ?? "CambiarAhora!2026";
+
+        if (await userManager.FindByEmailAsync(adminEmail) is null)
+        {
+            var admin = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                FullName = "Administrador CentralPsi"
+            };
+            var result = await userManager.CreateAsync(admin, adminPassword);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(admin, AdminRole);
+                var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
+                logger.LogWarning(
+                    "Se creó el usuario administrador {Email} con la contraseña de config Seed:AdminPassword. Cámbiala de inmediato desde el panel.",
+                    adminEmail);
+            }
+        }
+
+        if (!await db.SlideImages.AnyAsync())
+        {
+            db.SlideImages.AddRange(
+                new SlideImage { ImagePath = "/images/seed/slide-1.svg", Title = "Tu bienestar emocional, un paso a la vez", SortOrder = 1 },
+                new SlideImage { ImagePath = "/images/seed/slide-2.svg", Title = "Profesionales acreditados por el Minsal", SortOrder = 2 },
+                new SlideImage { ImagePath = "/images/seed/slide-3.svg", Title = "Agenda cuando tú lo necesites", SortOrder = 3 },
+                new SlideImage { ImagePath = "/images/seed/slide-4.svg", Title = "Un espacio seguro para hablar y avanzar", SortOrder = 4 }
+            );
+        }
+
+        if (!await db.NewsArticles.AnyAsync())
+        {
+            db.NewsArticles.AddRange(
+                new NewsArticle
+                {
+                    Title = "5 señales de que podrías beneficiarte de terapia",
+                    Summary = "Reconocer el momento adecuado para pedir ayuda es un acto de autocuidado, no una debilidad.",
+                    Content = "Cambios en el sueño, irritabilidad persistente, dificultad para concentrarte, aislamiento social y agotamiento emocional son señales frecuentes. Consultar con un profesional a tiempo puede marcar una gran diferencia.",
+                    Category = NewsCategory.Consejo
+                },
+                new NewsArticle
+                {
+                    Title = "La OMS destaca el aumento de la ansiedad a nivel mundial",
+                    Summary = "Organismos de salud reportan un alza sostenida en trastornos de ansiedad y depresión desde 2020.",
+                    Content = "Diversos estudios epidemiológicos muestran que la ansiedad y la depresión se encuentran entre las principales causas de discapacidad a nivel global, reforzando la importancia del acceso a atención psicológica oportuna.",
+                    Category = NewsCategory.Noticia
+                },
+                new NewsArticle
+                {
+                    Title = "Respiración 4-7-8: una técnica simple para bajar la ansiedad",
+                    Summary = "Un ejercicio de respiración que puedes practicar en cualquier momento del día.",
+                    Content = "Inhala por 4 segundos, sostén el aire por 7 segundos y exhala lentamente por 8 segundos. Repetir este ciclo 4 veces ayuda a activar el sistema nervioso parasimpático y reducir la sensación de estrés agudo.",
+                    Category = NewsCategory.Tip
+                },
+                new NewsArticle
+                {
+                    Title = "Estudio: la terapia online es tan efectiva como la presencial",
+                    Summary = "Una revisión de múltiples estudios confirma la efectividad de la psicoterapia por videollamada.",
+                    Content = "Metaanálisis recientes muestran que, para gran parte de los motivos de consulta, la terapia realizada por videollamada logra resultados clínicos comparables a la atención presencial, con la ventaja de una mayor accesibilidad.",
+                    Category = NewsCategory.EstudioCientifico
+                }
+            );
+        }
+
+        await db.SaveChangesAsync();
+    }
+}
