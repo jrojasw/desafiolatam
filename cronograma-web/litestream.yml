@@ -5,7 +5,7 @@ dbs:
         bucket: ${LITESTREAM_BUCKET}
         path: cronograma
         endpoint: ${LITESTREAM_ENDPOINT}
-        region: auto
+        region: ${LITESTREAM_REGION}
         access-key-id: ${LITESTREAM_ACCESS_KEY_ID}
         secret-access-key: ${LITESTREAM_SECRET_ACCESS_KEY}
         force-path-style: true
