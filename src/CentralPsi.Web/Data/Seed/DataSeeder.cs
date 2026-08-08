@@ -24,7 +24,9 @@ public static class DataSeeder
         var adminEmail = config["Seed:AdminEmail"] ?? "admin@centralpsi.cl";
         var adminPassword = config["Seed:AdminPassword"] ?? "CambiarAhora!2026";
 
-        if (await userManager.FindByEmailAsync(adminEmail) is null)
+        var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
+        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+        if (existingAdmin is null)
         {
             var admin = new ApplicationUser
             {
@@ -37,11 +39,24 @@ public static class DataSeeder
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(admin, AdminRole);
-                var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
                 logger.LogWarning(
                     "Se creó el usuario administrador {Email} con la contraseña de config Seed:AdminPassword. Cámbiala de inmediato desde el panel.",
                     adminEmail);
             }
+            else
+            {
+                // Surface *why* it failed instead of silently leaving no admin account at all - the most
+                // common cause is Seed:AdminPassword not meeting Identity's default policy (10+ chars, at
+                // least one uppercase, one lowercase and one digit).
+                logger.LogError(
+                    "No se pudo crear el usuario administrador {Email}: {Errors}",
+                    adminEmail,
+                    string.Join("; ", result.Errors.Select(e => e.Description)));
+            }
+        }
+        else if (!await userManager.IsInRoleAsync(existingAdmin, AdminRole))
+        {
+            await userManager.AddToRoleAsync(existingAdmin, AdminRole);
         }
 
         if (!await db.SlideImages.AnyAsync())
