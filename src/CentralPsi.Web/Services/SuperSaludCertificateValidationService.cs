@@ -118,22 +118,25 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
         });
         var page = await browser.NewPageAsync();
 
-        var url = $"{_options.ValidationBaseUrl}?id={Uri.EscapeDataString(validationCode)}";
-        await page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle, Timeout = 20000 });
+        // Navigate to the bare form (no ?id= query param) - it turns out the app pre-fills the field from
+        // that param, and typing on top of an already-filled field (see below) was corrupting the value.
+        await page.GotoAsync(_options.ValidationBaseUrl, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle, Timeout = 20000 });
 
-        // The ?id= query param only pre-loads the form - a real visitor still has to type the code and press
-        // "Consultar Certificado" to actually trigger the (reCAPTCHA-gated) lookup, so do the same here:
-        // explicitly fill the ID field (don't rely on the query param having done it) and click the button.
-        // Use text-based / visibility-based locators rather than assuming a plain <button> tag, since Angular
-        // Material-style UIs often render clickable controls as other elements.
+        // A real visitor has to type the code and press "Consultar Certificado" to trigger the
+        // (reCAPTCHA-gated) lookup, so do the same here. Use text-based / visibility-based locators rather
+        // than assuming a plain <button> tag, since Angular Material-style UIs often render clickable
+        // controls as other elements.
         var idInput = page.Locator("input:visible").First;
         var inputCount = await page.Locator("input:visible").CountAsync();
         string? inputValueAfterTyping = null;
         if (inputCount > 0)
         {
             // Angular reactive forms often only pick up real keyboard events, not a value set in one shot -
-            // click to focus, then type it out character by character like a real visitor, then blur.
+            // click to focus, clear whatever might already be there, then type it out character by character
+            // like a real visitor, then blur.
             await idInput.ClickAsync();
+            await page.Keyboard.PressAsync("Control+A");
+            await page.Keyboard.PressAsync("Backspace");
             await idInput.PressSequentiallyAsync(validationCode, new LocatorPressSequentiallyOptions { Delay = 60 });
             await page.Keyboard.PressAsync("Tab");
             inputValueAfterTyping = await idInput.InputValueAsync();
