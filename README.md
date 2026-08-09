@@ -28,17 +28,24 @@ src/CentralPsi.Web/
 
 - **Inscripción de profesionales** (`/profesionales/inscripcion`): datos, cédula (frente/reverso), certificado
   Minsal, código de validación y horario semanal de atención.
-- **Validación automática del certificado** (`SuperSaludCertificateValidationService`): consulta
-  `emisorcertificados.superdesalud.gob.cl/ValidacionCertificados/?id=...` y, si el certificado se subió como
-  imagen, decodifica su código QR (ZXing.Net) y lo contrasta con el código ingresado. Si el resultado es
-  ambiguo, el profesional queda `PendingVerification` para revisión manual en el panel — nunca se rechaza
-  solo, ni se publica solo, de forma automática cuando hay dudas.
+- **Validación automática del certificado** (`SuperSaludCertificateValidationService`): abre
+  `emisorcertificados.superdesalud.gob.cl/ValidacionCertificados/?id=...` con un navegador Chromium sin
+  interfaz (Playwright), ya que esa página arma el resultado ("Estado del certificado: VIGENTE") con
+  JavaScript y una verificación reCAPTCHA v3 en segundo plano - una simple petición HTTP nunca ve ese texto.
+  Si además el certificado se subió como imagen, decodifica su código QR (ZXing.Net) y lo contrasta con el
+  código ingresado. Si el resultado es ambiguo, el profesional queda `PendingVerification` para revisión
+  manual en el panel (con un botón "Reintentar validación automática") — nunca se rechaza ni se publica solo
+  de forma automática cuando hay dudas.
 
-  ⚠️ **Importante**: la red de este entorno de desarrollo bloquea la salida hacia
-  `superdesalud.gob.cl`, así que los patrones de texto usados para interpretar la respuesta HTML
-  (`ValidKeywords` / `InvalidKeywords` en `SuperSaludCertificateValidationService.cs`) no pudieron
-  verificarse contra una respuesta real. Antes de confiar en la aprobación 100% automática en producción,
-  pruébalo con un certificado real y ajusta esos patrones si es necesario.
+  ⚠️ **Sobre el uso de un navegador para esto**: no es un intento de "saltarse" reCAPTCHA - Chromium ejecuta
+  la página igual que lo haría cualquier persona verificando un certificado (el uso público normal de esa
+  herramienta), sin resolver desafíos ni usar tokens falsos. Si el propio sitio decide bloquear según el
+  puntaje de reCAPTCHA, el resultado simplemente queda "Inconcluso" y pasa a revisión manual, igual que antes.
+
+  ⚠️ **Costo en recursos**: esto requiere una imagen Docker más pesada (incluye Chromium) y puede acercarse al
+  límite de RAM del plan gratuito de Render (512 MB) mientras se ejecuta una validación. Si ves que las
+  validaciones fallan por falta de memoria, el siguiente paso es subir el Web Service al plan pago más básico
+  de Render (más RAM).
 - **Listado público de profesionales** (`/profesionales`) y **ficha + agenda** (`/profesionales/{id}`) con
   selector de horarios disponibles (calculados a partir del horario semanal menos las horas ya tomadas).
 - **Reserva + pago** (`/reserva/...`): datos del paciente, aceptación obligatoria de términos y condiciones,

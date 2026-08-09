@@ -1,5 +1,6 @@
 using CentralPsi.Web.Options;
 using Microsoft.Extensions.Options;
+using Microsoft.Playwright;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using ZXing;
@@ -11,17 +12,17 @@ namespace CentralPsi.Web.Services;
 ///  1) looks up the validation code on the Superintendencia de Salud's public verification page, and
 ///  2) if the uploaded file is an image, decodes its QR code and checks it references the same code/site.
 ///
-/// The real page (confirmed against a live certificate on 2026-08-08) renders a banner
-/// "Estado del certificado: VIGENTE" plus ID/NOMBRE ASOCIADO/RUN/fechas fields. It's rendered client-side
-/// (Angular-style), so whether a plain HttpClient GET sees that text depends on whether the site does
-/// server-side rendering for it - if this keeps coming back "Inconclusive" in production even for real, valid
-/// certificates, that confirms it's client-only rendering and the fix would need a headless-browser render
-/// step instead of a text scrape. Until proven otherwise, "Inconclusive" stays the safe default and the admin
-/// dashboard's manual approve/reject is the real gate for publishing a professional.
+/// The lookup page (confirmed against a live certificate on 2026-08-08) renders a banner
+/// "Estado del certificado: VIGENTE" plus ID/NOMBRE ASOCIADO/RUN/fechas fields, but only after client-side
+/// JavaScript runs (Angular) and a background reCAPTCHA v3 check clears - a plain HttpClient GET never sees
+/// that text. Since this is the same public lookup tool anyone verifying a certificate normally uses (not a
+/// private or rate-limited endpoint), a real headless browser (Playwright/Chromium) renders the page exactly
+/// like a normal visitor's browser would, then we read the rendered text with the same keyword matching used
+/// before. If the page's own backend ever decides to block on reCAPTCHA score, this degrades to "Inconclusive"
+/// exactly like before, and the admin dashboard's manual approve/reject stays the real gate.
 /// </summary>
 public class SuperSaludCertificateValidationService : ICertificateValidationService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly SuperSaludOptions _options;
     private readonly ILogger<SuperSaludCertificateValidationService> _logger;
 
@@ -29,11 +30,9 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
     private static readonly string[] InvalidKeywords = { "no vigente", "no existe", "no encontrado", "no se encontró", "no válido", "inválido", "sin resultados", "revocado", "anulado" };
 
     public SuperSaludCertificateValidationService(
-        IHttpClientFactory httpClientFactory,
         IOptions<SuperSaludOptions> options,
         ILogger<SuperSaludCertificateValidationService> logger)
     {
-        _httpClientFactory = httpClientFactory;
         _options = options.Value;
         _logger = logger;
     }
@@ -45,11 +44,8 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
 
         try
         {
-            var client = _httpClientFactory.CreateClient("SuperSalud");
-            var url = $"{_options.ValidationBaseUrl}?id={Uri.EscapeDataString(validationCode)}";
-            var response = await client.GetAsync(url, ct);
-            var html = await response.Content.ReadAsStringAsync(ct);
-            var normalized = html.ToLowerInvariant();
+            var renderedText = await RenderValidationPageTextAsync(validationCode, ct);
+            var normalized = renderedText.ToLowerInvariant();
 
             if (InvalidKeywords.Any(k => normalized.Contains(k)))
             {
@@ -107,6 +103,24 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
         var inconclusive = webLookupValid is null || qrRawData is null;
 
         return new CertificateValidationResult(isValid, inconclusive, string.Join(" ", notes), qrRawData);
+    }
+
+    private async Task<string> RenderValidationPageTextAsync(string validationCode, CancellationToken ct)
+    {
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Args = new[] { "--no-sandbox", "--disable-dev-shm-usage" }
+        });
+        var page = await browser.NewPageAsync();
+
+        var url = $"{_options.ValidationBaseUrl}?id={Uri.EscapeDataString(validationCode)}";
+        await page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle, Timeout = 20000 });
+
+        // Give the Angular app + background reCAPTCHA check a moment to finish rendering the result banner.
+        await page.WaitForTimeoutAsync(1500);
+
+        return await page.InnerTextAsync("body");
     }
 
     private static string? DecodeQrCode(string filePath)

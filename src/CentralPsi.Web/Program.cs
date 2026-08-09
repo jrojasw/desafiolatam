@@ -59,11 +59,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // ---- Application services ----
 builder.Services.AddHttpClient();
-builder.Services.AddHttpClient("SuperSalud", client =>
-{
-    client.Timeout = TimeSpan.FromSeconds(15);
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("CentralPsi/1.0 (+https://centralpsi.cl)");
-});
 
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
