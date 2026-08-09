@@ -42,7 +42,15 @@ public class SmtpEmailService : IEmailService
         message.Body = new TextPart("html") { Text = htmlBody };
 
         using var client = new SmtpClient();
-        var socketOptions = _options.UseSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto;
+        // Port 465 is "implicit TLS" (SSL from the first byte); port 587 is "STARTTLS" (starts plaintext,
+        // then upgrades). Using the wrong one for a given port fails the handshake, so pick based on the
+        // port rather than a single UseSsl flag.
+        var socketOptions = _options.Port switch
+        {
+            465 => SecureSocketOptions.SslOnConnect,
+            587 => SecureSocketOptions.StartTls,
+            _ => _options.UseSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto
+        };
         await client.ConnectAsync(_options.Host, _options.Port, socketOptions);
         if (!string.IsNullOrEmpty(_options.User))
         {
