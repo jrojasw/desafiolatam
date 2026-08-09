@@ -46,25 +46,29 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
         {
             var renderedText = await RenderValidationPageTextAsync(validationCode, ct);
             var normalized = renderedText.ToLowerInvariant();
+            var snippet = renderedText.Length > 400 ? renderedText[..400] : renderedText;
 
             if (InvalidKeywords.Any(k => normalized.Contains(k)))
             {
                 webLookupValid = false;
                 notes.Add("La página de validación de la Superintendencia de Salud indicó que el código no es válido.");
+                _logger.LogInformation("[SuperSaludCheck] código {Code}: INVÁLIDO. Texto renderizado: {Snippet}", validationCode, snippet);
             }
             else if (ValidKeywords.Any(k => normalized.Contains(k)))
             {
                 webLookupValid = true;
                 notes.Add("La página de validación de la Superintendencia de Salud confirmó el código.");
+                _logger.LogInformation("[SuperSaludCheck] código {Code}: VÁLIDO. Texto renderizado: {Snippet}", validationCode, snippet);
             }
             else
             {
                 notes.Add("No se pudo interpretar automáticamente la respuesta de la Superintendencia de Salud; requiere revisión manual.");
+                _logger.LogInformation("[SuperSaludCheck] código {Code}: INCONCLUSO. Texto renderizado ({Length} caracteres): {Snippet}", validationCode, renderedText.Length, snippet);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error consultando el sitio de validación de la Superintendencia de Salud");
+            _logger.LogWarning(ex, "[SuperSaludCheck] código {Code}: ERROR al renderizar la página", validationCode);
             notes.Add($"No se pudo contactar el sitio de validación automáticamente ({ex.Message}); requiere revisión manual.");
         }
 
