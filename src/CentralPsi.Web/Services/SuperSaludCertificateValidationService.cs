@@ -128,11 +128,19 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
         // Material-style UIs often render clickable controls as other elements.
         var idInput = page.Locator("input:visible").First;
         var inputCount = await page.Locator("input:visible").CountAsync();
+        string? inputValueAfterTyping = null;
         if (inputCount > 0)
         {
-            await idInput.FillAsync(validationCode);
+            // Angular reactive forms often only pick up real keyboard events, not a value set in one shot -
+            // click to focus, then type it out character by character like a real visitor, then blur.
+            await idInput.ClickAsync();
+            await idInput.PressSequentiallyAsync(validationCode, new LocatorPressSequentiallyOptions { Delay = 60 });
+            await page.Keyboard.PressAsync("Tab");
+            inputValueAfterTyping = await idInput.InputValueAsync();
         }
-        _logger.LogInformation("[SuperSaludCheck] código {Code}: {InputCount} campo(s) de texto visibles encontrados.", validationCode, inputCount);
+        _logger.LogInformation(
+            "[SuperSaludCheck] código {Code}: {InputCount} campo(s) de texto visibles encontrados, valor tras escribir = '{Value}'.",
+            validationCode, inputCount, inputValueAfterTyping);
 
         var searchButton = page.GetByText("Consultar Certificado");
         var buttonCount = await searchButton.CountAsync();
