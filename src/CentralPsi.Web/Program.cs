@@ -3,6 +3,7 @@ using CentralPsi.Web.Data.Seed;
 using CentralPsi.Web.Models.Entities;
 using CentralPsi.Web.Options;
 using CentralPsi.Web.Services;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -56,6 +57,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
 });
+
+// Persist Data Protection keys in Postgres so admin sessions (and antiforgery tokens) survive container
+// restarts - without this, every restart/redeploy silently invalidates every logged-in session.
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>();
 
 // ---- Application services ----
 builder.Services.AddHttpClient();

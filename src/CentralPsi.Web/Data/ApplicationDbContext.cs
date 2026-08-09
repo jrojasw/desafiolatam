@@ -1,10 +1,15 @@
 using CentralPsi.Web.Models.Entities;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CentralPsi.Web.Data;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+// IDataProtectionKeyContext persists the ASP.NET Data Protection keys (which encrypt auth cookies, antiforgery
+// tokens, etc.) to the database instead of the container's local disk - Render's free tier restarts the
+// container on every deploy and after periods of inactivity, which would otherwise generate fresh keys each
+// time and silently log out every admin session.
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -18,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CancellationRequest> CancellationRequests => Set<CancellationRequest>();
     public DbSet<SlideImage> SlideImages => Set<SlideImage>();
     public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
+    public DbSet<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey> DataProtectionKeys => Set<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
