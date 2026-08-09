@@ -124,21 +124,27 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
         // The ?id= query param only pre-loads the form - a real visitor still has to type the code and press
         // "Consultar Certificado" to actually trigger the (reCAPTCHA-gated) lookup, so do the same here:
         // explicitly fill the ID field (don't rely on the query param having done it) and click the button.
-        var idInput = page.Locator("input").First;
-        if (await idInput.IsVisibleAsync())
+        // Use text-based / visibility-based locators rather than assuming a plain <button> tag, since Angular
+        // Material-style UIs often render clickable controls as other elements.
+        var idInput = page.Locator("input:visible").First;
+        var inputCount = await page.Locator("input:visible").CountAsync();
+        if (inputCount > 0)
         {
             await idInput.FillAsync(validationCode);
         }
+        _logger.LogInformation("[SuperSaludCheck] código {Code}: {InputCount} campo(s) de texto visibles encontrados.", validationCode, inputCount);
 
-        var searchButton = page.Locator("button:has-text('Consultar Certificado')");
-        if (await searchButton.CountAsync() > 0)
+        var searchButton = page.GetByText("Consultar Certificado");
+        var buttonCount = await searchButton.CountAsync();
+        if (buttonCount > 0)
         {
             await searchButton.First.ClickAsync();
             await page.WaitForLoadStateAsync(LoadState.NetworkIdle, new PageWaitForLoadStateOptions { Timeout = 20000 });
         }
+        _logger.LogInformation("[SuperSaludCheck] código {Code}: {ButtonCount} elemento(s) 'Consultar Certificado' encontrados, click enviado = {Clicked}.", validationCode, buttonCount, buttonCount > 0);
 
         // Give the Angular app + background reCAPTCHA check a moment to finish rendering the result banner.
-        await page.WaitForTimeoutAsync(2000);
+        await page.WaitForTimeoutAsync(2500);
 
         return await page.InnerTextAsync("body");
     }
