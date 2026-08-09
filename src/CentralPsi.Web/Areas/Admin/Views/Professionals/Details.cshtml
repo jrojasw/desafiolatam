@@ -67,6 +67,12 @@
             </p>
 
             <div class="d-flex flex-column gap-2 mt-3">
+                @if (Model.Status == ProfessionalStatus.PendingVerification)
+                {
+                    <form asp-action="RetryValidation" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn cp-btn-outline w-100">🔄 Reintentar validación automática</button>
+                    </form>
+                }
                 @if (Model.Status != ProfessionalStatus.Verified)
                 {
                     <form asp-action="Approve" asp-route-id="@Model.Id" method="post">

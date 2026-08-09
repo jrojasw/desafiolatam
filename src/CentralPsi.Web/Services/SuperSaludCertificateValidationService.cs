@@ -11,11 +11,13 @@ namespace CentralPsi.Web.Services;
 ///  1) looks up the validation code on the Superintendencia de Salud's public verification page, and
 ///  2) if the uploaded file is an image, decodes its QR code and checks it references the same code/site.
 ///
-/// NOTE: this environment's outbound network policy blocks emisorcertificados.superdesalud.gob.cl, so the
-/// exact HTML markers below (ValidKeywords / InvalidKeywords) could not be verified against a live response
-/// while building this. They should be confirmed/tuned against a real certificate before relying on the
-/// automatic pass in production - until then, treat "Inconclusive" results as the safe default and keep the
-/// admin dashboard's manual approve/reject as the actual gate for publishing a professional.
+/// The real page (confirmed against a live certificate on 2026-08-08) renders a banner
+/// "Estado del certificado: VIGENTE" plus ID/NOMBRE ASOCIADO/RUN/fechas fields. It's rendered client-side
+/// (Angular-style), so whether a plain HttpClient GET sees that text depends on whether the site does
+/// server-side rendering for it - if this keeps coming back "Inconclusive" in production even for real, valid
+/// certificates, that confirms it's client-only rendering and the fix would need a headless-browser render
+/// step instead of a text scrape. Until proven otherwise, "Inconclusive" stays the safe default and the admin
+/// dashboard's manual approve/reject is the real gate for publishing a professional.
 /// </summary>
 public class SuperSaludCertificateValidationService : ICertificateValidationService
 {
@@ -23,8 +25,8 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
     private readonly SuperSaludOptions _options;
     private readonly ILogger<SuperSaludCertificateValidationService> _logger;
 
-    private static readonly string[] ValidKeywords = { "certificado válido", "certificado vigente", "documento válido", "válido" };
-    private static readonly string[] InvalidKeywords = { "no existe", "no encontrado", "no válido", "inválido", "sin resultados" };
+    private static readonly string[] ValidKeywords = { "estado del certificado: vigente", "certificado válido", "documento válido", "vigente" };
+    private static readonly string[] InvalidKeywords = { "no vigente", "no existe", "no encontrado", "no se encontró", "no válido", "inválido", "sin resultados", "revocado", "anulado" };
 
     public SuperSaludCertificateValidationService(
         IHttpClientFactory httpClientFactory,

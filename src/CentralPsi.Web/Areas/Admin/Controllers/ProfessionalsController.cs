@@ -16,12 +16,18 @@ public class ProfessionalsController : Controller
     private readonly ApplicationDbContext _db;
     private readonly IFileStorageService _fileStorage;
     private readonly INotificationService _notifications;
+    private readonly ICertificateValidationService _certificateValidation;
 
-    public ProfessionalsController(ApplicationDbContext db, IFileStorageService fileStorage, INotificationService notifications)
+    public ProfessionalsController(
+        ApplicationDbContext db,
+        IFileStorageService fileStorage,
+        INotificationService notifications,
+        ICertificateValidationService certificateValidation)
     {
         _db = db;
         _fileStorage = fileStorage;
         _notifications = notifications;
+        _certificateValidation = certificateValidation;
     }
 
     [HttpGet("")]
@@ -74,6 +80,36 @@ public class ProfessionalsController : Controller
         };
         var bytes = await System.IO.File.ReadAllBytesAsync(physicalPath);
         return File(bytes, contentType);
+    }
+
+    [HttpPost("{id:guid}/ReintentarValidacion")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RetryValidation(Guid id)
+    {
+        var professional = await _db.Professionals.FindAsync(id);
+        if (professional is null) return NotFound();
+
+        var physicalPath = _fileStorage.GetPrivatePhysicalPath(professional.CertificateFilePath);
+        var result = await _certificateValidation.ValidateAsync(professional.CertificateValidationCode, physicalPath);
+
+        professional.CertificateQrRawData = result.QrRawData;
+        professional.CertificateVerificationNotes = result.Notes;
+        professional.CertificateVerifiedAt = DateTime.UtcNow;
+
+        if (result.IsValid && !result.Inconclusive && professional.Status == ProfessionalStatus.PendingVerification)
+        {
+            professional.Status = ProfessionalStatus.Verified;
+            await _db.SaveChangesAsync();
+            await _notifications.SendProfessionalVerifiedAsync(professional);
+            TempData["SuccessMessage"] = $"¡Validación automática exitosa! {professional.FullName} quedó publicado.";
+        }
+        else
+        {
+            await _db.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Se volvió a intentar la validación automática - revisa la nota actualizada abajo.";
+        }
+
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     [HttpPost("{id:guid}/Aprobar")]
