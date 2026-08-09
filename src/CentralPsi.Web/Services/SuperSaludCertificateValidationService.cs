@@ -121,8 +121,24 @@ public class SuperSaludCertificateValidationService : ICertificateValidationServ
         var url = $"{_options.ValidationBaseUrl}?id={Uri.EscapeDataString(validationCode)}";
         await page.GotoAsync(url, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle, Timeout = 20000 });
 
+        // The ?id= query param only pre-loads the form - a real visitor still has to type the code and press
+        // "Consultar Certificado" to actually trigger the (reCAPTCHA-gated) lookup, so do the same here:
+        // explicitly fill the ID field (don't rely on the query param having done it) and click the button.
+        var idInput = page.Locator("input").First;
+        if (await idInput.IsVisibleAsync())
+        {
+            await idInput.FillAsync(validationCode);
+        }
+
+        var searchButton = page.Locator("button:has-text('Consultar Certificado')");
+        if (await searchButton.CountAsync() > 0)
+        {
+            await searchButton.First.ClickAsync();
+            await page.WaitForLoadStateAsync(LoadState.NetworkIdle, new PageWaitForLoadStateOptions { Timeout = 20000 });
+        }
+
         // Give the Angular app + background reCAPTCHA check a moment to finish rendering the result banner.
-        await page.WaitForTimeoutAsync(1500);
+        await page.WaitForTimeoutAsync(2000);
 
         return await page.InnerTextAsync("body");
     }
