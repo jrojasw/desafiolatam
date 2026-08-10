@@ -35,9 +35,26 @@ public class ProfessionalRegisterViewModel
     [Display(Name = "Orientación / enfoque terapéutico")]
     public string Orientation { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Cuéntanos sobre tu experiencia")]
-    [Display(Name = "Experiencia profesional")]
+    [Display(Name = "Especifica tu orientación")]
+    public string? OrientationOther { get; set; }
+
+    [Required(ErrorMessage = "Cuéntanos tu formación y forma de trabajar (mínimo 40 caracteres)")]
+    [MinLength(40, ErrorMessage = "Cuéntanos un poco más sobre tu formación y forma de trabajar (mínimo 40 caracteres)")]
+    [Display(Name = "Experiencia y forma de trabajar")]
     public string Experience { get; set; } = string.Empty;
+
+    public static readonly string[] OrientationOptions =
+    {
+        "Cognitivo-conductual",
+        "Psicoanálisis / Psicodinámica",
+        "Sistémica",
+        "Humanista",
+        "Gestalt",
+        "Integrativa",
+        "Terapia de Aceptación y Compromiso (ACT)",
+        "EMDR",
+        "Otro"
+    };
 
     [Display(Name = "Foto de perfil (opcional)")]
     public IFormFile? ProfilePhoto { get; set; }

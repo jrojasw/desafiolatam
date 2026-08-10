@@ -52,12 +52,29 @@
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Orientation" class="form-label"></label>
-                    <input asp-for="Orientation" class="form-control" placeholder="Ej: Cognitivo-conductual" />
+                    <select asp-for="Orientation" class="form-select" id="orientationSelect">
+                        <option value="">Selecciona una opción</option>
+                        @foreach (var option in CentralPsi.Web.Models.ViewModels.ProfessionalRegisterViewModel.OrientationOptions)
+                        {
+                            <option value="@option">@option</option>
+                        }
+                    </select>
                     <span asp-validation-for="Orientation" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 d-none" id="orientationOtherWrapper">
+                    <label asp-for="OrientationOther" class="form-label"></label>
+                    <input asp-for="OrientationOther" class="form-control" placeholder="Escribe tu orientación" />
+                    <span asp-validation-for="OrientationOther" class="text-danger small"></span>
                 </div>
                 <div class="col-12">
                     <label asp-for="Experience" class="form-label"></label>
-                    <textarea asp-for="Experience" class="form-control" rows="4" placeholder="Cuéntanos tu formación y experiencia; esto se mostrará en tu perfil público."></textarea>
+                    <div class="form-text mb-1">
+                        Cuéntale a quien te va a agendar cómo trabajas: tu formación, tu enfoque en sesión, con
+                        qué temas o poblaciones tienes más experiencia, etc. Este texto se muestra tal cual en
+                        tu perfil público, así que evita dejarlo vacío o genérico (ej. no escribas solo "sube tu
+                        cv" — cuéntanos de verdad cómo trabajas).
+                    </div>
+                    <textarea asp-for="Experience" class="form-control" rows="4" placeholder="Ej: Soy psicólogo clínico con 5 años de experiencia trabajando con adultos jóvenes, con enfoque cognitivo-conductual. En sesión priorizo un espacio cercano y sin juicios, trabajando con metas concretas..."></textarea>
                     <span asp-validation-for="Experience" class="text-danger small"></span>
                 </div>
                 <div class="col-12">
@@ -125,4 +142,15 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var select = document.getElementById('orientationSelect');
+            var wrapper = document.getElementById('orientationOtherWrapper');
+            function toggle() {
+                wrapper.classList.toggle('d-none', select.value !== 'Otro');
+            }
+            select.addEventListener('change', toggle);
+            toggle();
+        })();
+    </script>
 }

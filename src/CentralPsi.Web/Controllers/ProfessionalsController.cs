@@ -84,10 +84,19 @@ public class ProfessionalsController : Controller
             ModelState.AddModelError(nameof(model.Email), "Ya existe una inscripción con este correo.");
         }
 
+        if (model.Orientation == "Otro" && string.IsNullOrWhiteSpace(model.OrientationOther))
+        {
+            ModelState.AddModelError(nameof(model.OrientationOther), "Especifica tu orientación");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
         }
+
+        var resolvedOrientation = model.Orientation == "Otro"
+            ? model.OrientationOther!.Trim()
+            : model.Orientation.Trim();
 
         var professional = new Professional
         {
@@ -96,7 +105,7 @@ public class ProfessionalsController : Controller
             Phone = model.Phone.Trim(),
             Rut = model.Rut?.Trim(),
             Specialty = string.IsNullOrWhiteSpace(model.Specialty) ? null : model.Specialty.Trim(),
-            Orientation = model.Orientation.Trim(),
+            Orientation = resolvedOrientation,
             Experience = model.Experience.Trim(),
             CertificateValidationCode = model.CertificateValidationCode.Trim(),
             Status = ProfessionalStatus.PendingVerification
