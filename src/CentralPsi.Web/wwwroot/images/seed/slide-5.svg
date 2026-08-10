@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" width="1600" height="700">
+  <defs>
+    <linearGradient id="g5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#204e4a"/>
+      <stop offset="100%" stop-color="#c07a3e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="700" fill="url(#g5)"/>
+  <circle cx="1360" cy="140" r="200" fill="#ffffff" opacity="0.07"/>
+  <circle cx="120" cy="600" r="240" fill="#ffffff" opacity="0.06"/>
+
+  <!-- Grupo de siluetas diversas: marcador temporal, reemplazar con foto real desde Admin > Slides -->
+  <g opacity="0.92">
+    <g transform="translate(980,300)"><circle cx="0" cy="0" r="46" fill="#ffffff" opacity="0.9"/><path d="M-58 130 C-58 60 -32 20 0 20 C32 20 58 60 58 130 Z" fill="#ffffff" opacity="0.9"/></g>
+    <g transform="translate(1090,330)"><circle cx="0" cy="0" r="38" fill="#ffffff" opacity="0.75"/><path d="M-48 108 C-48 50 -26 16 0 16 C26 16 48 50 48 108 Z" fill="#ffffff" opacity="0.75"/></g>
+    <g transform="translate(870,335)"><circle cx="0" cy="0" r="38" fill="#ffffff" opacity="0.75"/><path d="M-48 108 C-48 50 -26 16 0 16 C26 16 48 50 48 108 Z" fill="#ffffff" opacity="0.75"/></g>
+    <g transform="translate(1180,365)"><circle cx="0" cy="0" r="30" fill="#ffffff" opacity="0.6"/><path d="M-38 86 C-38 40 -21 13 0 13 C21 13 38 40 38 86 Z" fill="#ffffff" opacity="0.6"/></g>
+    <g transform="translate(780,365)"><circle cx="0" cy="0" r="30" fill="#ffffff" opacity="0.6"/><path d="M-38 86 C-38 40 -21 13 0 13 C21 13 38 40 38 86 Z" fill="#ffffff" opacity="0.6"/></g>
+  </g>
+</svg>

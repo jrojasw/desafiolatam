@@ -69,6 +69,22 @@ public static class DataSeeder
             );
         }
 
+        // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
+        // slide also reaches databases that were seeded before it existed, matched by Title so it's never duplicated.
+        const string recruitmentSlideTitle = "Súmate a CentralPsi y trabaja con estabilidad";
+        if (!await db.SlideImages.AnyAsync(s => s.Title == recruitmentSlideTitle))
+        {
+            db.SlideImages.Add(new SlideImage
+            {
+                ImagePath = "/images/seed/slide-5.svg",
+                Title = recruitmentSlideTitle,
+                Subtitle = "Invitamos a psicólogos y psicólogas de todas las edades y géneros a inscribirse: agenda tus propias horas, genera ingresos estables y sigue ayudando a más personas.",
+                ButtonText = "Inscríbete gratis",
+                ButtonUrl = "/profesionales/inscripcion",
+                SortOrder = 0
+            });
+        }
+
         if (!await db.NewsArticles.AnyAsync())
         {
             db.NewsArticles.AddRange(

@@ -27,7 +27,14 @@
                                 {
                                     <p>@slide.Subtitle</p>
                                 }
-                                <a asp-controller="Professionals" asp-action="Index" class="btn cp-btn-primary btn-lg mt-2">Agenda tu hora</a>
+                                @if (!string.IsNullOrWhiteSpace(slide.ButtonUrl))
+                                {
+                                    <a href="@slide.ButtonUrl" class="btn cp-btn-primary btn-lg mt-2">@(string.IsNullOrWhiteSpace(slide.ButtonText) ? "Agenda tu hora" : slide.ButtonText)</a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Professionals" asp-action="Index" class="btn cp-btn-primary btn-lg mt-2">Agenda tu hora</a>
+                                }
                             </div>
                         }
                     </div>

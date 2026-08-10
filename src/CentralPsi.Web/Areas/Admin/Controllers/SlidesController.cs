@@ -44,6 +44,8 @@ public class SlidesController : Controller
             Id = slide.Id,
             Title = slide.Title,
             Subtitle = slide.Subtitle,
+            ButtonText = slide.ButtonText,
+            ButtonUrl = slide.ButtonUrl,
             SortOrder = slide.SortOrder,
             IsActive = slide.IsActive,
             CurrentImagePath = slide.ImagePath
@@ -74,6 +76,8 @@ public class SlidesController : Controller
 
         slide.Title = model.Title;
         slide.Subtitle = model.Subtitle;
+        slide.ButtonText = model.ButtonText;
+        slide.ButtonUrl = model.ButtonUrl;
         slide.SortOrder = model.SortOrder;
         slide.IsActive = model.IsActive;
         if (model.Image is { Length: > 0 })

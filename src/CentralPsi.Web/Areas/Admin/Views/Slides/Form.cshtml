@@ -25,6 +25,15 @@
             <input asp-for="Subtitle" class="form-control" />
         </div>
         <div class="mb-3">
+            <label asp-for="ButtonText" class="form-label"></label>
+            <input asp-for="ButtonText" class="form-control" placeholder="Agenda tu hora" />
+            <div class="form-text">Déjalo vacío para usar el texto y enlace por defecto ("Agenda tu hora" → Nuestros profesionales).</div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ButtonUrl" class="form-label"></label>
+            <input asp-for="ButtonUrl" class="form-control" placeholder="/profesionales/inscripcion" />
+        </div>
+        <div class="mb-3">
             <label asp-for="SortOrder" class="form-label"></label>
             <input asp-for="SortOrder" type="number" class="form-control" style="max-width:120px;" />
         </div>

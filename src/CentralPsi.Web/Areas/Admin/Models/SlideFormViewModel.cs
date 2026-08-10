@@ -12,6 +12,12 @@ public class SlideFormViewModel
     [Display(Name = "Subtítulo")]
     public string? Subtitle { get; set; }
 
+    [Display(Name = "Texto del botón")]
+    public string? ButtonText { get; set; }
+
+    [Display(Name = "Enlace del botón")]
+    public string? ButtonUrl { get; set; }
+
     [Display(Name = "Orden")]
     public int SortOrder { get; set; }
 
