@@ -93,6 +93,20 @@ public static class DataSeeder
             recruitmentSlide.ImagePath = recruitmentSlideImage;
         }
 
+        const string bookingSlideTitle = "Encuentra al profesional ideal para ti";
+        if (!await db.SlideImages.AnyAsync(s => s.Title == bookingSlideTitle))
+        {
+            db.SlideImages.Add(new SlideImage
+            {
+                ImagePath = "/images/seed/slide-6-pacientes.jpg",
+                Title = bookingSlideTitle,
+                Subtitle = "Agenda tu hora desde donde estés con excelentes profesionales de la psicología, validados ante la Superintendencia de Salud.",
+                ButtonText = "Ver profesionales",
+                ButtonUrl = "/profesionales",
+                SortOrder = 1
+            });
+        }
+
         if (!await db.NewsArticles.AnyAsync())
         {
             db.NewsArticles.AddRange(
