@@ -14,4 +14,11 @@ public class SmtpOptions
 
     /// <summary>When true, emails are written to the log instead of sent (useful for local dev without SMTP creds).</summary>
     public bool DryRun { get; set; } = true;
+
+    /// <summary>
+    /// Brevo transactional email API key. When set, emails are sent over HTTPS via Brevo's REST API instead
+    /// of raw SMTP sockets - several PaaS hosts (Render included, based on repeated connection timeouts to
+    /// two different providers) block outbound SMTP ports entirely, while HTTPS is essentially never blocked.
+    /// </summary>
+    public string? ApiKey { get; set; }
 }

@@ -70,7 +70,18 @@ builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
 builder.Services.AddScoped<ISlotAvailabilityService, SlotAvailabilityService>();
 builder.Services.AddScoped<IRefundCalculationService, RefundCalculationService>();
-builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+
+// Prefer Brevo's HTTPS API over raw SMTP when an API key is configured - several PaaS hosts (this one
+// included) block outbound SMTP ports, which HTTPS doesn't run into.
+var smtpApiKey = builder.Configuration["Smtp:ApiKey"];
+if (!string.IsNullOrWhiteSpace(smtpApiKey))
+{
+    builder.Services.AddScoped<IEmailService, BrevoApiEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+}
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICertificateValidationService, SuperSaludCertificateValidationService>();
 builder.Services.AddScoped<IPaymentService, TransbankWebpayService>();
