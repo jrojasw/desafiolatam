@@ -70,6 +70,14 @@ public static class DataSeeder
         }
 
         // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
+        // photo also reaches the row that was seeded with the original abstract-gradient placeholder.
+        var bienestarSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Tu bienestar emocional, un paso a la vez");
+        if (bienestarSlide is not null && bienestarSlide.ImagePath == "/images/seed/slide-1.svg")
+        {
+            bienestarSlide.ImagePath = "/images/seed/slide-1-bienestar.jpg";
+        }
+
+        // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
         // slide also reaches databases that were seeded before it existed, matched by Title so it's never duplicated.
         const string recruitmentSlideTitle = "Súmate a CentralPsi y trabaja con estabilidad";
         const string recruitmentSlideImage = "/images/seed/slide-5-profesionales.jpg";
