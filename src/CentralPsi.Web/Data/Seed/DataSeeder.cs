@@ -72,17 +72,25 @@ public static class DataSeeder
         // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
         // slide also reaches databases that were seeded before it existed, matched by Title so it's never duplicated.
         const string recruitmentSlideTitle = "Súmate a CentralPsi y trabaja con estabilidad";
-        if (!await db.SlideImages.AnyAsync(s => s.Title == recruitmentSlideTitle))
+        const string recruitmentSlideImage = "/images/seed/slide-5-profesionales.jpg";
+        var recruitmentSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == recruitmentSlideTitle);
+        if (recruitmentSlide is null)
         {
             db.SlideImages.Add(new SlideImage
             {
-                ImagePath = "/images/seed/slide-5.svg",
+                ImagePath = recruitmentSlideImage,
                 Title = recruitmentSlideTitle,
                 Subtitle = "Invitamos a psicólogos y psicólogas de todas las edades y géneros a inscribirse: agenda tus propias horas, genera ingresos estables y sigue ayudando a más personas.",
                 ButtonText = "Inscríbete gratis",
                 ButtonUrl = "/profesionales/inscripcion",
                 SortOrder = 0
             });
+        }
+        else if (recruitmentSlide.ImagePath == "/images/seed/slide-5.svg")
+        {
+            // An earlier deploy seeded this row with the temporary abstract placeholder; swap it for the
+            // real photo now that one exists, without touching anything an admin may have edited since.
+            recruitmentSlide.ImagePath = recruitmentSlideImage;
         }
 
         if (!await db.NewsArticles.AnyAsync())
