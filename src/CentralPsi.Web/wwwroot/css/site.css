@@ -162,13 +162,23 @@ a:hover {
   letter-spacing: .03em;
 }
 
+.cp-professional-card {
+  max-width: 260px;
+  margin: 0 auto;
+}
 .cp-professional-photo {
-  height: 220px;
+  aspect-ratio: 3 / 4;
   width: 100%;
   object-fit: cover;
   border-top-left-radius: 1rem;
   border-top-right-radius: 1rem;
   background: var(--cp-primary-light);
+}
+.cp-professional-card .p-3 {
+  padding: .85rem 1rem !important;
+}
+.cp-professional-card h5 {
+  font-size: 1rem;
 }
 
 /* ---- Footer ---- */

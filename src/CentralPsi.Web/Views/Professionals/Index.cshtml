@@ -17,11 +17,11 @@
         }
         else
         {
-            <div class="row gy-4">
+            <div class="row gy-4 justify-content-center justify-content-sm-start">
                 @foreach (var professional in Model.Professionals)
                 {
-                    <div class="col-md-6 col-lg-4">
-                        <div class="cp-card">
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="cp-card cp-professional-card">
                             <img src="@(string.IsNullOrEmpty(professional.ProfilePhotoPath) ? Url.Content("~/images/seed/avatar-placeholder.svg") : Url.Content(professional.ProfilePhotoPath))"
                                  class="cp-professional-photo" alt="@professional.FullName" />
                             <div class="p-3">
