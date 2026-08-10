@@ -17,17 +17,34 @@ public class ProfessionalsController : Controller
     private readonly IFileStorageService _fileStorage;
     private readonly INotificationService _notifications;
     private readonly ICertificateValidationService _certificateValidation;
+    private readonly ILogger<ProfessionalsController> _logger;
 
     public ProfessionalsController(
         ApplicationDbContext db,
         IFileStorageService fileStorage,
         INotificationService notifications,
-        ICertificateValidationService certificateValidation)
+        ICertificateValidationService certificateValidation,
+        ILogger<ProfessionalsController> logger)
     {
         _db = db;
         _fileStorage = fileStorage;
         _notifications = notifications;
         _certificateValidation = certificateValidation;
+        _logger = logger;
+    }
+
+    /// <summary>Notification failures (bad SMTP config, provider outage) shouldn't turn an otherwise-successful
+    /// admin action (approve/reject/etc., already saved to the DB) into a 500 error page.</summary>
+    private async Task TrySendNotificationAsync(Func<Task> send, Guid professionalId)
+    {
+        try
+        {
+            await send();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error enviando notificación por correo para el profesional {ProfessionalId}", professionalId);
+        }
     }
 
     [HttpGet("")]
@@ -100,7 +117,7 @@ public class ProfessionalsController : Controller
         {
             professional.Status = ProfessionalStatus.Verified;
             await _db.SaveChangesAsync();
-            await _notifications.SendProfessionalVerifiedAsync(professional);
+            await TrySendNotificationAsync(() => _notifications.SendProfessionalVerifiedAsync(professional), professional.Id);
             TempData["SuccessMessage"] = $"¡Validación automática exitosa! {professional.FullName} quedó publicado.";
         }
         else
@@ -123,7 +140,7 @@ public class ProfessionalsController : Controller
         professional.CertificateVerifiedAt = DateTime.UtcNow;
         professional.CertificateVerificationNotes = (professional.CertificateVerificationNotes ?? "") + " [Aprobado manualmente por el administrador]";
         await _db.SaveChangesAsync();
-        await _notifications.SendProfessionalVerifiedAsync(professional);
+        await TrySendNotificationAsync(() => _notifications.SendProfessionalVerifiedAsync(professional), professional.Id);
 
         TempData["SuccessMessage"] = $"{professional.FullName} fue publicado en el listado de profesionales.";
         return RedirectToAction(nameof(Details), new { id });
@@ -138,7 +155,9 @@ public class ProfessionalsController : Controller
 
         professional.Status = ProfessionalStatus.Rejected;
         await _db.SaveChangesAsync();
-        await _notifications.SendProfessionalRejectedAsync(professional, reason ?? "No cumple los requisitos de validación.");
+        await TrySendNotificationAsync(
+            () => _notifications.SendProfessionalRejectedAsync(professional, reason ?? "No cumple los requisitos de validación."),
+            professional.Id);
 
         TempData["SuccessMessage"] = $"{professional.FullName} fue rechazado.";
         return RedirectToAction(nameof(Details), new { id });

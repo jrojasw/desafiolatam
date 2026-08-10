@@ -187,7 +187,18 @@ public class BookingController : Controller
             appointment.GoogleMeetLink = meet.MeetLink;
 
             await _db.SaveChangesAsync();
-            await _notifications.SendAppointmentConfirmedAsync(appointment, professional);
+
+            try
+            {
+                await _notifications.SendAppointmentConfirmedAsync(appointment, professional);
+            }
+            catch (Exception ex)
+            {
+                // The payment is already authorized and saved above - a notification failure (bad SMTP
+                // credentials, provider outage, etc.) must not turn into a 500 that makes a paying patient
+                // think their booking failed.
+                _logger.LogError(ex, "Error enviando el correo de confirmación para la cita {AppointmentId}", appointment.Id);
+            }
         }
         else
         {
@@ -262,7 +273,16 @@ public class BookingController : Controller
             await _googleCalendar.CancelSessionEventAsync(appointment.GoogleEventId);
         }
 
-        await _notifications.SendCancellationRefundNoticeAsync(appointment, appointment.Professional, cancellationRequest);
+        try
+        {
+            await _notifications.SendCancellationRefundNoticeAsync(appointment, appointment.Professional, cancellationRequest);
+        }
+        catch (Exception ex)
+        {
+            // The cancellation itself is already saved above - don't fail the whole request over a
+            // notification-only error, but log it since reembolsos@ needs that email to process the refund.
+            _logger.LogError(ex, "Error enviando el aviso de cancelación/reembolso para la cita {AppointmentId}", appointment.Id);
+        }
 
         TempData["SuccessMessage"] = "Tu hora fue cancelada. Revisa tu correo para conocer el detalle del reembolso.";
         return RedirectToAction(nameof(Cancel), new { token });
