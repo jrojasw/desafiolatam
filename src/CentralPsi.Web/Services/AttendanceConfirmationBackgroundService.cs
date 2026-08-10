@@ -50,6 +50,7 @@ public class AttendanceConfirmationBackgroundService : BackgroundService
             .Where(a => a.Status == AppointmentStatus.Confirmed
                         && a.ScheduledEndUtc <= DateTime.UtcNow
                         && a.AttendanceRequestSentAtUtc == null)
+            .OrderBy(a => a.ScheduledEndUtc)
             .Take(50)
             .ToListAsync(ct);
 
