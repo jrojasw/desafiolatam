@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70" width="70" height="70">
+  <defs><clipPath id="cpFaviconLens"><circle cx="33" cy="39" r="22"/></clipPath></defs>
+  <circle cx="33" cy="39" r="22" fill="#204e4a"/>
+  <circle cx="50" cy="20" r="12" fill="#7fb6ad"/>
+  <g clip-path="url(#cpFaviconLens)"><circle cx="50" cy="20" r="12" fill="#4a938c"/></g>
+</svg>
