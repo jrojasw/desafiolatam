@@ -72,9 +72,35 @@ public static class DataSeeder
         // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
         // photo also reaches the row that was seeded with the original abstract-gradient placeholder.
         var bienestarSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Tu bienestar emocional, un paso a la vez");
-        if (bienestarSlide is not null && bienestarSlide.ImagePath == "/images/seed/slide-1.svg")
+        if (bienestarSlide is not null)
         {
-            bienestarSlide.ImagePath = "/images/seed/slide-1-bienestar.jpg";
+            if (bienestarSlide.ImagePath == "/images/seed/slide-1.svg")
+            {
+                bienestarSlide.ImagePath = "/images/seed/slide-1-bienestar.jpg";
+            }
+            if (string.IsNullOrWhiteSpace(bienestarSlide.Subtitle))
+            {
+                bienestarSlide.Subtitle = "Sin apuros ni exigencias: avanza a tu propio ritmo con el acompañamiento de un profesional que se ajusta a tu proceso.";
+            }
+        }
+
+        var agendaSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Agenda cuando tú lo necesites");
+        if (agendaSlide is not null)
+        {
+            if (agendaSlide.ImagePath == "/images/seed/slide-3.svg")
+            {
+                agendaSlide.ImagePath = "/images/seed/slide-4-agenda.jpg";
+            }
+            if (string.IsNullOrWhiteSpace(agendaSlide.Subtitle))
+            {
+                agendaSlide.Subtitle = "Reserva tu hora online, a la hora del día que te acomode, sin listas de espera ni llamadas telefónicas.";
+            }
+        }
+
+        var espacioSeguroSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Un espacio seguro para hablar y avanzar");
+        if (espacioSeguroSlide is not null && string.IsNullOrWhiteSpace(espacioSeguroSlide.Subtitle))
+        {
+            espacioSeguroSlide.Subtitle = "Confidencial, sin juicios y 100% online: un lugar para expresarte con libertad y trabajar en lo que te importa.";
         }
 
         // Repurposes the old "Profesionales acreditados por el Minsal" slide into a family-wellbeing/systemic
