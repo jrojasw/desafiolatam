@@ -138,7 +138,7 @@ public static class DataSeeder
             db.NewsArticles.Remove(droppedArticle);
         }
 
-        async Task UpsertNewsArticleAsync(string title, string summary, string content, NewsCategory category, string imagePath)
+        async Task UpsertNewsArticleAsync(string title, string summary, string content, NewsCategory category, string imagePath, string? sourceUrl = null)
         {
             var article = await db.NewsArticles.FirstOrDefaultAsync(n => n.Title == title);
             if (article is null)
@@ -151,28 +151,40 @@ public static class DataSeeder
             article.Content = content;
             article.Category = category;
             article.ImagePath = imagePath;
+            article.SourceUrl = sourceUrl;
         }
 
         await UpsertNewsArticleAsync(
             "La OMS destaca el aumento de la ansiedad a nivel mundial",
             "Organismos de salud reportan un alza sostenida en trastornos de ansiedad y depresión desde 2020.",
-            "Diversos estudios epidemiológicos muestran que la ansiedad y la depresión se encuentran entre las principales causas de discapacidad a nivel global, reforzando la importancia del acceso a atención psicológica oportuna.",
+            "Según cifras publicadas por la Organización Mundial de la Salud (OMS), la prevalencia mundial de ansiedad y depresión aumentó un 25% durante el primer año de la pandemia de COVID-19. El aislamiento social, el miedo al contagio, las preocupaciones económicas y los duelos vividos durante ese período fueron factores clave detrás de este incremento.\n\n" +
+            "El mismo informe advierte que este aumento no fue parejo: mujeres y personas jóvenes se vieron afectadas de manera desproporcionada, en un momento en que, paradójicamente, el acceso a servicios de salud mental se vio interrumpido en gran parte del mundo.\n\n" +
+            "Para Chile, estas cifras confirman una tendencia que muchos profesionales de la salud mental ya observaban en sus consultas: una demanda creciente de atención psicológica, muchas veces contenida por barreras de acceso, costo o tiempos de espera. Plataformas de agendamiento online como CentralPsi buscan reducir precisamente esas barreras, facilitando que más personas encuentren ayuda profesional sin que la distancia o los horarios sean un obstáculo.",
             NewsCategory.Noticia,
-            "/images/seed/news-ansiedad-mundial.jpg");
+            "/images/seed/news-ansiedad-mundial.jpg",
+            "https://www.who.int/news/item/02-03-2022-covid-19-pandemic-triggers-25-increase-in-prevalence-of-anxiety-and-depression-worldwide");
 
         await UpsertNewsArticleAsync(
             "Respiración 4-7-8: una técnica simple para bajar la ansiedad",
             "Un ejercicio de respiración que puedes practicar en cualquier momento del día.",
-            "Inhala por 4 segundos, sostén el aire por 7 segundos y exhala lentamente por 8 segundos. Repetir este ciclo 4 veces ayuda a activar el sistema nervioso parasimpático y reducir la sensación de estrés agudo.",
+            "La técnica de respiración 4-7-8, popularizada por el médico Andrew Weil a partir de prácticas de respiración yóguica (pranayama), es un ejercicio simple que puedes practicar en cualquier momento del día, sin necesitar ningún elemento adicional.\n\n" +
+            "Cómo hacerla: inhala por la nariz contando hasta 4, sostén el aire contando hasta 7, y exhala lentamente por la boca (con un sonido suave, como un suspiro) contando hasta 8. Repite el ciclo entre 4 y 8 veces.\n\n" +
+            "Al alargar la exhalación por sobre la inhalación, este patrón de respiración ayuda a activar el sistema nervioso parasimpático — el mismo que se encarga de bajarnos las revoluciones después de un momento de estrés — lo que puede traducirse en una sensación de mayor calma y, para algunas personas, facilitar quedarse dormido.\n\n" +
+            "Como cualquier herramienta de autorregulación, funciona mejor como complemento del trabajo terapéutico, no como reemplazo: si la ansiedad es persistente o interfiere con tu día a día, conversarlo con un profesional puede ayudarte a entender qué hay detrás.",
             NewsCategory.Tip,
-            "/images/seed/news-respiracion-478.jpg");
+            "/images/seed/news-respiracion-478.jpg",
+            "https://health.clevelandclinic.org/4-7-8-breathing");
 
         await UpsertNewsArticleAsync(
             "Estudio: la terapia online es tan efectiva como la presencial",
             "Una revisión de múltiples estudios confirma la efectividad de la psicoterapia por videollamada.",
-            "Metaanálisis recientes muestran que, para gran parte de los motivos de consulta, la terapia realizada por videollamada logra resultados clínicos comparables a la atención presencial, con la ventaja de una mayor accesibilidad.",
+            "Una revisión sistemática y metaanálisis publicado en JMIR Mental Health (2023) comparó tratamientos psiquiátricos y psicoterapéuticos entregados por telemedicina versus de forma presencial, en personas con trastorno de estrés postraumático, trastornos del ánimo y trastornos de ansiedad.\n\n" +
+            "Los resultados mostraron que la atención por videollamada logra una efectividad equivalente a la presencial en varios indicadores clave: mejoría clínica, satisfacción de las personas atendidas, calidad del vínculo terapéutico y tasas de abandono del tratamiento.\n\n" +
+            "Esto respalda lo que muchos pacientes ya reportan de forma anecdótica: que la comodidad de conectarse desde la casa, sin trasladarse ni depender de horarios rígidos, no compromete la calidad de la terapia — y en muchos casos, facilita sostener el proceso en el tiempo.\n\n" +
+            "En CentralPsi, todas las sesiones se realizan por videollamada con profesionales verificados, para que la distancia deje de ser un motivo para postergar el autocuidado.",
             NewsCategory.EstudioCientifico,
-            "/images/seed/news-terapia-online-estudio.jpg");
+            "/images/seed/news-terapia-online-estudio.jpg",
+            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10357375/");
 
         await db.SaveChangesAsync();
     }
