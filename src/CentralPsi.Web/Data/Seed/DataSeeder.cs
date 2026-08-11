@@ -69,101 +69,66 @@ public static class DataSeeder
             );
         }
 
-        // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
-        // photo also reaches the row that was seeded with the original abstract-gradient placeholder.
-        var bienestarSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Tu bienestar emocional, un paso a la vez");
-        if (bienestarSlide is not null)
+        // These six slides are managed entirely through this seeder now (not through admin uploads), so every
+        // startup forces ImagePath back to the known-good file checked into wwwroot/images/seed. This is
+        // deliberately unconditional: a slide's ImagePath can end up pointing at /uploads/slides/<guid> if it
+        // was ever edited from the admin panel, and uploaded files live on Render's ephemeral disk - they
+        // vanish on the next deploy/restart, leaving a broken image. Converging here every boot is what fixes
+        // that permanently instead of only healing it once.
+        async Task<SlideImage> UpsertManagedSlideAsync(
+            string title, string imagePath, string subtitle, string? buttonText, string? buttonUrl, int sortOrder, string? matchAlsoTitle = null)
         {
-            if (bienestarSlide.ImagePath == "/images/seed/slide-1.svg")
+            var slide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == title || s.Title == matchAlsoTitle);
+            if (slide is null)
             {
-                bienestarSlide.ImagePath = "/images/seed/slide-1-bienestar.jpg";
+                slide = new SlideImage { Title = title, SortOrder = sortOrder };
+                db.SlideImages.Add(slide);
             }
-            if (string.IsNullOrWhiteSpace(bienestarSlide.Subtitle))
-            {
-                bienestarSlide.Subtitle = "Sin apuros ni exigencias: avanza a tu propio ritmo con el acompañamiento de un profesional que se ajusta a tu proceso.";
-            }
+
+            slide.Title = title;
+            slide.ImagePath = imagePath;
+            slide.Subtitle = subtitle;
+            slide.ButtonText = buttonText;
+            slide.ButtonUrl = buttonUrl;
+            return slide;
         }
 
-        var agendaSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Agenda cuando tú lo necesites");
-        if (agendaSlide is not null)
-        {
-            if (agendaSlide.ImagePath == "/images/seed/slide-3.svg")
-            {
-                agendaSlide.ImagePath = "/images/seed/slide-4-agenda.jpg";
-            }
-            if (string.IsNullOrWhiteSpace(agendaSlide.Subtitle))
-            {
-                agendaSlide.Subtitle = "Reserva tu hora online, a la hora del día que te acomode, sin listas de espera ni llamadas telefónicas.";
-            }
-        }
+        await UpsertManagedSlideAsync(
+            "Tu bienestar emocional, un paso a la vez",
+            "/images/seed/slide-1-bienestar.jpg",
+            "Sin apuros ni exigencias: avanza a tu propio ritmo con el acompañamiento de un profesional que se ajusta a tu proceso.",
+            null, null, 1);
 
-        var espacioSeguroSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Un espacio seguro para hablar y avanzar");
-        if (espacioSeguroSlide is not null)
-        {
-            if (string.IsNullOrWhiteSpace(espacioSeguroSlide.Subtitle))
-            {
-                espacioSeguroSlide.Subtitle = "Confidencial, sin juicios y 100% online: un lugar para expresarte con libertad y trabajar en lo que te importa.";
-            }
-            if (espacioSeguroSlide.ImagePath == "/images/seed/slide-4.svg")
-            {
-                espacioSeguroSlide.ImagePath = "/images/seed/slide-espacio-seguro.jpg";
-            }
-        }
+        await UpsertManagedSlideAsync(
+            "Encuentra al profesional ideal para ti",
+            "/images/seed/slide-6-pacientes.jpg",
+            "Agenda tu hora desde donde estés con excelentes profesionales de la psicología, validados ante la Superintendencia de Salud.",
+            "Ver profesionales", "/profesionales", 1);
 
-        // Repurposes the old "Profesionales acreditados por el Minsal" slide into a family-wellbeing/systemic
-        // content slide. Matches by either the old or new title so it's idempotent and only touches this once.
-        const string familySlideTitle = "El bienestar de tu familia, primero";
-        var familySlide = await db.SlideImages.FirstOrDefaultAsync(s =>
-            s.Title == "Profesionales acreditados por el Minsal" || s.Title == familySlideTitle);
-        if (familySlide is not null)
-        {
-            familySlide.Title = familySlideTitle;
-            familySlide.Subtitle = "Padres, hijos, hermanos, abuelos o quien compone tu familia: encuentra profesionales especializados en terapia familiar y sistémica para fortalecer la comunicación y el vínculo.";
-            familySlide.ButtonText = "Ver profesionales";
-            familySlide.ButtonUrl = "/profesionales";
-            if (familySlide.ImagePath == "/images/seed/slide-2.svg")
-            {
-                familySlide.ImagePath = "/images/seed/slide-3-familia.jpg";
-            }
-        }
+        await UpsertManagedSlideAsync(
+            "El bienestar de tu familia, primero",
+            "/images/seed/slide-3-familia.jpg",
+            "Padres, hijos, hermanos, abuelos o quien compone tu familia: encuentra profesionales especializados en terapia familiar y sistémica para fortalecer la comunicación y el vínculo.",
+            "Ver profesionales", "/profesionales", 2,
+            matchAlsoTitle: "Profesionales acreditados por el Minsal");
 
-        // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
-        // slide also reaches databases that were seeded before it existed, matched by Title so it's never duplicated.
-        const string recruitmentSlideTitle = "Súmate a CentralPsi y trabaja con estabilidad";
-        const string recruitmentSlideImage = "/images/seed/slide-5-profesionales.jpg";
-        var recruitmentSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == recruitmentSlideTitle);
-        if (recruitmentSlide is null)
-        {
-            db.SlideImages.Add(new SlideImage
-            {
-                ImagePath = recruitmentSlideImage,
-                Title = recruitmentSlideTitle,
-                Subtitle = "Invitamos a psicólogos y psicólogas de todas las edades y géneros a inscribirse: agenda tus propias horas, genera ingresos estables y sigue ayudando a más personas.",
-                ButtonText = "Inscríbete gratis",
-                ButtonUrl = "/profesionales/inscripcion",
-                SortOrder = 0
-            });
-        }
-        else if (recruitmentSlide.ImagePath == "/images/seed/slide-5.svg")
-        {
-            // An earlier deploy seeded this row with the temporary abstract placeholder; swap it for the
-            // real photo now that one exists, without touching anything an admin may have edited since.
-            recruitmentSlide.ImagePath = recruitmentSlideImage;
-        }
+        await UpsertManagedSlideAsync(
+            "Agenda cuando tú lo necesites",
+            "/images/seed/slide-4-agenda.jpg",
+            "Reserva tu hora online, a la hora del día que te acomode, sin listas de espera ni llamadas telefónicas.",
+            null, null, 3);
 
-        const string bookingSlideTitle = "Encuentra al profesional ideal para ti";
-        if (!await db.SlideImages.AnyAsync(s => s.Title == bookingSlideTitle))
-        {
-            db.SlideImages.Add(new SlideImage
-            {
-                ImagePath = "/images/seed/slide-6-pacientes.jpg",
-                Title = bookingSlideTitle,
-                Subtitle = "Agenda tu hora desde donde estés con excelentes profesionales de la psicología, validados ante la Superintendencia de Salud.",
-                ButtonText = "Ver profesionales",
-                ButtonUrl = "/profesionales",
-                SortOrder = 1
-            });
-        }
+        await UpsertManagedSlideAsync(
+            "Un espacio seguro para hablar y avanzar",
+            "/images/seed/slide-espacio-seguro.jpg",
+            "Confidencial, sin juicios y 100% online: un lugar para expresarte con libertad y trabajar en lo que te importa.",
+            null, null, 4);
+
+        await UpsertManagedSlideAsync(
+            "Súmate a CentralPsi y trabaja con estabilidad",
+            "/images/seed/slide-5-profesionales.jpg",
+            "Invitamos a psicólogos y psicólogas de todas las edades y géneros a inscribirse: agenda tus propias horas, genera ingresos estables y sigue ayudando a más personas.",
+            "Inscríbete gratis", "/profesionales/inscripcion", 0);
 
         if (!await db.NewsArticles.AnyAsync())
         {
