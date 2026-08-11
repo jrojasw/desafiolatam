@@ -98,9 +98,16 @@ public static class DataSeeder
         }
 
         var espacioSeguroSlide = await db.SlideImages.FirstOrDefaultAsync(s => s.Title == "Un espacio seguro para hablar y avanzar");
-        if (espacioSeguroSlide is not null && string.IsNullOrWhiteSpace(espacioSeguroSlide.Subtitle))
+        if (espacioSeguroSlide is not null)
         {
-            espacioSeguroSlide.Subtitle = "Confidencial, sin juicios y 100% online: un lugar para expresarte con libertad y trabajar en lo que te importa.";
+            if (string.IsNullOrWhiteSpace(espacioSeguroSlide.Subtitle))
+            {
+                espacioSeguroSlide.Subtitle = "Confidencial, sin juicios y 100% online: un lugar para expresarte con libertad y trabajar en lo que te importa.";
+            }
+            if (espacioSeguroSlide.ImagePath == "/images/seed/slide-4.svg")
+            {
+                espacioSeguroSlide.ImagePath = "/images/seed/slide-espacio-seguro.jpg";
+            }
         }
 
         // Repurposes the old "Profesionales acreditados por el Minsal" slide into a family-wellbeing/systemic
