@@ -139,7 +139,7 @@ public class ProfessionalsController : Controller
 
         await TryAutoValidateAsync(professional);
 
-        TempData["SuccessMessage"] = "¡Gracias por inscribirte! Estamos validando tu certificado; te avisaremos por correo apenas quede publicado tu perfil.";
+        TempData["SuccessMessage"] = "¡Gracias por inscribirte! Estamos validando tu certificado; te avisaremos por correo apenas quede publicado tu perfil. Si más adelante necesitas modificar algún dato de tu perfil (foto, descripción, orientación, etc.), escríbenos a admin@centralpsi.cl.";
         return RedirectToAction(nameof(Index));
     }
 
