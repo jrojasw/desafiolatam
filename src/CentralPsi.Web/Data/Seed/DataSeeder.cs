@@ -77,6 +77,23 @@ public static class DataSeeder
             bienestarSlide.ImagePath = "/images/seed/slide-1-bienestar.jpg";
         }
 
+        // Repurposes the old "Profesionales acreditados por el Minsal" slide into a family-wellbeing/systemic
+        // content slide. Matches by either the old or new title so it's idempotent and only touches this once.
+        const string familySlideTitle = "El bienestar de tu familia, primero";
+        var familySlide = await db.SlideImages.FirstOrDefaultAsync(s =>
+            s.Title == "Profesionales acreditados por el Minsal" || s.Title == familySlideTitle);
+        if (familySlide is not null)
+        {
+            familySlide.Title = familySlideTitle;
+            familySlide.Subtitle = "Padres, hijos, hermanos, abuelos o quien compone tu familia: encuentra profesionales especializados en terapia familiar y sistémica para fortalecer la comunicación y el vínculo.";
+            familySlide.ButtonText = "Ver profesionales";
+            familySlide.ButtonUrl = "/profesionales";
+            if (familySlide.ImagePath == "/images/seed/slide-2.svg")
+            {
+                familySlide.ImagePath = "/images/seed/slide-3-familia.jpg";
+            }
+        }
+
         // Runs on every startup (unlike the block above, which only fires for a brand-new database) so this
         // slide also reaches databases that were seeded before it existed, matched by Title so it's never duplicated.
         const string recruitmentSlideTitle = "Súmate a CentralPsi y trabaja con estabilidad";
