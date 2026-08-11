@@ -13,7 +13,7 @@
             {
                 <tr>
                     <td>@article.Title</td>
-                    <td>@article.Category</td>
+                    <td>@article.Category.ToDisplayName()</td>
                     <td>@article.PublishedAtUtc.ToLocalTime().ToString("dd-MM-yyyy")</td>
                     <td>
                         @if (article.IsActive)

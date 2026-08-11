@@ -111,8 +111,10 @@
                     <div class="cp-card">
                         <img src="@(string.IsNullOrEmpty(article.ImagePath) ? Url.Content("~/images/seed/motivational.svg") : Url.Content(article.ImagePath))" class="cp-news-image" alt="@article.Title" />
                         <div class="p-3">
-                            <span class="cp-badge-category">@article.Category</span>
-                            <h5 class="mt-2">@article.Title</h5>
+                            <span class="cp-badge-category">@article.Category.ToDisplayName()</span>
+                            <h5 class="mt-2">
+                                <a asp-controller="News" asp-action="Details" asp-route-id="@article.Id" class="stretched-link text-decoration-none text-reset">@article.Title</a>
+                            </h5>
                             <p class="text-muted small">@article.Summary</p>
                         </div>
                     </div>

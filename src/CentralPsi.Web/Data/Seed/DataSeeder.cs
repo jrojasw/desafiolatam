@@ -138,30 +138,53 @@ public static class DataSeeder
                     Title = "5 señales de que podrías beneficiarte de terapia",
                     Summary = "Reconocer el momento adecuado para pedir ayuda es un acto de autocuidado, no una debilidad.",
                     Content = "Cambios en el sueño, irritabilidad persistente, dificultad para concentrarte, aislamiento social y agotamiento emocional son señales frecuentes. Consultar con un profesional a tiempo puede marcar una gran diferencia.",
-                    Category = NewsCategory.Consejo
+                    Category = NewsCategory.Consejo,
+                    ImagePath = "/images/seed/news-senales-terapia.svg"
                 },
                 new NewsArticle
                 {
                     Title = "La OMS destaca el aumento de la ansiedad a nivel mundial",
                     Summary = "Organismos de salud reportan un alza sostenida en trastornos de ansiedad y depresión desde 2020.",
                     Content = "Diversos estudios epidemiológicos muestran que la ansiedad y la depresión se encuentran entre las principales causas de discapacidad a nivel global, reforzando la importancia del acceso a atención psicológica oportuna.",
-                    Category = NewsCategory.Noticia
+                    Category = NewsCategory.Noticia,
+                    ImagePath = "/images/seed/news-ansiedad-mundial.svg"
                 },
                 new NewsArticle
                 {
                     Title = "Respiración 4-7-8: una técnica simple para bajar la ansiedad",
                     Summary = "Un ejercicio de respiración que puedes practicar en cualquier momento del día.",
                     Content = "Inhala por 4 segundos, sostén el aire por 7 segundos y exhala lentamente por 8 segundos. Repetir este ciclo 4 veces ayuda a activar el sistema nervioso parasimpático y reducir la sensación de estrés agudo.",
-                    Category = NewsCategory.Tip
+                    Category = NewsCategory.Tip,
+                    ImagePath = "/images/seed/news-respiracion-478.svg"
                 },
                 new NewsArticle
                 {
                     Title = "Estudio: la terapia online es tan efectiva como la presencial",
                     Summary = "Una revisión de múltiples estudios confirma la efectividad de la psicoterapia por videollamada.",
                     Content = "Metaanálisis recientes muestran que, para gran parte de los motivos de consulta, la terapia realizada por videollamada logra resultados clínicos comparables a la atención presencial, con la ventaja de una mayor accesibilidad.",
-                    Category = NewsCategory.EstudioCientifico
+                    Category = NewsCategory.EstudioCientifico,
+                    ImagePath = "/images/seed/news-terapia-online-estudio.svg"
                 }
             );
+        }
+        else
+        {
+            // Backfills the illustration on rows that predate this field, matched by Title. Only fires when
+            // ImagePath is still empty, so it never overwrites a real photo an admin has since uploaded.
+            var seedImageByTitle = new Dictionary<string, string>
+            {
+                ["5 señales de que podrías beneficiarte de terapia"] = "/images/seed/news-senales-terapia.svg",
+                ["La OMS destaca el aumento de la ansiedad a nivel mundial"] = "/images/seed/news-ansiedad-mundial.svg",
+                ["Respiración 4-7-8: una técnica simple para bajar la ansiedad"] = "/images/seed/news-respiracion-478.svg",
+                ["Estudio: la terapia online es tan efectiva como la presencial"] = "/images/seed/news-terapia-online-estudio.svg"
+            };
+            var articlesMissingImage = await db.NewsArticles
+                .Where(n => string.IsNullOrEmpty(n.ImagePath) && seedImageByTitle.Keys.Contains(n.Title))
+                .ToListAsync();
+            foreach (var article in articlesMissingImage)
+            {
+                article.ImagePath = seedImageByTitle[article.Title];
+            }
         }
 
         await db.SaveChangesAsync();

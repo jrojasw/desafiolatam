@@ -1,0 +1,35 @@
+@model CentralPsi.Web.Models.Entities.NewsArticle
+@{
+    ViewData["Title"] = Model.Title;
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<section class="cp-section">
+    <div class="container" style="max-width:760px;">
+        <a asp-controller="Home" asp-action="Index" class="text-decoration-none small mb-3 d-inline-block" style="color:var(--cp-muted);">&larr; Volver al inicio</a>
+
+        <span class="cp-badge-category">@Model.Category.ToDisplayName()</span>
+        <h1 class="cp-section-title mt-3 mb-2">@Model.Title</h1>
+        <p class="text-muted small mb-4">@Model.PublishedAtUtc.ToString("d 'de' MMMM 'de' yyyy", culture)</p>
+
+        <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? Url.Content("~/images/seed/motivational.svg") : Url.Content(Model.ImagePath))"
+             class="w-100 mb-4" style="border-radius:1rem;max-height:380px;object-fit:cover;" alt="@Model.Title" />
+
+        <p class="fw-bold" style="font-size:1.1rem;color:var(--cp-text);">@Model.Summary</p>
+
+        <div style="white-space:pre-line;line-height:1.75;">@Model.Content</div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SourceUrl))
+        {
+            <p class="mt-4 small">
+                Fuente: <a href="@Model.SourceUrl" target="_blank" rel="noopener noreferrer">@Model.SourceUrl</a>
+            </p>
+        }
+
+        <hr class="my-4" />
+        <div class="text-center">
+            <p class="text-muted mb-2">¿Sientes que necesitas hablar con alguien?</p>
+            <a asp-controller="Professionals" asp-action="Index" class="btn cp-btn-primary btn-lg">Ver profesionales disponibles</a>
+        </div>
+    </div>
+</section>

@@ -8,6 +8,18 @@ public enum NewsCategory
     EstudioCientifico = 3
 }
 
+public static class NewsCategoryExtensions
+{
+    public static string ToDisplayName(this NewsCategory category) => category switch
+    {
+        NewsCategory.Noticia => "Noticia",
+        NewsCategory.Consejo => "Consejo",
+        NewsCategory.Tip => "Tip",
+        NewsCategory.EstudioCientifico => "Estudio científico",
+        _ => category.ToString()
+    };
+}
+
 /// <summary>Mental health news/tips/studies card shown on the homepage, editable from the admin dashboard.</summary>
 public class NewsArticle
 {
