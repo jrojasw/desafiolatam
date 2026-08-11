@@ -139,7 +139,10 @@ public class ProfessionalsController : Controller
 
         await TryAutoValidateAsync(professional);
 
-        TempData["SuccessMessage"] = "¡Gracias por inscribirte! Estamos validando tu certificado; te avisaremos por correo apenas quede publicado tu perfil. Si más adelante necesitas modificar algún dato de tu perfil (foto, descripción, orientación, etc.), escríbenos a admin@centralpsi.cl.";
+        // SuccessMessage is rendered HTML-encoded (some call sites elsewhere interpolate user-supplied names into
+        // it), so the bold notice goes in this separate, developer-controlled-only key that the layout renders raw.
+        TempData["SuccessMessage"] = "¡Gracias por inscribirte! Estamos validando tu certificado; te avisaremos por correo apenas quede publicado tu perfil.";
+        TempData["SuccessMessageHtmlSuffix"] = " <strong>Si más adelante necesitas modificar algún dato de tu perfil (foto, descripción, orientación, etc.), escríbenos a admin@centralpsi.cl.</strong>";
         return RedirectToAction(nameof(Index));
     }
 
