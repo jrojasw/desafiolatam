@@ -1,3 +1,6 @@
+using CentralPsi.Web.Options;
+using Microsoft.Extensions.Options;
+
 namespace CentralPsi.Web.Services;
 
 public class FileStorageService : IFileStorageService
@@ -5,10 +8,23 @@ public class FileStorageService : IFileStorageService
     private readonly string _publicRoot;
     private readonly string _privateRoot;
 
-    public FileStorageService(IWebHostEnvironment env)
+    /// <summary>Physical path uploads are actually served from - exposed so Program.cs can wire up an extra
+    /// static-files middleware when it points outside wwwroot (i.e. at a persistent disk mount).</summary>
+    public string PublicRoot => _publicRoot;
+
+    public FileStorageService(IWebHostEnvironment env, IOptions<StorageOptions> storageOptions)
     {
-        _publicRoot = Path.Combine(env.WebRootPath, "uploads");
-        _privateRoot = Path.Combine(env.ContentRootPath, "App_Data", "private-uploads");
+        var rootPath = storageOptions.Value.RootPath;
+        if (!string.IsNullOrWhiteSpace(rootPath))
+        {
+            _publicRoot = Path.Combine(rootPath, "uploads");
+            _privateRoot = Path.Combine(rootPath, "private-uploads");
+        }
+        else
+        {
+            _publicRoot = Path.Combine(env.WebRootPath, "uploads");
+            _privateRoot = Path.Combine(env.ContentRootPath, "App_Data", "private-uploads");
+        }
         Directory.CreateDirectory(_publicRoot);
         Directory.CreateDirectory(_privateRoot);
     }

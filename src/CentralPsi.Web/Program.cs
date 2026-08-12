@@ -26,6 +26,7 @@ builder.Services.Configure<TransbankOptions>(builder.Configuration.GetSection(Tr
 builder.Services.Configure<GoogleCalendarOptions>(builder.Configuration.GetSection(GoogleCalendarOptions.SectionName));
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
 builder.Services.Configure<SuperSaludOptions>(builder.Configuration.GetSection(SuperSaludOptions.SectionName));
+builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection(StorageOptions.SectionName));
 
 // ---- Data ----
 // Render's managed Postgres hands out a single DATABASE_URL (postgres://user:pass@host:port/db) rather than
@@ -120,6 +121,20 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// When Storage:RootPath points at a persistent disk (e.g. a Render Disk), public uploads live outside wwwroot,
+// so the default UseStaticFiles() above won't serve them - wire up a second one for that path under /uploads.
+var storageRootPath = app.Configuration[$"{StorageOptions.SectionName}:RootPath"];
+if (!string.IsNullOrWhiteSpace(storageRootPath))
+{
+    var persistentUploadsPath = Path.Combine(storageRootPath, "uploads");
+    Directory.CreateDirectory(persistentUploadsPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(persistentUploadsPath),
+        RequestPath = "/uploads"
+    });
+}
 
 app.UseRouting();
 
