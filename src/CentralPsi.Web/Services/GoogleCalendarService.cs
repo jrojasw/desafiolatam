@@ -33,7 +33,7 @@ public class GoogleCalendarService : IGoogleCalendarService
 
     public async Task<MeetEventResult> CreateSessionEventAsync(Appointment appointment, Professional professional, CancellationToken ct = default)
     {
-        if (!_options.Enabled || string.IsNullOrWhiteSpace(_options.ServiceAccountJsonPath))
+        if (!IsConfigured())
         {
             _logger.LogWarning("Google Calendar no está configurado (GoogleCalendarOptions.Enabled=false); no se generará enlace de Meet para la cita {AppointmentId}.", appointment.Id);
             return new MeetEventResult(null, null);
@@ -84,7 +84,7 @@ public class GoogleCalendarService : IGoogleCalendarService
 
     public async Task CancelSessionEventAsync(string googleEventId, CancellationToken ct = default)
     {
-        if (!_options.Enabled || string.IsNullOrWhiteSpace(_options.ServiceAccountJsonPath))
+        if (!IsConfigured())
         {
             return;
         }
@@ -100,9 +100,14 @@ public class GoogleCalendarService : IGoogleCalendarService
         }
     }
 
+    private bool IsConfigured() =>
+        _options.Enabled && (!string.IsNullOrWhiteSpace(_options.ServiceAccountJson) || !string.IsNullOrWhiteSpace(_options.ServiceAccountJsonPath));
+
     private CalendarService BuildCalendarService()
     {
-        var credential = GoogleCredential.FromFile(_options.ServiceAccountJsonPath)
+        var credential = (!string.IsNullOrWhiteSpace(_options.ServiceAccountJson)
+                ? GoogleCredential.FromJson(_options.ServiceAccountJson)
+                : GoogleCredential.FromFile(_options.ServiceAccountJsonPath))
             .CreateScoped(CalendarService.Scope.Calendar);
 
         if (!string.IsNullOrWhiteSpace(_options.ImpersonateUser))
