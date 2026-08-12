@@ -84,6 +84,30 @@ public class NotificationService : INotificationService
           {html}
         </div>";
 
+    private static string SessionTipsBox(bool forProfessional)
+    {
+        var items = forProfessional
+            ? new[]
+            {
+                "Conéctate desde un espacio <strong>privado y silencioso</strong>, que resguarde la confidencialidad de la sesión.",
+                "Verifica tu <strong>conexión a internet, cámara y micrófono</strong> antes de la hora.",
+                "Ten el enlace de la sesión a mano con anticipación.",
+                "Evita interrupciones y notificaciones durante la sesión."
+            }
+            : new[]
+            {
+                "Busca un lugar <strong>silencioso y privado</strong>, sin otras personas alrededor.",
+                "Verifica que tengas <strong>buena iluminación</strong>, así el profesional puede verte con claridad.",
+                "Confirma que tu <strong>conexión a internet sea estable</strong> (evita usar solo datos móviles si puedes).",
+                "Prueba tu <strong>cámara y micrófono</strong> antes de la hora agendada.",
+                "Si no puedes estar en un lugar 100% privado, usar <strong>audífonos</strong> ayuda a resguardar tu confidencialidad."
+            };
+        var listItems = string.Join("", items.Select(i => $@"<li style=""margin-bottom:6px;"">{i}</li>"));
+        return InfoBox($@"
+          <p style=""margin:0 0 8px;font-weight:bold;"">Antes de tu sesión</p>
+          <ul style=""margin:0;padding-left:18px;"">{listItems}</ul>");
+    }
+
     public async Task SendProfessionalVerifiedAsync(Professional professional)
     {
         var body = Wrap(
@@ -144,6 +168,7 @@ public class NotificationService : INotificationService
             Paragraph($@"Tu sesión con <strong>{professional.FullName}</strong> quedó confirmada para el
                 <strong>{when}</strong> (hora de Chile).") +
             meetSection +
+            SessionTipsBox(forProfessional: false) +
             Paragraph($@"Recuerda: CentralPsi solo actúa como agendador (box virtual) entre tú y el
                 profesional; revisa nuestras <a href=""{_options.BaseUrl}/terminos"" style=""color:#2f6f6a;"">
                 condiciones de pago y reembolso</a>.") +
@@ -158,6 +183,7 @@ public class NotificationService : INotificationService
             Paragraph($@"Tienes una nueva sesión el <strong>{when}</strong> (hora de Chile) con
                 {appointment.PatientFullName}.") +
             meetSection +
+            SessionTipsBox(forProfessional: true) +
             Paragraph("Equipo CentralPsi"));
         await _email.SendAsync(professional.Email, professional.FullName,
             "CentralPsi - Nueva sesión confirmada", professionalBody);

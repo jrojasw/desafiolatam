@@ -14,6 +14,10 @@
             Valor de la sesión: <strong>$@Model.Amount.ToString("N0")</strong> CLP
         </div>
 
+        <button type="button" class="btn cp-btn-outline btn-sm mb-4" data-bs-toggle="modal" data-bs-target="#cpSessionTipsModal">
+            💡 Ver sugerencias para tu sesión
+        </button>
+
         <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
         <form asp-action="Confirm" method="post" class="cp-form-card">
@@ -53,6 +57,37 @@
     </div>
 </section>
 
+<div class="modal fade" id="cpSessionTipsModal" tabindex="-1" aria-labelledby="cpSessionTipsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:1rem;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cpSessionTipsLabel">Antes de tu sesión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">Para que puedas aprovechar mejor tu sesión, te recomendamos:</p>
+                <ul class="small mb-0">
+                    <li class="mb-2">Busca un lugar <strong>silencioso y privado</strong>, sin otras personas alrededor.</li>
+                    <li class="mb-2">Verifica que tengas <strong>buena iluminación</strong>, así el profesional puede verte con claridad.</li>
+                    <li class="mb-2">Confirma que tu <strong>conexión a internet sea estable</strong> (evita usar solo datos móviles si puedes).</li>
+                    <li class="mb-2">Prueba tu <strong>cámara y micrófono</strong> antes de la hora agendada.</li>
+                    <li class="mb-2">Si no puedes estar en un lugar 100% privado, usar <strong>audífonos</strong> ayuda a resguardar tu confidencialidad.</li>
+                    <li>Silencia las notificaciones del teléfono y evita interrupciones durante la sesión.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn cp-btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tipsModal = new bootstrap.Modal(document.getElementById('cpSessionTipsModal'));
+            tipsModal.show();
+        });
+    </script>
 }
