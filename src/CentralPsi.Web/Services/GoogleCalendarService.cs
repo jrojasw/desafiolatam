@@ -1,22 +1,24 @@
 using CentralPsi.Web.Models.Entities;
 using CentralPsi.Web.Options;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
+using Google.Apis.Http;
 using Google.Apis.Services;
 using Microsoft.Extensions.Options;
 
 namespace CentralPsi.Web.Services;
 
 /// <summary>
-/// Creates the Google Meet-backed calendar event for a confirmed appointment using a Google Cloud service
-/// account with domain-wide delegation (GoogleCalendarOptions.ImpersonateUser). Requires:
-///  1) a service account JSON key (GoogleCalendarOptions.ServiceAccountJsonPath),
-///  2) domain-wide delegation enabled for that service account in the Google Workspace admin console with the
-///     https://www.googleapis.com/auth/calendar scope, and
-///  3) GoogleCalendarOptions.Enabled = true once those are in place.
-/// Until configured, this service logs and returns no Meet link so booking still completes - the notification
-/// email tells the patient/professional the link will follow.
+/// Creates the Google Meet-backed calendar event for a confirmed appointment. Supports two auth paths:
+///  - OAuth (preferred): a free Google account authorized once via /Admin/GoogleCalendar/Connect, using
+///    GoogleCalendarOptions.ClientId/ClientSecret/RefreshToken. No Google Workspace required.
+///  - Service account with Workspace domain-wide delegation (GoogleCalendarOptions.ImpersonateUser), for anyone
+///    who already has Workspace and a service account JSON key.
+/// Until either is configured (and Enabled = true), this service logs and returns no Meet link so booking still
+/// completes - the notification email tells the patient/professional the link will follow.
 /// </summary>
 public class GoogleCalendarService : IGoogleCalendarService
 {
@@ -100,19 +102,39 @@ public class GoogleCalendarService : IGoogleCalendarService
         }
     }
 
+    private bool HasOAuthCredentials() =>
+        !string.IsNullOrWhiteSpace(_options.ClientId)
+        && !string.IsNullOrWhiteSpace(_options.ClientSecret)
+        && !string.IsNullOrWhiteSpace(_options.RefreshToken);
+
     private bool IsConfigured() =>
-        _options.Enabled && (!string.IsNullOrWhiteSpace(_options.ServiceAccountJson) || !string.IsNullOrWhiteSpace(_options.ServiceAccountJsonPath));
+        _options.Enabled
+        && (HasOAuthCredentials() || !string.IsNullOrWhiteSpace(_options.ServiceAccountJson) || !string.IsNullOrWhiteSpace(_options.ServiceAccountJsonPath));
 
     private CalendarService BuildCalendarService()
     {
-        var credential = (!string.IsNullOrWhiteSpace(_options.ServiceAccountJson)
-                ? GoogleCredential.FromJson(_options.ServiceAccountJson)
-                : GoogleCredential.FromFile(_options.ServiceAccountJsonPath))
-            .CreateScoped(CalendarService.Scope.Calendar);
-
-        if (!string.IsNullOrWhiteSpace(_options.ImpersonateUser))
+        IConfigurableHttpClientInitializer credential;
+        if (HasOAuthCredentials())
         {
-            credential = credential.CreateWithUser(_options.ImpersonateUser);
+            var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+            {
+                ClientSecrets = new ClientSecrets { ClientId = _options.ClientId, ClientSecret = _options.ClientSecret },
+                Scopes = new[] { CalendarService.Scope.Calendar }
+            });
+            credential = new UserCredential(flow, "centralpsi-agenda", new TokenResponse { RefreshToken = _options.RefreshToken });
+        }
+        else
+        {
+            var googleCredential = (!string.IsNullOrWhiteSpace(_options.ServiceAccountJson)
+                    ? GoogleCredential.FromJson(_options.ServiceAccountJson)
+                    : GoogleCredential.FromFile(_options.ServiceAccountJsonPath))
+                .CreateScoped(CalendarService.Scope.Calendar);
+
+            if (!string.IsNullOrWhiteSpace(_options.ImpersonateUser))
+            {
+                googleCredential = googleCredential.CreateWithUser(_options.ImpersonateUser);
+            }
+            credential = googleCredential;
         }
 
         return new CalendarService(new BaseClientService.Initializer

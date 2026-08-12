@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Google Calendar / Meet";
+    bool hasClientCredentials = ViewBag.HasClientCredentials;
+    bool hasRefreshToken = ViewBag.HasRefreshToken;
+    bool enabled = ViewBag.Enabled;
+    string redirectUri = ViewBag.RedirectUri;
+}
+
+<div class="cp-form-card" style="max-width:680px;">
+    <h4 class="mb-3">Conectar Google Calendar / Meet</h4>
+    <p class="text-muted small">
+        Esto permite que CentralPsi cree automáticamente un evento con enlace de Google Meet cada vez que se
+        confirma una hora, usando una cuenta de Google normal (no requiere Google Workspace).
+    </p>
+
+    <table class="table table-sm">
+        <tbody>
+            <tr>
+                <td>Client ID / Secret configurados</td>
+                <td>@(hasClientCredentials ? "✅ Sí" : "❌ No — falta agregarlos en las variables de entorno")</td>
+            </tr>
+            <tr>
+                <td>Cuenta de Google conectada (refresh token)</td>
+                <td>@(hasRefreshToken ? "✅ Sí" : "❌ No")</td>
+            </tr>
+            <tr>
+                <td>Integración habilitada (GoogleCalendar:Enabled)</td>
+                <td>@(enabled ? "✅ Sí" : "❌ No")</td>
+            </tr>
+        </tbody>
+    </table>
+
+    @if (!hasClientCredentials)
+    {
+        <div class="alert alert-warning small">
+            Falta crear el Client ID/Secret en Google Cloud Console y agregarlos como variables de entorno
+            <code>GoogleCalendar__ClientId</code> y <code>GoogleCalendar__ClientSecret</code>. El "Authorized
+            redirect URI" que debes registrar en Google Cloud es:
+            <br /><code>@redirectUri</code>
+        </div>
+    }
+    else
+    {
+        <a asp-action="Connect" class="btn cp-btn-primary">
+            @(hasRefreshToken ? "Reconectar cuenta de Google" : "Conectar cuenta de Google")
+        </a>
+    }
+</div>
