@@ -137,6 +137,7 @@ public class BookingController : Controller
             ScheduledStartUtc = model.StartUtc,
             ScheduledEndUtc = model.StartUtc.AddMinutes(_appOptions.SessionDurationMinutes),
             Amount = _appOptions.AppointmentPriceClp,
+            ProfessionalPayoutAmount = _appOptions.ProfessionalPayoutClp,
             TermsAccepted = true,
             TermsAcceptedAtUtc = DateTime.UtcNow,
             TermsAcceptedIp = HttpContext.Connection.RemoteIpAddress?.ToString(),

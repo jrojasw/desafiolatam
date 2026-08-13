@@ -59,6 +59,12 @@ public class Appointment
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
+    // Manual payout tracking: the professional emails their boleta to pagos@centralpsi.cl after each session,
+    // and an admin marks it paid here once the transfer to the professional's bank account is done.
+    public decimal ProfessionalPayoutAmount { get; set; }
+    public DateTime? ProfessionalPaidAtUtc { get; set; }
+    public string? ProfessionalPaymentNote { get; set; }
+
     public Payment? Payment { get; set; }
     public CancellationRequest? CancellationRequest { get; set; }
 }

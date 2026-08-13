@@ -5,6 +5,9 @@ public class AppOptions
     public const string SectionName = "App";
 
     public decimal AppointmentPriceClp { get; set; } = 29750m;
+
+    /// <summary>Flat amount CentralPsi pays the professional per session, out of AppointmentPriceClp.</summary>
+    public decimal ProfessionalPayoutClp { get; set; } = 15000m;
     public int SessionDurationMinutes { get; set; } = 50;
     public string TimeZoneId { get; set; } = "America/Santiago";
     public string AdminEmail { get; set; } = "admin@centralpsi.cl";
