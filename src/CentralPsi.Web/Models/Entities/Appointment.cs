@@ -64,6 +64,7 @@ public class Appointment
     public decimal ProfessionalPayoutAmount { get; set; }
     public DateTime? ProfessionalPaidAtUtc { get; set; }
     public string? ProfessionalPaymentNote { get; set; }
+    public string? ProfessionalPaymentReceiptPath { get; set; }
 
     public Payment? Payment { get; set; }
     public CancellationRequest? CancellationRequest { get; set; }

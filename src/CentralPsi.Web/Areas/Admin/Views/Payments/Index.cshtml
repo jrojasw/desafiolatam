@@ -27,7 +27,7 @@
         <thead>
             <tr>
                 <th>Sesión</th><th>Profesional</th><th>Paciente</th><th>Monto sesión</th>
-                <th>A pagar profesional</th><th>Datos bancarios</th><th>Estado</th><th></th>
+                <th>A pagar profesional</th><th>Datos bancarios</th><th>Estado</th><th>Comprobante</th><th></th>
             </tr>
         </thead>
         <tbody>
@@ -79,11 +79,29 @@
                             <span class="cp-status-pill cp-status-pending">Pendiente</span>
                         }
                     </td>
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(a.ProfessionalPaymentReceiptPath))
+                        {
+                            <a asp-action="Receipt" asp-route-id="@a.Id" target="_blank" class="btn btn-sm cp-btn-outline">Ver comprobante</a>
+                        }
+                        else if (a.ProfessionalPaidAtUtc is not null)
+                        {
+                            <form asp-action="UploadReceipt" asp-route-id="@a.Id" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-1">
+                                <input type="file" name="receipt" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.webp" style="max-width:170px;" required />
+                                <button type="submit" class="btn btn-sm cp-btn-outline">Subir comprobante</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">-</span>
+                        }
+                    </td>
                     <td class="text-end">
                         @if (a.ProfessionalPaidAtUtc is null)
                         {
-                            <form asp-action="MarkPaid" asp-route-id="@a.Id" method="post" class="d-flex gap-1 justify-content-end">
-                                <input type="text" name="note" class="form-control form-control-sm" placeholder="Nota (opcional)" style="max-width:140px;" />
+                            <form asp-action="MarkPaid" asp-route-id="@a.Id" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-1 align-items-end">
+                                <input type="text" name="note" class="form-control form-control-sm" placeholder="Nota (opcional)" style="max-width:170px;" />
+                                <input type="file" name="receipt" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.webp" style="max-width:170px;" title="Comprobante de la transferencia (opcional)" />
                                 <button type="submit" class="btn btn-sm cp-btn-primary">Marcar pagado</button>
                             </form>
                         }

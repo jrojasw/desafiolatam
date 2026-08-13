@@ -1,6 +1,7 @@
 using CentralPsi.Web.Data;
 using CentralPsi.Web.Data.Seed;
 using CentralPsi.Web.Models.Entities;
+using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +19,12 @@ namespace CentralPsi.Web.Areas.Admin.Controllers;
 public class PaymentsController : Controller
 {
     private readonly ApplicationDbContext _db;
+    private readonly IFileStorageService _fileStorage;
 
-    public PaymentsController(ApplicationDbContext db)
+    public PaymentsController(ApplicationDbContext db, IFileStorageService fileStorage)
     {
         _db = db;
+        _fileStorage = fileStorage;
     }
 
     [HttpGet("")]
@@ -52,13 +55,17 @@ public class PaymentsController : Controller
 
     [HttpPost("{id:guid}/MarcarPagado")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> MarkPaid(Guid id, string? note)
+    public async Task<IActionResult> MarkPaid(Guid id, string? note, IFormFile? receipt)
     {
         var appointment = await _db.Appointments.FindAsync(id);
         if (appointment is null) return NotFound();
 
         appointment.ProfessionalPaidAtUtc = DateTime.UtcNow;
         appointment.ProfessionalPaymentNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        if (receipt is { Length: > 0 })
+        {
+            appointment.ProfessionalPaymentReceiptPath = await _fileStorage.SavePrivateAsync(receipt, "comprobantes-pago");
+        }
         await _db.SaveChangesAsync();
 
         TempData["SuccessMessage"] = "Pago marcado como realizado.";
@@ -77,5 +84,45 @@ public class PaymentsController : Controller
 
         TempData["SuccessMessage"] = "Pago vuelto a marcar como pendiente.";
         return RedirectToAction(nameof(Index), new { filter = "pagados" });
+    }
+
+    [HttpPost("{id:guid}/SubirComprobante")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadReceipt(Guid id, IFormFile receipt)
+    {
+        var appointment = await _db.Appointments.FindAsync(id);
+        if (appointment is null) return NotFound();
+
+        if (receipt is not { Length: > 0 })
+        {
+            TempData["ErrorMessage"] = "Selecciona un archivo (PDF o imagen) antes de subir.";
+            return RedirectToAction(nameof(Index), new { filter = "pagados" });
+        }
+
+        appointment.ProfessionalPaymentReceiptPath = await _fileStorage.SavePrivateAsync(receipt, "comprobantes-pago");
+        await _db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Comprobante de pago subido.";
+        return RedirectToAction(nameof(Index), new { filter = "pagados" });
+    }
+
+    [HttpGet("{id:guid}/Comprobante")]
+    public async Task<IActionResult> Receipt(Guid id)
+    {
+        var appointment = await _db.Appointments.FindAsync(id);
+        if (appointment is null || string.IsNullOrEmpty(appointment.ProfessionalPaymentReceiptPath)) return NotFound();
+
+        var physicalPath = _fileStorage.GetPrivatePhysicalPath(appointment.ProfessionalPaymentReceiptPath);
+        if (!System.IO.File.Exists(physicalPath)) return NotFound();
+
+        var contentType = Path.GetExtension(physicalPath).ToLowerInvariant() switch
+        {
+            ".pdf" => "application/pdf",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            _ => "image/jpeg"
+        };
+        var bytes = await System.IO.File.ReadAllBytesAsync(physicalPath);
+        return File(bytes, contentType);
     }
 }
