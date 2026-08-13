@@ -60,8 +60,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Persist Data Protection keys in Postgres so admin sessions (and antiforgery tokens) survive container
-// restarts - without this, every restart/redeploy silently invalidates every logged-in session.
+// restarts - without this, every restart/redeploy silently invalidates every logged-in session. Pinning
+// SetApplicationName is equally required: without it, the "application id" used to isolate protected payloads
+// defaults to the container's content-root path, which can differ across deploys/restarts even though the keys
+// themselves are the same row in Postgres - that mismatch is what makes a previously-issued token (password
+// reset, email confirmation, etc.) come back as "Invalid token" after a redeploy.
 builder.Services.AddDataProtection()
+    .SetApplicationName("CentralPsi")
     .PersistKeysToDbContext<ApplicationDbContext>();
 
 // ---- Application services ----

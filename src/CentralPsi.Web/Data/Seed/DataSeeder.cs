@@ -54,9 +54,36 @@ public static class DataSeeder
                     string.Join("; ", result.Errors.Select(e => e.Description)));
             }
         }
-        else if (!await userManager.IsInRoleAsync(existingAdmin, AdminRole))
+        else
         {
-            await userManager.AddToRoleAsync(existingAdmin, AdminRole);
+            if (!await userManager.IsInRoleAsync(existingAdmin, AdminRole))
+            {
+                await userManager.AddToRoleAsync(existingAdmin, AdminRole);
+            }
+
+            // Emergency escape hatch: if the "forgot password" email flow is ever broken (e.g. an "Invalid
+            // token" error) and there's no other admin account to fix it, set Seed:ForceAdminPasswordReset=true
+            // as a Render env var (Seed:AdminPassword can be set alongside it to choose the new password),
+            // redeploy, log in, then remove ForceAdminPasswordReset - otherwise it resets the password back to
+            // Seed:AdminPassword on every future deploy too.
+            if (config.GetValue<bool>("Seed:ForceAdminPasswordReset"))
+            {
+                var resetToken = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
+                var resetResult = await userManager.ResetPasswordAsync(existingAdmin, resetToken, adminPassword);
+                if (resetResult.Succeeded)
+                {
+                    logger.LogWarning(
+                        "Se restableció la contraseña del administrador {Email} vía Seed:ForceAdminPasswordReset. Quita esa variable de entorno ahora para que no se repita en cada despliegue.",
+                        adminEmail);
+                }
+                else
+                {
+                    logger.LogError(
+                        "No se pudo restablecer la contraseña del administrador {Email} vía Seed:ForceAdminPasswordReset: {Errors}",
+                        adminEmail,
+                        string.Join("; ", resetResult.Errors.Select(e => e.Description)));
+                }
+            }
         }
 
         if (!await db.SlideImages.AnyAsync())
