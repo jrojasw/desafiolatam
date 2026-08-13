@@ -22,6 +22,15 @@
             en <strong>Nuestros profesionales</strong> y te avisaremos por correo.
         </p>
 
+        <div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
+            <strong>Requisito importante:</strong> para poder pagarte tu parte de cada sesión, necesitas contar con
+            <strong>Inicio de Actividades vigente en el SII</strong> y emitir una boleta de honorarios por el monto
+            correspondiente. Después de cada sesión, deberás enviar tu boleta a
+            <a href="mailto:pagos@centralpsi.cl">pagos@centralpsi.cl</a> para que procesemos tu pago. Si aún no
+            tienes Inicio de Actividades, puedes hacerlo en <a href="https://www.sii.cl/" target="_blank" rel="noopener">sii.cl</a>
+            antes de completar esta inscripción.
+        </div>
+
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
         <form asp-action="Register" method="post" enctype="multipart/form-data" class="cp-form-card">
@@ -132,6 +141,12 @@
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <div class="form-check my-3">
+                <input asp-for="TaxComplianceAccepted" class="form-check-input" />
+                <label asp-for="TaxComplianceAccepted" class="form-check-label small"></label>
+                <div><span asp-validation-for="TaxComplianceAccepted" class="text-danger small"></span></div>
             </div>
 
             <div class="form-text mt-3 mb-2">

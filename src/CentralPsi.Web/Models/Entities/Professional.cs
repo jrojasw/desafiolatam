@@ -35,6 +35,10 @@ public class Professional
 
     public ProfessionalStatus Status { get; set; } = ProfessionalStatus.PendingVerification;
 
+    /// <summary>When the professional confirmed having an active SII "Inicio de Actividades" and understanding
+    /// they must send their boleta de honorarios to pagos@centralpsi.cl to get paid for each session.</summary>
+    public DateTime? TaxComplianceAcceptedAtUtc { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? DeactivatedAt { get; set; }
 

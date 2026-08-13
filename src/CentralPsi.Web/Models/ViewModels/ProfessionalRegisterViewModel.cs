@@ -75,6 +75,9 @@ public class ProfessionalRegisterViewModel
     [Display(Name = "Código de validación del certificado")]
     public string CertificateValidationCode { get; set; } = string.Empty;
 
+    [Display(Name = "Declaro contar con Inicio de Actividades vigente en el SII y entiendo que debo enviar mi boleta de honorarios a pagos@centralpsi.cl para recibir el pago de cada sesión")]
+    public bool TaxComplianceAccepted { get; set; }
+
     public List<AvailabilitySlotInput> Availability { get; set; } = BuildDefaultAvailability();
 
     public static List<AvailabilitySlotInput> BuildDefaultAvailability()

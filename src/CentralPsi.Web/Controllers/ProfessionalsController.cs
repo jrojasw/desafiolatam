@@ -89,6 +89,11 @@ public class ProfessionalsController : Controller
             ModelState.AddModelError(nameof(model.OrientationOther), "Especifica tu orientación");
         }
 
+        if (!model.TaxComplianceAccepted)
+        {
+            ModelState.AddModelError(nameof(model.TaxComplianceAccepted), "Debes confirmar que cuentas con Inicio de Actividades para continuar");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -108,7 +113,8 @@ public class ProfessionalsController : Controller
             Orientation = resolvedOrientation,
             Experience = model.Experience.Trim(),
             CertificateValidationCode = model.CertificateValidationCode.Trim(),
-            Status = ProfessionalStatus.PendingVerification
+            Status = ProfessionalStatus.PendingVerification,
+            TaxComplianceAcceptedAtUtc = DateTime.UtcNow
         };
 
         professional.CedulaFrontPath = await _fileStorage.SavePrivateAsync(model.CedulaFront, "cedulas");
