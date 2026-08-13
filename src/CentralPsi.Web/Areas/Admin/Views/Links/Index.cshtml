@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "Enlaces / Accesos";
+}
+
+<p class="text-muted small mb-4">
+    Todos los accesos que usas para operar CentralPsi, en un solo lugar. Las páginas internas abren directo
+    (ya estás con sesión iniciada); las externas te van a pedir iniciar sesión con tu propia cuenta.
+</p>
+
+<div class="row g-4">
+
+    <div class="col-md-6 col-lg-4">
+        <div class="cp-form-card h-100">
+            <h5 class="mb-3">🖥️ Panel CentralPsi</h5>
+            <ul class="list-unstyled small mb-0">
+                <li class="mb-2"><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Resumen</a></li>
+                <li class="mb-2"><a asp-area="Admin" asp-controller="Professionals" asp-action="Index">Profesionales</a></li>
+                <li class="mb-2"><a asp-area="Admin" asp-controller="Slides" asp-action="Index">Slider de inicio</a></li>
+                <li class="mb-2"><a asp-area="Admin" asp-controller="News" asp-action="Index">Noticias</a></li>
+                <li class="mb-2"><a asp-area="Admin" asp-controller="GoogleCalendar" asp-action="Index">Google Calendar / Meet</a></li>
+                <li><a asp-area="Admin" asp-controller="Account" asp-action="ChangePassword">Cambiar contraseña</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="cp-form-card h-100">
+            <h5 class="mb-3">☁️ Hosting y código</h5>
+            <ul class="list-unstyled small mb-0">
+                <li class="mb-2"><a href="https://dashboard.render.com/" target="_blank" rel="noopener">Render (hosting + base de datos)</a></li>
+                <li class="mb-2"><a href="https://uptimerobot.com/dashboard" target="_blank" rel="noopener">UptimeRobot (monitoreo)</a></li>
+                <li><a href="https://github.com/jrojasw/desafiolatam" target="_blank" rel="noopener">Repositorio en GitHub</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="cp-form-card h-100">
+            <h5 class="mb-3">💳 Pagos</h5>
+            <ul class="list-unstyled small mb-0">
+                <li class="mb-2"><a href="https://publico.transbank.cl/" target="_blank" rel="noopener">Transbank (afiliación / portal comercio)</a></li>
+                <li><a href="https://www.transbankdevelopers.cl/" target="_blank" rel="noopener">Transbank Developers</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="cp-form-card h-100">
+            <h5 class="mb-3">✉️ Correo y dominio</h5>
+            <ul class="list-unstyled small mb-0">
+                <li class="mb-2"><a href="https://app.brevo.com/" target="_blank" rel="noopener">Brevo (envío de correos)</a></li>
+                <li><a href="https://www.cpanelhost.cl/" target="_blank" rel="noopener">cPanelHost (DNS / correo de centralpsi.cl)</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="cp-form-card h-100">
+            <h5 class="mb-3">🔑 Google</h5>
+            <ul class="list-unstyled small mb-0">
+                <li><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="cp-form-card h-100">
+            <h5 class="mb-3">📋 Trámites</h5>
+            <ul class="list-unstyled small mb-0">
+                <li class="mb-2"><a href="https://www.sii.cl/" target="_blank" rel="noopener">SII</a></li>
+                <li><a href="https://www.registroempresas.cl/" target="_blank" rel="noopener">Registro de Empresas (constituir SpA)</a></li>
+            </ul>
+        </div>
+    </div>
+
+</div>
