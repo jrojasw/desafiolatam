@@ -249,14 +249,27 @@ public class NotificationService : INotificationService
         await _email.SendAsync(_options.RefundsEmail, "Equipo de Reembolsos CentralPsi",
             $"Reembolso a procesar - cita {appointment.Id}", refundBody);
 
+        var isAdminCancellation = request.RequestedBy == "admin";
+        var cancellationIntro = isAdminCancellation
+            ? Paragraph($@"Hola {appointment.PatientFullName}, lamentamos informarte que tu hora del
+                <strong>{when}</strong> con {professional.FullName} fue cancelada por CentralPsi porque el
+                profesional ya no está disponible en la plataforma. Esto no fue algo que hicieras tú, así que
+                tienes derecho al reembolso completo de tu pago.")
+            : Paragraph($@"Hola {appointment.PatientFullName}, confirmamos la cancelación de tu hora del
+                {when} con {professional.FullName}.");
+        var rescheduleInvite = isAdminCancellation
+            ? Paragraph($@"Si prefieres continuar en vez de esperar el reembolso, puedes
+                <a href=""{_options.BaseUrl}/profesionales"" style=""color:#2f6f6a;"">agendar una nueva hora con
+                otro profesional aquí</a> (es una reserva y pago nuevos e independientes de este reembolso).")
+            : string.Empty;
         var patientBody = Wrap(
             Heading("Tu hora fue cancelada") +
-            Paragraph($@"Hola {appointment.PatientFullName}, confirmamos la cancelación de tu hora del
-                {when} con {professional.FullName}.") +
+            cancellationIntro +
             Paragraph($@"Según nuestra política de reembolsos, corresponde un reembolso de
                 <strong>${request.RefundAmount:N0} CLP</strong> ({request.RefundTier}), el cual será
                 procesado de forma manual dentro de un máximo de {_options.RefundProcessingBusinessDays} días
                 hábiles a la cuenta que nos indiques respondiendo este correo.") +
+            rescheduleInvite +
             Paragraph("Equipo CentralPsi"));
         await _email.SendAsync(appointment.PatientEmail, appointment.PatientFullName,
             "CentralPsi - Confirmación de cancelación", patientBody);

@@ -6,6 +6,8 @@
         [DayOfWeek.Monday] = "Lunes", [DayOfWeek.Tuesday] = "Martes", [DayOfWeek.Wednesday] = "Miércoles",
         [DayOfWeek.Thursday] = "Jueves", [DayOfWeek.Friday] = "Viernes", [DayOfWeek.Saturday] = "Sábado", [DayOfWeek.Sunday] = "Domingo",
     };
+    var appointments = ViewBag.Appointments as List<Appointment> ?? new List<Appointment>();
+    var culture = new System.Globalization.CultureInfo("es-CL");
 }
 
 <div class="row gy-4">
@@ -41,6 +43,50 @@
                         <li>@dayNames[a.DayOfWeek]: @a.StartTime.ToString(@"hh\:mm") - @a.EndTime.ToString(@"hh\:mm")</li>
                     }
                 </ul>
+            }
+
+            <hr />
+            <h5>Citas</h5>
+            @if (appointments.Count == 0)
+            {
+                <p class="text-muted">Sin citas registradas.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Fecha</th><th>Paciente</th><th>Estado</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var a in appointments)
+                            {
+                                <tr>
+                                    <td>@a.ScheduledStartUtc.ToLocalTime().ToString("dd-MM-yyyy HH:mm", culture)</td>
+                                    <td>
+                                        @if (a.IsForMinor)
+                                        {
+                                            @($"{a.MinorFullName} ({a.MinorAge} años)")
+                                        }
+                                        else
+                                        {
+                                            @a.PatientFullName
+                                        }
+                                    </td>
+                                    <td>@a.Status</td>
+                                    <td class="text-end">
+                                        @if (a.Status is AppointmentStatus.PendingPayment or AppointmentStatus.Confirmed)
+                                        {
+                                            var confirmMessage = $"¿Cancelar esta cita? Se avisará al paciente por correo y se ofrecerá el reembolso completo de ${a.Amount:N0} CLP, o reagendar con otro profesional.";
+                                            <form asp-action="CancelAppointment" asp-route-id="@Model.Id" asp-route-appointmentId="@a.Id" method="post"
+                                                  onsubmit="@($"return confirm('{confirmMessage}');")">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar cita</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
 
             <hr />
@@ -105,7 +151,7 @@
                         <button type="submit" class="btn cp-btn-primary w-100">Reactivar</button>
                     </form>
                 }
-                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar definitivamente este profesional? Solo es posible si no tiene citas asociadas.');">
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar definitivamente este profesional? Solo es posible si nunca tuvo citas (ni siquiera canceladas). Si tuvo citas, cancélalas arriba y usa \'Desactivar\' en su lugar.');">
                     <button type="submit" class="btn btn-outline-danger w-100">Eliminar definitivamente</button>
                 </form>
             </div>
