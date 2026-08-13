@@ -94,6 +94,12 @@ public class ProfessionalsController : Controller
             ModelState.AddModelError(nameof(model.TaxComplianceAccepted), "Debes confirmar que cuentas con Inicio de Actividades para continuar");
         }
 
+        if (!string.IsNullOrWhiteSpace(model.Rut) && !string.IsNullOrWhiteSpace(model.BankAccountHolderRut)
+            && NormalizeRut(model.Rut) != NormalizeRut(model.BankAccountHolderRut))
+        {
+            ModelState.AddModelError(nameof(model.BankAccountHolderRut), "La cuenta bancaria debe estar a tu propio nombre: este RUT debe coincidir con el que ingresaste arriba. No aceptamos cuentas de terceros ni de sociedades.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -187,4 +193,8 @@ public class ProfessionalsController : Controller
             _logger.LogError(ex, "Error en la validación automática del certificado para {ProfessionalId}", professional.Id);
         }
     }
+
+    /// <summary>Strips dots/dashes and uppercases so "12.345.678-9" and "12345678-9" compare equal.</summary>
+    private static string NormalizeRut(string rut) =>
+        new string(rut.Where(c => !char.IsWhiteSpace(c) && c != '.' && c != '-').ToArray()).ToUpperInvariant();
 }

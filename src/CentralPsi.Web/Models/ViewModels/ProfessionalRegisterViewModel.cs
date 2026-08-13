@@ -25,6 +25,7 @@ public class ProfessionalRegisterViewModel
     [Display(Name = "Teléfono")]
     public string Phone { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Ingresa tu RUT")]
     [Display(Name = "RUT")]
     public string? Rut { get; set; }
 

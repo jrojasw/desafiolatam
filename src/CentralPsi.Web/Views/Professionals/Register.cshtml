@@ -121,7 +121,11 @@
 
             <hr class="my-4" />
             <h5 class="mb-3">Datos bancarios para el pago</h5>
-            <p class="text-muted small">Aquí transferiremos tu parte de cada sesión. Estos datos no se muestran en tu perfil público.</p>
+            <p class="text-muted small">
+                Aquí transferiremos tu parte de cada sesión. <strong>La cuenta debe estar a tu propio nombre y RUT</strong>
+                — no aceptamos cuentas de terceros ni de sociedades. Si no tienes cuenta bancaria, puedes solicitar
+                una Cuenta RUT gratuita en BancoEstado. Estos datos no se muestran en tu perfil público.
+            </p>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label asp-for="BankName" class="form-label"></label>
@@ -153,7 +157,6 @@
                     <label asp-for="BankAccountHolderName" class="form-label"></label>
                     <input asp-for="BankAccountHolderName" class="form-control" />
                     <span asp-validation-for="BankAccountHolderName" class="text-danger small"></span>
-                    <div class="form-text">Si la cuenta no está a tu nombre (ej. una sociedad), indica el nombre del titular.</div>
                 </div>
             </div>
 
