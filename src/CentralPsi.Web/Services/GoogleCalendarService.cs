@@ -45,9 +45,13 @@ public class GoogleCalendarService : IGoogleCalendarService
         {
             var service = BuildCalendarService();
 
+            var attendeeLabel = appointment.IsForMinor
+                ? $"{appointment.MinorFullName} ({appointment.MinorAge} años, a cargo de {appointment.PatientFullName})"
+                : appointment.PatientFullName;
+
             var newEvent = new Event
             {
-                Summary = $"Sesión CentralPsi: {professional.FullName} / {appointment.PatientFullName}",
+                Summary = $"Sesión CentralPsi: {professional.FullName} / {attendeeLabel}",
                 Description = "Sesión agendada a través de CentralPsi. Este evento fue generado automáticamente.",
                 Start = new EventDateTime { DateTimeDateTimeOffset = new DateTimeOffset(appointment.ScheduledStartUtc, TimeSpan.Zero) },
                 End = new EventDateTime { DateTimeDateTimeOffset = new DateTimeOffset(appointment.ScheduledEndUtc, TimeSpan.Zero) },

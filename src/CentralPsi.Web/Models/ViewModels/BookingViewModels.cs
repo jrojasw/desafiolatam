@@ -28,6 +28,30 @@ public class BookingStartViewModel
 
     [Display(Name = "He leído y acepto los términos y condiciones, la política de reembolsos y que CentralPsi actúa solo como agendador")]
     public bool TermsAccepted { get; set; }
+
+    [Display(Name = "Esta sesión es para un niño, niña o adolescente a mi cargo")]
+    public bool IsForMinor { get; set; }
+
+    [Display(Name = "Nombre completo del niño, niña o adolescente")]
+    public string? MinorFullName { get; set; }
+
+    [Display(Name = "Edad")]
+    [Range(0, 17, ErrorMessage = "La edad debe ser entre 0 y 17 años")]
+    public int? MinorAge { get; set; }
+
+    [Display(Name = "Tu relación con el niño, niña o adolescente")]
+    public string? GuardianRelationship { get; set; }
+
+    [Display(Name = "Declaro ser madre, padre o tutor/a legal y autorizo esta sesión de terapia para la persona indicada arriba")]
+    public bool GuardianConsentAccepted { get; set; }
+
+    public static readonly string[] GuardianRelationshipOptions =
+    {
+        "Madre",
+        "Padre",
+        "Tutor/a legal",
+        "Otro cuidador responsable"
+    };
 }
 
 public class WebpayRedirectViewModel

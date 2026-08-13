@@ -153,6 +153,13 @@ public class NotificationService : INotificationService
             "Profesional pendiente de revisión manual", adminBody);
     }
 
+    /// <summary>When the session is for a minor, surfaces the minor's name/age/relationship alongside the
+    /// responsible adult - who remains the one being greeted/contacted, since they're the accountable party.</summary>
+    private static string MinorNotice(Appointment appointment) => appointment.IsForMinor
+        ? InfoBox($@"Esta sesión es para <strong>{appointment.MinorFullName}</strong> ({appointment.MinorAge}
+            años), a cargo de {appointment.PatientFullName} ({appointment.GuardianRelationship}).")
+        : string.Empty;
+
     public async Task SendAppointmentConfirmedAsync(Appointment appointment, Professional professional)
     {
         var startLocal = _timeZone.ToLocal(appointment.ScheduledStartUtc);
@@ -161,12 +168,14 @@ public class NotificationService : INotificationService
             ? Paragraph("El enlace de Google Meet será enviado a la brevedad.")
             : Button(appointment.GoogleMeetLink, "Unirme a la sesión (Google Meet)");
         var cancelLink = $"{_options.BaseUrl}/reserva/cancelar/{appointment.CancellationToken}";
+        var minorNotice = MinorNotice(appointment);
 
         var patientBody = Wrap(
             Heading("Tu hora fue confirmada") +
             Paragraph($"Hola {appointment.PatientFullName},") +
             Paragraph($@"Tu sesión con <strong>{professional.FullName}</strong> quedó confirmada para el
                 <strong>{when}</strong> (hora de Chile).") +
+            minorNotice +
             meetSection +
             SessionTipsBox(forProfessional: false) +
             Paragraph($@"Recuerda: CentralPsi solo actúa como agendador (box virtual) entre tú y el
@@ -177,11 +186,18 @@ public class NotificationService : INotificationService
         await _email.SendAsync(appointment.PatientEmail, appointment.PatientFullName,
             "CentralPsi - Confirmación de tu hora", patientBody);
 
+        var professionalAttendee = appointment.IsForMinor
+            ? $"{appointment.MinorFullName} ({appointment.MinorAge} años)"
+            : appointment.PatientFullName;
         var professionalBody = Wrap(
             Heading("Nueva sesión agendada y pagada") +
             Paragraph($"Hola {professional.FullName},") +
             Paragraph($@"Tienes una nueva sesión el <strong>{when}</strong> (hora de Chile) con
-                {appointment.PatientFullName}.") +
+                {professionalAttendee}.") +
+            (appointment.IsForMinor
+                ? Paragraph($@"Contacto responsable: {appointment.PatientFullName} ({appointment.GuardianRelationship}) -
+                    {appointment.PatientEmail}, {appointment.PatientPhone}.")
+                : string.Empty) +
             meetSection +
             SessionTipsBox(forProfessional: true) +
             Paragraph("Equipo CentralPsi"));
@@ -220,6 +236,7 @@ public class NotificationService : INotificationService
             InfoBox($@"
                 <p style=""margin:0 0 6px;""><strong>Cita:</strong> {appointment.Id}</p>
                 <p style=""margin:0 0 6px;""><strong>Paciente:</strong> {appointment.PatientFullName} ({appointment.PatientEmail}, {appointment.PatientPhone})</p>
+                {(appointment.IsForMinor ? $@"<p style=""margin:0 0 6px;""><strong>Sesión para (menor de edad):</strong> {appointment.MinorFullName} ({appointment.MinorAge} años) - {appointment.GuardianRelationship}</p>" : "")}
                 <p style=""margin:0 0 6px;""><strong>Profesional:</strong> {professional.FullName}</p>
                 <p style=""margin:0 0 6px;""><strong>Hora agendada:</strong> {when} (hora de Chile)</p>
                 <p style=""margin:0 0 6px;""><strong>Cancelada por:</strong> {request.RequestedBy}</p>

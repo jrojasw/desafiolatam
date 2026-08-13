@@ -31,6 +31,14 @@ public class Appointment
     public DateTime? TermsAcceptedAtUtc { get; set; }
     public string? TermsAcceptedIp { get; set; }
 
+    // When the session is for a minor, PatientFullName/Email/Phone above stay the responsible adult's
+    // (guardian) contact info - they're the one who books, pays, and receives all communications.
+    public bool IsForMinor { get; set; }
+    public string? MinorFullName { get; set; }
+    public int? MinorAge { get; set; }
+    public string? GuardianRelationship { get; set; }
+    public DateTime? GuardianConsentAcceptedAtUtc { get; set; }
+
     public string? GoogleEventId { get; set; }
     public string? GoogleMeetLink { get; set; }
 

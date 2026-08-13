@@ -44,7 +44,17 @@
                             <td>@row.StartLocal.ToString("dd-MM-yyyy", culture)</td>
                             <td>@row.StartLocal.ToString("HH:mm")</td>
                             <td>@row.Professional.FullName</td>
-                            <td>@row.Appointment.PatientFullName</td>
+                            <td>
+                                @if (row.Appointment.IsForMinor)
+                                {
+                                    <span>@row.Appointment.MinorFullName (@row.Appointment.MinorAge años)</span>
+                                    <br /><span class="text-muted small">A cargo de @row.Appointment.PatientFullName (@row.Appointment.GuardianRelationship)</span>
+                                }
+                                else
+                                {
+                                    @row.Appointment.PatientFullName
+                                }
+                            </td>
                             <td>@row.Appointment.PatientEmail<br />@row.Appointment.PatientPhone</td>
                             <td>@row.Appointment.Status</td>
                             <td>

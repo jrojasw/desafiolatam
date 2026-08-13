@@ -42,6 +42,44 @@
             </div>
 
             <div class="form-check my-4">
+                <input asp-for="IsForMinor" class="form-check-input" id="isForMinorCheck" />
+                <label asp-for="IsForMinor" class="form-check-label small"></label>
+            </div>
+
+            <div id="minorFieldsWrapper" class="d-none">
+                <div class="cp-crisis-notice mb-3" style="background:#eef6f5;color:var(--cp-primary-dark);">
+                    Los datos de contacto de arriba (nombre, correo, teléfono) siguen siendo los tuyos: eres tú
+                    quien agenda, recibe las confirmaciones y paga la sesión. Aquí solo indícanos para quién es.
+                </div>
+                <div class="mb-3">
+                    <label asp-for="MinorFullName" class="form-label"></label>
+                    <input asp-for="MinorFullName" class="form-control" />
+                    <span asp-validation-for="MinorFullName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="MinorAge" class="form-label"></label>
+                    <input asp-for="MinorAge" type="number" min="0" max="17" class="form-control" style="max-width:120px;" />
+                    <span asp-validation-for="MinorAge" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="GuardianRelationship" class="form-label"></label>
+                    <select asp-for="GuardianRelationship" class="form-select">
+                        <option value="">Selecciona una opción</option>
+                        @foreach (var option in CentralPsi.Web.Models.ViewModels.BookingStartViewModel.GuardianRelationshipOptions)
+                        {
+                            <option value="@option">@option</option>
+                        }
+                    </select>
+                    <span asp-validation-for="GuardianRelationship" class="text-danger small"></span>
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="GuardianConsentAccepted" class="form-check-input" />
+                    <label asp-for="GuardianConsentAccepted" class="form-check-label small"></label>
+                    <div><span asp-validation-for="GuardianConsentAccepted" class="text-danger small"></span></div>
+                </div>
+            </div>
+
+            <div class="form-check my-4">
                 <input asp-for="TermsAccepted" class="form-check-input" />
                 <label asp-for="TermsAccepted" class="form-check-label small">
                     He leído y acepto los <a asp-controller="Home" asp-action="Terms" target="_blank">términos y condiciones</a>,
@@ -88,6 +126,14 @@
         document.addEventListener('DOMContentLoaded', function () {
             var tipsModal = new bootstrap.Modal(document.getElementById('cpSessionTipsModal'));
             tipsModal.show();
+
+            var minorCheck = document.getElementById('isForMinorCheck');
+            var minorWrapper = document.getElementById('minorFieldsWrapper');
+            function toggleMinorFields() {
+                minorWrapper.classList.toggle('d-none', !minorCheck.checked);
+            }
+            minorCheck.addEventListener('change', toggleMinorFields);
+            toggleMinorFields();
         });
     </script>
 }

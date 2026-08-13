@@ -103,6 +103,26 @@ public class BookingController : Controller
             ModelState.AddModelError(nameof(model.TermsAccepted), "Debes aceptar los términos y condiciones para continuar");
         }
 
+        if (model.IsForMinor)
+        {
+            if (string.IsNullOrWhiteSpace(model.MinorFullName))
+            {
+                ModelState.AddModelError(nameof(model.MinorFullName), "Ingresa el nombre completo del niño, niña o adolescente");
+            }
+            if (model.MinorAge is null)
+            {
+                ModelState.AddModelError(nameof(model.MinorAge), "Ingresa la edad");
+            }
+            if (string.IsNullOrWhiteSpace(model.GuardianRelationship))
+            {
+                ModelState.AddModelError(nameof(model.GuardianRelationship), "Indica tu relación con el niño, niña o adolescente");
+            }
+            if (!model.GuardianConsentAccepted)
+            {
+                ModelState.AddModelError(nameof(model.GuardianConsentAccepted), "Debes confirmar que eres madre, padre o tutor/a legal y autorizas la sesión");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             return View("Start", model);
@@ -119,7 +139,12 @@ public class BookingController : Controller
             Amount = _appOptions.AppointmentPriceClp,
             TermsAccepted = true,
             TermsAcceptedAtUtc = DateTime.UtcNow,
-            TermsAcceptedIp = HttpContext.Connection.RemoteIpAddress?.ToString()
+            TermsAcceptedIp = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            IsForMinor = model.IsForMinor,
+            MinorFullName = model.IsForMinor ? model.MinorFullName!.Trim() : null,
+            MinorAge = model.IsForMinor ? model.MinorAge : null,
+            GuardianRelationship = model.IsForMinor ? model.GuardianRelationship!.Trim() : null,
+            GuardianConsentAcceptedAtUtc = model.IsForMinor ? DateTime.UtcNow : null
         };
         _db.Appointments.Add(appointment);
         await _db.SaveChangesAsync();
