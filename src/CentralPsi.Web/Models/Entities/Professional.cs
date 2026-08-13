@@ -39,6 +39,15 @@ public class Professional
     /// they must send their boleta de honorarios to pagos@centralpsi.cl to get paid for each session.</summary>
     public DateTime? TaxComplianceAcceptedAtUtc { get; set; }
 
+    // Bank details used to transfer the professional's share of each session's payment. Collected once at
+    // registration (private - never shown on the public profile) instead of trying to parse them out of every
+    // payment email, which is unreliable.
+    public string BankName { get; set; } = string.Empty;
+    public string BankAccountType { get; set; } = string.Empty;
+    public string BankAccountNumber { get; set; } = string.Empty;
+    public string BankAccountHolderName { get; set; } = string.Empty;
+    public string BankAccountHolderRut { get; set; } = string.Empty;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? DeactivatedAt { get; set; }
 

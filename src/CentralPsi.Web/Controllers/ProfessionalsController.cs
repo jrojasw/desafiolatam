@@ -114,7 +114,12 @@ public class ProfessionalsController : Controller
             Experience = model.Experience.Trim(),
             CertificateValidationCode = model.CertificateValidationCode.Trim(),
             Status = ProfessionalStatus.PendingVerification,
-            TaxComplianceAcceptedAtUtc = DateTime.UtcNow
+            TaxComplianceAcceptedAtUtc = DateTime.UtcNow,
+            BankName = model.BankName.Trim(),
+            BankAccountType = model.BankAccountType.Trim(),
+            BankAccountNumber = model.BankAccountNumber.Trim(),
+            BankAccountHolderName = model.BankAccountHolderName.Trim(),
+            BankAccountHolderRut = model.BankAccountHolderRut.Trim()
         };
 
         professional.CedulaFrontPath = await _fileStorage.SavePrivateAsync(model.CedulaFront, "cedulas");

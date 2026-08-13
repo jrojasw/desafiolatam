@@ -21,6 +21,13 @@
             <p><strong>Experiencia:</strong><br />@Model.Experience</p>
 
             <hr />
+            <h5>Datos bancarios (para el pago)</h5>
+            <p><strong>Banco:</strong> @Model.BankName</p>
+            <p><strong>Tipo de cuenta:</strong> @Model.BankAccountType</p>
+            <p><strong>Número de cuenta:</strong> @Model.BankAccountNumber</p>
+            <p><strong>Titular:</strong> @Model.BankAccountHolderName (RUT @Model.BankAccountHolderRut)</p>
+
+            <hr />
             <h5>Horario de atención</h5>
             @if (Model.Availabilities.Count == 0)
             {

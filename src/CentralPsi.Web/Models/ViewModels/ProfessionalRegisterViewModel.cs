@@ -75,8 +75,36 @@ public class ProfessionalRegisterViewModel
     [Display(Name = "Código de validación del certificado")]
     public string CertificateValidationCode { get; set; } = string.Empty;
 
-    [Display(Name = "Declaro contar con Inicio de Actividades vigente en el SII y entiendo que debo emitir mi boleta de honorarios a nombre del paciente y enviar una copia junto con mis datos bancarios a pagos@centralpsi.cl para recibir el pago de cada sesión dentro de 3 días hábiles")]
+    [Display(Name = "Declaro contar con Inicio de Actividades vigente en el SII y entiendo que debo emitir mi boleta de honorarios a nombre del paciente y enviar una copia a pagos@centralpsi.cl para recibir el pago de cada sesión dentro de 3 días hábiles")]
     public bool TaxComplianceAccepted { get; set; }
+
+    [Required(ErrorMessage = "Indica el banco")]
+    [Display(Name = "Banco")]
+    public string BankName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Indica el tipo de cuenta")]
+    [Display(Name = "Tipo de cuenta")]
+    public string BankAccountType { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Ingresa el número de cuenta")]
+    [Display(Name = "Número de cuenta")]
+    public string BankAccountNumber { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Ingresa el nombre del titular de la cuenta")]
+    [Display(Name = "Nombre del titular")]
+    public string BankAccountHolderName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Ingresa el RUT del titular de la cuenta")]
+    [Display(Name = "RUT del titular")]
+    public string BankAccountHolderRut { get; set; } = string.Empty;
+
+    public static readonly string[] BankAccountTypeOptions =
+    {
+        "Cuenta Corriente",
+        "Cuenta Vista",
+        "Cuenta de Ahorro",
+        "Cuenta RUT"
+    };
 
     public List<AvailabilitySlotInput> Availability { get; set; } = BuildDefaultAvailability();
 

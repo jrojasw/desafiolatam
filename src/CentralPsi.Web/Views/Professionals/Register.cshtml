@@ -26,9 +26,9 @@
             <strong>Requisito importante:</strong> para poder pagarte tu parte de cada sesión, necesitas contar con
             <strong>Inicio de Actividades vigente en el SII</strong> y emitir una boleta de honorarios <strong>a
             nombre del paciente atendido</strong> por el monto correspondiente. Después de cada sesión, envía esa
-            boleta al paciente y, además, una copia junto con tus <strong>datos bancarios</strong> a
-            <a href="mailto:pagos@centralpsi.cl">pagos@centralpsi.cl</a> — una vez recibida, te transferiremos tu
-            pago dentro de un plazo de <strong>3 días hábiles</strong>. Si aún no tienes Inicio de Actividades, puedes hacerlo en
+            boleta al paciente y, además, una copia a <a href="mailto:pagos@centralpsi.cl">pagos@centralpsi.cl</a>
+            — con los datos bancarios que dejas más abajo, te transferiremos tu pago dentro de un plazo de
+            <strong>3 días hábiles</strong>. Si aún no tienes Inicio de Actividades, puedes hacerlo en
             <a href="https://www.sii.cl/" target="_blank" rel="noopener">sii.cl</a> antes de completar esta inscripción.
         </div>
 
@@ -116,6 +116,44 @@
                     <input asp-for="CertificateValidationCode" class="form-control" />
                     <span asp-validation-for="CertificateValidationCode" class="text-danger small"></span>
                     <div class="form-text">Es el código que aparece en tu certificado para validarlo en emisorcertificados.superdesalud.gob.cl</div>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <h5 class="mb-3">Datos bancarios para el pago</h5>
+            <p class="text-muted small">Aquí transferiremos tu parte de cada sesión. Estos datos no se muestran en tu perfil público.</p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="BankName" class="form-label"></label>
+                    <input asp-for="BankName" class="form-control" placeholder="Ej: Banco Estado" />
+                    <span asp-validation-for="BankName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BankAccountType" class="form-label"></label>
+                    <select asp-for="BankAccountType" class="form-select">
+                        <option value="">Selecciona una opción</option>
+                        @foreach (var option in CentralPsi.Web.Models.ViewModels.ProfessionalRegisterViewModel.BankAccountTypeOptions)
+                        {
+                            <option value="@option">@option</option>
+                        }
+                    </select>
+                    <span asp-validation-for="BankAccountType" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BankAccountNumber" class="form-label"></label>
+                    <input asp-for="BankAccountNumber" class="form-control" />
+                    <span asp-validation-for="BankAccountNumber" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BankAccountHolderRut" class="form-label"></label>
+                    <input asp-for="BankAccountHolderRut" class="form-control" placeholder="12.345.678-9" />
+                    <span asp-validation-for="BankAccountHolderRut" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="BankAccountHolderName" class="form-label"></label>
+                    <input asp-for="BankAccountHolderName" class="form-control" />
+                    <span asp-validation-for="BankAccountHolderName" class="text-danger small"></span>
+                    <div class="form-text">Si la cuenta no está a tu nombre (ej. una sociedad), indica el nombre del titular.</div>
                 </div>
             </div>
 
