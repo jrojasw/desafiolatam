@@ -109,6 +109,9 @@ a:hover {
 }
 
 @media (max-width: 576px) {
+  .cp-hero .carousel-item img {
+    object-position: var(--cp-mobile-focus-x, 50%) center;
+  }
   .cp-hero .carousel-caption {
     left: 5%;
     right: 5%;

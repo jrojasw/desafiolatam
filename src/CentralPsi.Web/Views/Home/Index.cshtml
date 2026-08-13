@@ -17,8 +17,14 @@
                 @for (var i = 0; i < Model.Slides.Count; i++)
                 {
                     var slide = Model.Slides[i];
+                    var mobileFocusX = slide.ImagePath switch
+                    {
+                        var p when p.Contains("slide-3-familia") => "44%",
+                        var p when p.Contains("slide-4-agenda") => "74%",
+                        _ => "50%"
+                    };
                     <div class="carousel-item @(i == 0 ? "active" : "")">
-                        <img src="@Url.Content(slide.ImagePath)" class="d-block w-100" alt="@slide.Title">
+                        <img src="@Url.Content(slide.ImagePath)" class="d-block w-100" alt="@slide.Title" style="--cp-mobile-focus-x:@mobileFocusX;">
                         @if (!string.IsNullOrWhiteSpace(slide.Title))
                         {
                             <div class="carousel-caption">
