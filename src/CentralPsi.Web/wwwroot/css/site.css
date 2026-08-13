@@ -108,6 +108,26 @@ a:hover {
   text-shadow: 0 1px 0 rgba(0,0,0,.5), 0 2px 10px rgba(0,0,0,.5);
 }
 
+@media (max-width: 576px) {
+  .cp-hero .carousel-caption {
+    left: 5%;
+    right: 5%;
+    max-width: none;
+    bottom: 14%;
+  }
+  .cp-hero .carousel-caption h1 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+  .cp-hero .carousel-caption p {
+    font-size: .9rem;
+  }
+  .cp-hero .carousel-caption .btn {
+    padding: .5rem 1rem;
+    font-size: .85rem;
+  }
+}
+
 /* ---- Sections ---- */
 .cp-section {
   padding: 4.5rem 0;
