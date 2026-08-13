@@ -10,10 +10,10 @@ using Microsoft.EntityFrameworkCore;
 namespace CentralPsi.Web.Controllers;
 
 /// <summary>
-/// Standalone operations calendar: intentionally not linked from any public page or from the admin
-/// dashboard's navigation (per the internal requirement that it stay a separate, unlinked page). It still
-/// requires the same admin login as the dashboard - "not linked" means undiscoverable via navigation, not
-/// unauthenticated.
+/// Standalone operations calendar: kept out of the main admin sidebar nav, but linked from the
+/// Admin > Enlaces hub now that there's a single admin - if more admin accounts are added later with
+/// different permission levels, revisit whether it should stay reachable from there. Requires the same
+/// admin login as the rest of the dashboard either way.
 /// </summary>
 [Authorize(Roles = DataSeeder.AdminRole)]
 [Route("panel-interno/calendario")]
