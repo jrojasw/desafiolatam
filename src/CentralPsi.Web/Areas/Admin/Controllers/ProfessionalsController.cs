@@ -253,12 +253,13 @@ public class ProfessionalsController : Controller
 
     /// <summary>
     /// Escape hatch for removing test/fictitious profiles that already went through a real booking during
-    /// development: normal Delete refuses to touch a professional with any appointment history at all (even
-    /// cancelled ones) to protect real payment/refund records, but that guard has no way to distinguish "real
-    /// cancelled booking with a refund owed to a real patient" from "fake test booking with fake test data".
-    /// Only allowed once every appointment is already Cancelled/Refunded (nothing active or ever Completed/paid
-    /// out) - this purges those appointment rows (and their cascading Payment/CancellationRequest rows) along
-    /// with the professional, instead of just blocking.
+    /// development: normal Delete refuses to touch a professional with any appointment history at all to
+    /// protect real payment/refund records, but that guard has no way to distinguish "real booking with money
+    /// owed to a real patient/professional" from "fake test booking with fake test data". Only allowed once
+    /// every appointment is out of an active/uncommitted state (nothing still PendingPayment or Confirmed) -
+    /// this purges those appointment rows (and their cascading Payment/CancellationRequest rows, Completed ones
+    /// included) along with the professional, instead of just blocking. Only ever use this on profiles you know
+    /// are test data.
     /// </summary>
     [HttpPost("{id:guid}/EliminarForzado")]
     [ValidateAntiForgeryToken]
@@ -268,11 +269,10 @@ public class ProfessionalsController : Controller
         if (professional is null) return NotFound();
 
         var appointments = await _db.Appointments.Where(a => a.ProfessionalId == id).ToListAsync();
-        var hasActiveOrCompleted = appointments.Any(a => a.Status is AppointmentStatus.PendingPayment
-            or AppointmentStatus.Confirmed or AppointmentStatus.Completed);
-        if (hasActiveOrCompleted)
+        var hasActive = appointments.Any(a => a.Status is AppointmentStatus.PendingPayment or AppointmentStatus.Confirmed);
+        if (hasActive)
         {
-            TempData["ErrorMessage"] = "No se puede forzar la eliminación: aún tiene citas activas o completadas. Cancélalas primero desde la lista de arriba.";
+            TempData["ErrorMessage"] = "No se puede forzar la eliminación: aún tiene citas activas (pendientes de pago o confirmadas). Cancélalas primero desde la lista de arriba.";
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -280,7 +280,7 @@ public class ProfessionalsController : Controller
         _db.Professionals.Remove(professional);
         await _db.SaveChangesAsync();
 
-        TempData["SuccessMessage"] = $"{professional.FullName} y sus citas canceladas fueron eliminados definitivamente.";
+        TempData["SuccessMessage"] = $"{professional.FullName} y sus citas fueron eliminados definitivamente.";
         return RedirectToAction(nameof(Index));
     }
 
