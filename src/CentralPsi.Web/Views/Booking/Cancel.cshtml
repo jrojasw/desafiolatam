@@ -9,6 +9,15 @@
         RefundTier.Partial50 => "50% del valor pagado",
         _ => "revisión manual (sin reembolso automático)"
     };
+    var statusText = Model.Appointment.Status switch
+    {
+        AppointmentStatus.PendingPayment => "Pendiente de pago",
+        AppointmentStatus.Confirmed => "Confirmada",
+        AppointmentStatus.Cancelled => "Cancelada",
+        AppointmentStatus.Completed => "Completada",
+        AppointmentStatus.Refunded => "Reembolsada",
+        _ => Model.Appointment.Status.ToString()
+    };
 }
 
 <section class="cp-section">
@@ -18,7 +27,7 @@
         <div class="cp-form-card">
             <p><strong>Profesional:</strong> @Model.Professional.FullName</p>
             <p><strong>Fecha y hora:</strong> @Model.StartLocal.ToString("dddd d 'de' MMMM 'de' yyyy, HH:mm 'hrs'", culture)</p>
-            <p><strong>Estado actual:</strong> @Model.Appointment.Status</p>
+            <p><strong>Estado actual:</strong> @statusText</p>
 
             @if (Model.AlreadyCancelled)
             {
@@ -28,7 +37,7 @@
             {
                 <div class="alert alert-warning">
                     Según nuestra política de reembolsos, si cancelas ahora corresponde un reembolso del
-                    <strong>@tierText</strong> (aprox. $@Model.ProjectedAmount.ToString("N0") CLP), procesado
+                    <strong>@tierText</strong> ($@Model.ProjectedAmount.ToString("N0") CLP), procesado
                     manualmente dentro de un máximo de 4 días hábiles.
                 </div>
 
