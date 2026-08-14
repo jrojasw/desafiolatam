@@ -23,6 +23,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
     public DbSet<CancellationRequest> CancellationRequests => Set<CancellationRequest>();
     public DbSet<SlideImage> SlideImages => Set<SlideImage>();
     public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
+    public DbSet<PaymentInboxMessage> PaymentInboxMessages => Set<PaymentInboxMessage>();
+    public DbSet<PaymentInboxAttachment> PaymentInboxAttachments => Set<PaymentInboxAttachment>();
     public DbSet<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey> DataProtectionKeys => Set<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -79,6 +81,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
         builder.Entity<NewsArticle>(e =>
         {
             e.Property(n => n.Category).HasConversion<string>();
+        });
+
+        builder.Entity<PaymentInboxMessage>(e =>
+        {
+            e.HasIndex(m => m.ImapUid).IsUnique();
+            e.HasMany(m => m.Attachments)
+                .WithOne(a => a.Message)
+                .HasForeignKey(a => a.PaymentInboxMessageId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

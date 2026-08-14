@@ -27,6 +27,7 @@ builder.Services.Configure<GoogleCalendarOptions>(builder.Configuration.GetSecti
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
 builder.Services.Configure<SuperSaludOptions>(builder.Configuration.GetSection(SuperSaludOptions.SectionName));
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection(StorageOptions.SectionName));
+builder.Services.Configure<PaymentsInboxOptions>(builder.Configuration.GetSection(PaymentsInboxOptions.SectionName));
 
 // ---- Data ----
 // Render's managed Postgres hands out a single DATABASE_URL (postgres://user:pass@host:port/db) rather than
@@ -93,6 +94,8 @@ builder.Services.AddScoped<ICertificateValidationService, SuperSaludCertificateV
 builder.Services.AddScoped<IPaymentService, TransbankWebpayService>();
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 builder.Services.AddHostedService<AttendanceConfirmationBackgroundService>();
+builder.Services.AddScoped<IPaymentInboxSyncService, PaymentInboxSyncService>();
+builder.Services.AddHostedService<PaymentInboxSyncBackgroundService>();
 
 builder.Services.AddControllersWithViews();
 

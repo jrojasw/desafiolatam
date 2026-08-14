@@ -41,6 +41,27 @@ public class FileStorageService : IFileStorageService
         return relative;
     }
 
+    public async Task<string> SavePrivateStreamAsync(Stream content, string originalFileName, string subfolder)
+    {
+        var extension = Path.GetExtension(originalFileName);
+        if (!AllowedExtensions.Contains(extension))
+        {
+            throw new InvalidOperationException($"Extensión de archivo no permitida: {extension}");
+        }
+
+        var targetDir = Path.Combine(_privateRoot, subfolder);
+        Directory.CreateDirectory(targetDir);
+        var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+        var fullPath = Path.Combine(targetDir, fileName);
+
+        await using (var stream = new FileStream(fullPath, FileMode.Create))
+        {
+            await content.CopyToAsync(stream);
+        }
+
+        return $"{subfolder}/{fileName}";
+    }
+
     public string GetPrivatePhysicalPath(string relativePath) => Path.Combine(_privateRoot, relativePath);
     public string GetPublicPhysicalPath(string relativePath) => Path.Combine(_publicRoot, relativePath);
 

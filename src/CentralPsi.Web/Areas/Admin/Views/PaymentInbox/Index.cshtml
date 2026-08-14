@@ -1,0 +1,91 @@
+@model List<PaymentInboxMessage>
+@{
+    ViewData["Title"] = "Bandeja de pagos";
+    var filter = ViewData["Filter"] as string ?? "pendientes";
+    var isConfigured = (bool)(ViewData["IsConfigured"] ?? false);
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
+    Copia en solo lectura de la casilla <strong>pagos@centralpsi.cl</strong> — se sincroniza automáticamente cada
+    10 minutos. Revisa la boleta adjunta, ve a <a asp-area="Admin" asp-controller="Payments" asp-action="Index">Pagos a profesionales</a>
+    para marcar la transferencia como hecha, y marca este correo como revisado.
+</div>
+
+@if (!isConfigured)
+{
+    <div class="alert alert-warning">Falta configurar <code>PaymentsInbox:Password</code> (variable de entorno <code>PaymentsInbox__Password</code> en Render) para que esto funcione.</div>
+}
+
+<div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Index" asp-route-filter="pendientes" class="btn btn-sm @(filter == "pendientes" ? "cp-btn-primary" : "cp-btn-outline")">Pendientes</a>
+        <a asp-action="Index" asp-route-filter="revisados" class="btn btn-sm @(filter == "revisados" ? "cp-btn-primary" : "cp-btn-outline")">Revisados</a>
+        <a asp-action="Index" asp-route-filter="todos" class="btn btn-sm @(filter == "todos" ? "cp-btn-primary" : "cp-btn-outline")">Todos</a>
+    </div>
+    <form asp-action="Sync" method="post">
+        <button type="submit" class="btn btn-sm cp-btn-outline">🔄 Sincronizar ahora</button>
+    </form>
+</div>
+
+@if (Model.Count == 0)
+{
+    <p class="text-muted">No hay correos en este filtro.</p>
+}
+else
+{
+    <div class="d-flex flex-column gap-3">
+        @foreach (var m in Model)
+        {
+            <div class="cp-form-card">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div>
+                        <div class="fw-bold">@(string.IsNullOrWhiteSpace(m.FromName) ? m.FromAddress : $"{m.FromName} <{m.FromAddress}>")</div>
+                        <div>@m.Subject</div>
+                        <div class="text-muted small">@m.ReceivedAtUtc.ToLocalTime().ToString("dd-MM-yyyy HH:mm", culture)</div>
+                    </div>
+                    <div>
+                        @if (m.Reviewed)
+                        {
+                            <span class="cp-status-pill cp-status-verified">Revisado</span>
+                        }
+                        else
+                        {
+                            <span class="cp-status-pill cp-status-pending">Pendiente</span>
+                        }
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(m.BodyPreview))
+                {
+                    <p class="small text-muted mt-2 mb-2" style="white-space:pre-wrap;">@m.BodyPreview</p>
+                }
+
+                @if (m.Attachments.Count > 0)
+                {
+                    <div class="d-flex gap-2 flex-wrap mb-2">
+                        @foreach (var att in m.Attachments)
+                        {
+                            <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Attachment" asp-route-attachmentId="@att.Id">📎 @att.FileName</a>
+                        }
+                    </div>
+                }
+
+                <div>
+                    @if (m.Reviewed)
+                    {
+                        <form asp-action="MarkPending" asp-route-id="@m.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm cp-btn-outline">Marcar pendiente</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="MarkReviewed" asp-route-id="@m.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm cp-btn-primary">Marcar revisado</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

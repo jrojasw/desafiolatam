@@ -11,6 +11,9 @@ public interface IFileStorageService
     /// </summary>
     Task<string> SavePrivateAsync(IFormFile file, string subfolder);
 
+    /// <summary>Same as SavePrivateAsync but for a raw stream (e.g. an email attachment) instead of an IFormFile.</summary>
+    Task<string> SavePrivateStreamAsync(Stream content, string originalFileName, string subfolder);
+
     string GetPrivatePhysicalPath(string relativePath);
     string GetPublicPhysicalPath(string relativePath);
 }
