@@ -13,7 +13,7 @@
     {
         AppointmentStatus.PendingPayment => "Pendiente de pago",
         AppointmentStatus.Confirmed => "Confirmada",
-        AppointmentStatus.Cancelled => "Cancelada",
+        AppointmentStatus.Cancelled => "Anulada",
         AppointmentStatus.Completed => "Completada",
         AppointmentStatus.Refunded => "Reembolsada",
         _ => Model.Appointment.Status.ToString()
@@ -31,7 +31,7 @@
 
             @if (Model.AlreadyCancelled)
             {
-                <div class="alert alert-info">Esta hora ya fue cancelada anteriormente.</div>
+                <div class="alert alert-info">Tu hora ya fue cancelada anteriormente.</div>
             }
             else
             {
