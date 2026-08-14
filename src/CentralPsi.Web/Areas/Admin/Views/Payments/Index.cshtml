@@ -86,10 +86,7 @@
                         }
                         else if (a.ProfessionalPaidAtUtc is not null)
                         {
-                            <form asp-action="UploadReceipt" asp-route-id="@a.Id" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-1">
-                                <input type="file" name="receipt" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.webp" style="max-width:170px;" required />
-                                <button type="submit" class="btn btn-sm cp-btn-outline">Subir comprobante</button>
-                            </form>
+                            <span class="text-muted small">Sin comprobante</span>
                         }
                         else
                         {

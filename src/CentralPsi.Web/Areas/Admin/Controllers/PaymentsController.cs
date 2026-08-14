@@ -86,26 +86,6 @@ public class PaymentsController : Controller
         return RedirectToAction(nameof(Index), new { filter = "pagados" });
     }
 
-    [HttpPost("{id:guid}/SubirComprobante")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UploadReceipt(Guid id, IFormFile receipt)
-    {
-        var appointment = await _db.Appointments.FindAsync(id);
-        if (appointment is null) return NotFound();
-
-        if (receipt is not { Length: > 0 })
-        {
-            TempData["ErrorMessage"] = "Selecciona un archivo (PDF o imagen) antes de subir.";
-            return RedirectToAction(nameof(Index), new { filter = "pagados" });
-        }
-
-        appointment.ProfessionalPaymentReceiptPath = await _fileStorage.SavePrivateAsync(receipt, "comprobantes-pago");
-        await _db.SaveChangesAsync();
-
-        TempData["SuccessMessage"] = "Comprobante de pago subido.";
-        return RedirectToAction(nameof(Index), new { filter = "pagados" });
-    }
-
     [HttpGet("{id:guid}/Comprobante")]
     public async Task<IActionResult> Receipt(Guid id)
     {
