@@ -8,6 +8,10 @@ public class AppOptions
 
     /// <summary>Flat amount CentralPsi pays the professional per session, out of AppointmentPriceClp.</summary>
     public decimal ProfessionalPayoutClp { get; set; } = 15000m;
+
+    /// <summary>Business days CentralPsi commits to for paying the professional after a session, once the
+    /// boleta arrives - drives the pending-payments "traffic light" in Admin/Pagos.</summary>
+    public int ProfessionalPayoutBusinessDays { get; set; } = 3;
     public int SessionDurationMinutes { get; set; } = 50;
     public string TimeZoneId { get; set; } = "America/Santiago";
     public string AdminEmail { get; set; } = "admin@centralpsi.cl";

@@ -1,10 +1,12 @@
 using CentralPsi.Web.Data;
 using CentralPsi.Web.Data.Seed;
 using CentralPsi.Web.Models.Entities;
+using CentralPsi.Web.Options;
 using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace CentralPsi.Web.Areas.Admin.Controllers;
 
@@ -20,15 +22,46 @@ public class PaymentsController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly IFileStorageService _fileStorage;
+    private readonly ITimeZoneService _timeZoneService;
+    private readonly AppOptions _appOptions;
+    private readonly ILogger<PaymentsController> _logger;
 
-    public PaymentsController(ApplicationDbContext db, IFileStorageService fileStorage)
+    public PaymentsController(
+        ApplicationDbContext db,
+        IFileStorageService fileStorage,
+        ITimeZoneService timeZoneService,
+        IOptions<AppOptions> appOptions,
+        ILogger<PaymentsController> logger)
     {
         _db = db;
         _fileStorage = fileStorage;
+        _timeZoneService = timeZoneService;
+        _appOptions = appOptions.Value;
+        _logger = logger;
+    }
+
+    /// <summary>Best-effort delete of a previously uploaded receipt when it's about to be replaced - not
+    /// critical to the mark-paid flow, so a failure here is logged and swallowed rather than surfaced.</summary>
+    private void TryDeleteOldReceipt(string? relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath)) return;
+
+        try
+        {
+            var physicalPath = _fileStorage.GetPrivatePhysicalPath(relativePath);
+            if (System.IO.File.Exists(physicalPath))
+            {
+                System.IO.File.Delete(physicalPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No se pudo borrar el comprobante anterior {Path}", relativePath);
+        }
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> Index(string filter = "pendientes")
+    public async Task<IActionResult> Index(string filter = "pendientes", string range = "todos")
     {
         var query = _db.Appointments
             .Include(a => a.Professional)
@@ -41,11 +74,42 @@ public class PaymentsController : Controller
             _ => query.Where(a => a.ProfessionalPaidAtUtc == null)
         };
 
+        var todayLocal = _timeZoneService.ToLocal(DateTime.UtcNow).Date;
+        DateTime? fromLocal = range switch
+        {
+            "hoy" => todayLocal,
+            "ayer" => todayLocal.AddDays(-1),
+            "antesdeayer" => todayLocal.AddDays(-2),
+            "semana" => todayLocal.AddDays(-((int)todayLocal.DayOfWeek == 0 ? 6 : (int)todayLocal.DayOfWeek - 1)),
+            "mes" => new DateTime(todayLocal.Year, todayLocal.Month, 1),
+            "anio" => new DateTime(todayLocal.Year, 1, 1),
+            _ => null
+        };
+        DateTime? toLocalExclusive = range switch
+        {
+            "hoy" => todayLocal.AddDays(1),
+            "ayer" => todayLocal,
+            "antesdeayer" => todayLocal.AddDays(-1),
+            "semana" => todayLocal.AddDays(1),
+            "mes" => todayLocal.AddDays(1),
+            "anio" => todayLocal.AddDays(1),
+            _ => null
+        };
+
+        if (fromLocal.HasValue && toLocalExclusive.HasValue)
+        {
+            var fromUtc = _timeZoneService.ToUtc(fromLocal.Value);
+            var toUtc = _timeZoneService.ToUtc(toLocalExclusive.Value);
+            query = query.Where(a => a.ScheduledStartUtc >= fromUtc && a.ScheduledStartUtc < toUtc);
+        }
+
         var appointments = await query
             .OrderByDescending(a => a.ScheduledStartUtc)
             .ToListAsync();
 
         ViewData["Filter"] = filter;
+        ViewData["Range"] = range;
+        ViewData["PayoutBusinessDays"] = _appOptions.ProfessionalPayoutBusinessDays;
         ViewData["TotalPendiente"] = await _db.Appointments
             .Where(a => a.Status == AppointmentStatus.Completed && a.ProfessionalPaidAtUtc == null)
             .SumAsync(a => a.ProfessionalPayoutAmount);
@@ -65,6 +129,8 @@ public class PaymentsController : Controller
             TempData["ErrorMessage"] = "Debes adjuntar el comprobante de la transferencia para poder marcar la sesión como pagada.";
             return RedirectToAction(nameof(Index), new { filter = "pendientes" });
         }
+
+        TryDeleteOldReceipt(appointment.ProfessionalPaymentReceiptPath);
 
         appointment.ProfessionalPaidAtUtc = DateTime.UtcNow;
         appointment.ProfessionalPaymentNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();

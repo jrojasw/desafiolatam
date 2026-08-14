@@ -1,25 +1,54 @@
 @model List<Appointment>
 @using CentralPsi.Web.Models.Entities
+@using CentralPsi.Web.Services
 @{
     ViewData["Title"] = "Pagos a profesionales";
     var filter = ViewData["Filter"] as string ?? "pendientes";
+    var range = ViewData["Range"] as string ?? "todos";
+    var payoutBusinessDays = (int)(ViewData["PayoutBusinessDays"] ?? 3);
     var totalPendiente = (decimal)(ViewData["TotalPendiente"] ?? 0m);
     var culture = new System.Globalization.CultureInfo("es-CL");
+    var now = DateTime.UtcNow;
+
+    (string CssClass, string Label) Urgency(Appointment a)
+    {
+        var businessDays = BusinessDayCalculator.BusinessDaysElapsed(a.ScheduledEndUtc, now);
+        return businessDays switch
+        {
+            <= 1 => ("cp-status-verified", "En plazo"),
+            2 => ("cp-status-warning", $"Por vencer (día {businessDays}/{payoutBusinessDays})"),
+            var d when d == payoutBusinessDays => ("cp-status-rejected", "Último día"),
+            var d when d < payoutBusinessDays => ("cp-status-warning", $"Por vencer (día {businessDays}/{payoutBusinessDays})"),
+            _ => ("cp-status-beacon", $"Vencido (+{businessDays - payoutBusinessDays} día(s) hábil(es))")
+        };
+    }
 }
 
 <div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
     Cuando llegue una boleta a <a href="mailto:pagos@centralpsi.cl">pagos@centralpsi.cl</a>, busca la sesión
     correspondiente abajo, revisa los datos bancarios del profesional y, una vez hecha la transferencia,
-    márcala como pagada. Recuerda el compromiso de transferir dentro de 3 días hábiles desde que recibes la boleta.
+    márcala como pagada. Recuerda el compromiso de transferir dentro de @payoutBusinessDays días hábiles desde
+    que se realiza la sesión. La columna "Plazo" se pone amarilla al segundo día, roja al último día, y parpadea
+    azul/rojo si ya nos pasamos del plazo.
 </div>
 
 <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div class="d-flex gap-2 flex-wrap">
-        <a asp-action="Index" asp-route-filter="pendientes" class="btn btn-sm @(filter == "pendientes" ? "cp-btn-primary" : "cp-btn-outline")">Pendientes</a>
-        <a asp-action="Index" asp-route-filter="pagados" class="btn btn-sm @(filter == "pagados" ? "cp-btn-primary" : "cp-btn-outline")">Pagados</a>
-        <a asp-action="Index" asp-route-filter="todos" class="btn btn-sm @(filter == "todos" ? "cp-btn-primary" : "cp-btn-outline")">Todos</a>
+        <a asp-action="Index" asp-route-filter="pendientes" asp-route-range="@range" class="btn btn-sm @(filter == "pendientes" ? "cp-btn-primary" : "cp-btn-outline")">Pendientes</a>
+        <a asp-action="Index" asp-route-filter="pagados" asp-route-range="@range" class="btn btn-sm @(filter == "pagados" ? "cp-btn-primary" : "cp-btn-outline")">Pagados</a>
+        <a asp-action="Index" asp-route-filter="todos" asp-route-range="@range" class="btn btn-sm @(filter == "todos" ? "cp-btn-primary" : "cp-btn-outline")">Todos</a>
     </div>
     <div class="fw-bold">Total pendiente de pago: $@totalPendiente.ToString("N0") CLP</div>
+</div>
+
+<div class="mb-3 d-flex gap-2 flex-wrap">
+    <a asp-action="Index" asp-route-filter="@filter" asp-route-range="hoy" class="btn btn-sm @(range == "hoy" ? "cp-btn-primary" : "cp-btn-outline")">Hoy</a>
+    <a asp-action="Index" asp-route-filter="@filter" asp-route-range="ayer" class="btn btn-sm @(range == "ayer" ? "cp-btn-primary" : "cp-btn-outline")">Ayer</a>
+    <a asp-action="Index" asp-route-filter="@filter" asp-route-range="antesdeayer" class="btn btn-sm @(range == "antesdeayer" ? "cp-btn-primary" : "cp-btn-outline")">Antes de ayer</a>
+    <a asp-action="Index" asp-route-filter="@filter" asp-route-range="semana" class="btn btn-sm @(range == "semana" ? "cp-btn-primary" : "cp-btn-outline")">Esta semana</a>
+    <a asp-action="Index" asp-route-filter="@filter" asp-route-range="mes" class="btn btn-sm @(range == "mes" ? "cp-btn-primary" : "cp-btn-outline")">Este mes</a>
+    <a asp-action="Index" asp-route-filter="@filter" asp-route-range="anio" class="btn btn-sm @(range == "anio" ? "cp-btn-primary" : "cp-btn-outline")">Este año</a>
+    <a asp-action="Index" asp-route-filter="@filter" asp-route-range="todos" class="btn btn-sm @(range == "todos" ? "cp-btn-primary" : "cp-btn-outline")">Todo</a>
 </div>
 
 <div class="table-responsive">
@@ -27,7 +56,7 @@
         <thead>
             <tr>
                 <th>Sesión</th><th>Profesional</th><th>Paciente</th><th>Monto sesión</th>
-                <th>A pagar profesional</th><th>Datos bancarios</th><th>Estado</th><th>Comprobante</th><th></th>
+                <th>A pagar profesional</th><th>Datos bancarios</th><th>Estado</th><th>Plazo</th><th>Comprobante</th><th></th>
             </tr>
         </thead>
         <tbody>
@@ -77,6 +106,17 @@
                         else
                         {
                             <span class="cp-status-pill cp-status-pending">Pendiente</span>
+                        }
+                    </td>
+                    <td>
+                        @if (a.ProfessionalPaidAtUtc is null)
+                        {
+                            var (cssClass, label) = Urgency(a);
+                            <span class="cp-status-pill @cssClass">@label</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">-</span>
                         }
                     </td>
                     <td>
