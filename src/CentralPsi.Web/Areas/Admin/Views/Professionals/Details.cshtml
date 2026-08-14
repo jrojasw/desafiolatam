@@ -8,6 +8,9 @@
     };
     var appointments = ViewBag.Appointments as List<Appointment> ?? new List<Appointment>();
     var culture = new System.Globalization.CultureInfo("es-CL");
+    var hasActiveOrCompletedAppointments = appointments.Any(a => a.Status is AppointmentStatus.PendingPayment
+        or AppointmentStatus.Confirmed or AppointmentStatus.Completed);
+    var canForceDelete = appointments.Count > 0 && !hasActiveOrCompletedAppointments;
 }
 
 <div class="row gy-4">
@@ -154,6 +157,13 @@
                 <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar definitivamente este profesional? Solo es posible si nunca tuvo citas (ni siquiera canceladas). Si tuvo citas, cancélalas arriba y usa \'Desactivar\' en su lugar.');">
                     <button type="submit" class="btn btn-outline-danger w-100">Eliminar definitivamente</button>
                 </form>
+                @if (canForceDelete)
+                {
+                    var forceMessage = "¿Forzar la eliminación de este profesional? Esto también borra permanentemente sus citas canceladas (y sus registros de reembolso). Úsalo solo con perfiles de prueba/ficticios, nunca con reservas reales de pacientes.";
+                    <form asp-action="ForceDelete" asp-route-id="@Model.Id" method="post" onsubmit="@($"return confirm('{forceMessage}');")">
+                        <button type="submit" class="btn btn-outline-danger w-100">Forzar eliminación (borra también sus citas canceladas)</button>
+                    </form>
+                }
             </div>
         </div>
     </div>
