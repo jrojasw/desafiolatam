@@ -15,11 +15,10 @@
         var businessDays = BusinessDayCalculator.BusinessDaysElapsed(a.ScheduledEndUtc, now);
         return businessDays switch
         {
-            <= 1 => ("cp-status-verified", "En plazo"),
-            2 => ("cp-status-warning", $"Por vencer (día {businessDays}/{payoutBusinessDays})"),
-            var d when d == payoutBusinessDays => ("cp-status-rejected", "Último día"),
-            var d when d < payoutBusinessDays => ("cp-status-warning", $"Por vencer (día {businessDays}/{payoutBusinessDays})"),
-            _ => ("cp-status-beacon", $"Vencido (+{businessDays - payoutBusinessDays} día(s) hábil(es))")
+            <= 1 => ("cp-urgency-green", "1 día"),
+            var d when d == payoutBusinessDays => ("cp-urgency-red", "Último día"),
+            var d when d < payoutBusinessDays => ("cp-urgency-yellow", "Por vencer"),
+            _ => ("cp-urgency-overdue", $"Vencido {businessDays - payoutBusinessDays} día(s)")
         };
     }
 }
@@ -28,8 +27,9 @@
     Cuando llegue una boleta a <a href="mailto:pagos@centralpsi.cl">pagos@centralpsi.cl</a>, busca la sesión
     correspondiente abajo, revisa los datos bancarios del profesional y, una vez hecha la transferencia,
     márcala como pagada. Recuerda el compromiso de transferir dentro de @payoutBusinessDays días hábiles desde
-    que se realiza la sesión. La columna "Plazo" se pone amarilla al segundo día, roja al último día, y parpadea
-    azul/rojo si ya nos pasamos del plazo.
+    que se realiza la sesión. La columna "Plazo" muestra un punto verde mientras hay margen, amarillo
+    ("Por vencer") al segundo día, rojo ("Último día") el día @payoutBusinessDays, y un punto rojo/azul
+    parpadeante ("Vencido") si ya nos pasamos del plazo.
 </div>
 
 <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -112,7 +112,10 @@
                         @if (a.ProfessionalPaidAtUtc is null)
                         {
                             var (cssClass, label) = Urgency(a);
-                            <span class="cp-status-pill @cssClass">@label</span>
+                            <span class="cp-urgency @cssClass">
+                                <span>@label</span>
+                                <span class="cp-urgency-dot"></span>
+                            </span>
                         }
                         else
                         {

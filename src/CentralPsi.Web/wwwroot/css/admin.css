@@ -61,16 +61,34 @@
 .cp-status-inactive { background:#e6e6e6; color:#666; }
 .cp-status-warning { background:#ffe6b3; color:#8a5300; }
 
-/* "Beacon": alternates red/blue like a police light, for payments past the 3-business-day commitment - meant
-   to be impossible to miss in the pendientes list. */
-.cp-status-beacon {
-  background:#c0392b; color:#fff;
-  animation: cp-beacon-flash 1s steps(1) infinite;
+/* Payout-deadline "traffic light": a text label with a colored dot underneath, used in the Pagos a
+   profesionales "Plazo" column. The dot (not the text) flashes red/blue once the 3-business-day commitment
+   is overdue - meant to be impossible to miss in the pendientes list. */
+.cp-urgency {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .25rem;
+  font-size: .75rem;
+  font-weight: 700;
 }
+.cp-urgency-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.cp-urgency-green { color:#1f7a4d; }
+.cp-urgency-green .cp-urgency-dot { background:#1f9d63; }
+.cp-urgency-yellow { color:#8a6413; }
+.cp-urgency-yellow .cp-urgency-dot { background:#e0a800; }
+.cp-urgency-red { color:#a33731; }
+.cp-urgency-red .cp-urgency-dot { background:#c0392b; }
+.cp-urgency-overdue { color:#a33731; }
+.cp-urgency-overdue .cp-urgency-dot { animation: cp-beacon-flash 1s steps(1) infinite; }
 @keyframes cp-beacon-flash {
   0%, 49% { background:#c0392b; }
   50%, 100% { background:#1a3fa3; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cp-status-beacon { animation: none; background:#c0392b; }
+  .cp-urgency-overdue .cp-urgency-dot { animation: none; background:#c0392b; }
 }
