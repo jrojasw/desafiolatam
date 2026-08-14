@@ -60,12 +60,15 @@ public class PaymentsController : Controller
         var appointment = await _db.Appointments.FindAsync(id);
         if (appointment is null) return NotFound();
 
+        if (receipt is not { Length: > 0 })
+        {
+            TempData["ErrorMessage"] = "Debes adjuntar el comprobante de la transferencia para poder marcar la sesión como pagada.";
+            return RedirectToAction(nameof(Index), new { filter = "pendientes" });
+        }
+
         appointment.ProfessionalPaidAtUtc = DateTime.UtcNow;
         appointment.ProfessionalPaymentNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
-        if (receipt is { Length: > 0 })
-        {
-            appointment.ProfessionalPaymentReceiptPath = await _fileStorage.SavePrivateAsync(receipt, "comprobantes-pago");
-        }
+        appointment.ProfessionalPaymentReceiptPath = await _fileStorage.SavePrivateAsync(receipt, "comprobantes-pago");
         await _db.SaveChangesAsync();
 
         TempData["SuccessMessage"] = "Pago marcado como realizado.";
