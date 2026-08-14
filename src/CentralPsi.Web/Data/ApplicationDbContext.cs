@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
     public DbSet<NewsArticle> NewsArticles => Set<NewsArticle>();
     public DbSet<PaymentInboxMessage> PaymentInboxMessages => Set<PaymentInboxMessage>();
     public DbSet<PaymentInboxAttachment> PaymentInboxAttachments => Set<PaymentInboxAttachment>();
+    public DbSet<FinanceSettings> FinanceSettings => Set<FinanceSettings>();
     public DbSet<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey> DataProtectionKeys => Set<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -90,6 +91,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
                 .WithOne(a => a.Message)
                 .HasForeignKey(a => a.PaymentInboxMessageId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<FinanceSettings>(e =>
+        {
+            e.Property(f => f.TaxRatePercent).HasPrecision(5, 2);
         });
     }
 }

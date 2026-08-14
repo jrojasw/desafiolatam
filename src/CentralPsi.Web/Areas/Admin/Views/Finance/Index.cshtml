@@ -1,0 +1,163 @@
+@model FinanceSummaryViewModel
+@using CentralPsi.Web.Models.ViewModels
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Finanzas";
+    var culture = new System.Globalization.CultureInfo("es-CL");
+    var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+    var dailyLabels = Model.DailySeries.Select(d => d.DateLocal.ToString("dd-MM", culture)).ToList();
+    var dailyRevenue = Model.DailySeries.Select(d => d.Revenue).ToList();
+    var dailyPayouts = Model.DailySeries.Select(d => d.Payouts).ToList();
+    var dailyMargin = Model.DailySeries.Select(d => d.Margin).ToList();
+
+    var monthlyLabels = Model.MonthlySeries.Select(m => m.Label).ToList();
+    var monthlyRevenue = Model.MonthlySeries.Select(m => m.Revenue).ToList();
+    var monthlyPayouts = Model.MonthlySeries.Select(m => m.Payouts).ToList();
+    var monthlyMargin = Model.MonthlySeries.Select(m => m.Margin).ToList();
+}
+
+<div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
+    Ingresos = pagos aprobados por Transbank. Margen bruto = ingresos − pagos a profesionales − reembolsos.
+    El impuesto es una <strong>estimación</strong> (aplica el % de abajo sobre el margen) mientras se formaliza
+    el Inicio de Actividades de CentralPsi — ajústalo cuando tengas la tasa real.
+</div>
+
+<div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Index" asp-route-range="hoy" class="btn btn-sm @(Model.Range == "hoy" ? "cp-btn-primary" : "cp-btn-outline")">Hoy</a>
+        <a asp-action="Index" asp-route-range="ayer" class="btn btn-sm @(Model.Range == "ayer" ? "cp-btn-primary" : "cp-btn-outline")">Ayer</a>
+        <a asp-action="Index" asp-route-range="semana" class="btn btn-sm @(Model.Range == "semana" ? "cp-btn-primary" : "cp-btn-outline")">Esta semana</a>
+        <a asp-action="Index" asp-route-range="mes" class="btn btn-sm @(Model.Range == "mes" ? "cp-btn-primary" : "cp-btn-outline")">Este mes</a>
+        <a asp-action="Index" asp-route-range="anio" class="btn btn-sm @(Model.Range == "anio" ? "cp-btn-primary" : "cp-btn-outline")">Este año</a>
+        <a asp-action="Index" asp-route-range="todos" class="btn btn-sm @(Model.Range == "todos" ? "cp-btn-primary" : "cp-btn-outline")">Todo</a>
+    </div>
+    <form asp-action="SetTaxRate" method="post" class="d-flex align-items-center gap-2">
+        <input type="hidden" name="range" value="@Model.Range" />
+        <label class="small mb-0">Tasa de impuesto estimada (%)</label>
+        <input type="number" name="taxRatePercent" value="@Model.TaxRatePercent" min="0" max="100" step="0.1" class="form-control form-control-sm" style="width:90px;" />
+        <button type="submit" class="btn btn-sm cp-btn-outline">Guardar</button>
+    </form>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="cp-form-card text-center py-3">
+            <div class="small text-muted">Sesiones pagadas</div>
+            <div class="fs-4 fw-bold">@Model.SessionCount</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="cp-form-card text-center py-3">
+            <div class="small text-muted">Ingresos</div>
+            <div class="fs-5 fw-bold">$@Model.TotalRevenue.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="cp-form-card text-center py-3">
+            <div class="small text-muted">Pagado a profesionales</div>
+            <div class="fs-5 fw-bold">$@Model.TotalProfessionalPayouts.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="cp-form-card text-center py-3">
+            <div class="small text-muted">Reembolsos</div>
+            <div class="fs-5 fw-bold">$@Model.TotalRefunds.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="cp-form-card text-center py-3">
+            <div class="small text-muted">Margen bruto</div>
+            <div class="fs-5 fw-bold">$@Model.GrossMargin.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="cp-form-card text-center py-3">
+            <div class="small text-muted">Utilidad neta (est.)</div>
+            <div class="fs-5 fw-bold">$@Model.EstimatedNetProfit.ToString("N0")</div>
+            <div class="small text-muted">Impuesto est.: $@Model.EstimatedTax.ToString("N0")</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="cp-form-card">
+            <h6>Últimos 30 días</h6>
+            <div style="position:relative; height:260px;">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="cp-form-card">
+            <h6>Últimos 12 meses</h6>
+            <div style="position:relative; height:260px;">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cp-form-card">
+    <h6>Informe mensual</h6>
+    <div class="table-responsive">
+        <table class="table table-sm cp-admin-table align-middle bg-white">
+            <thead>
+                <tr>
+                    <th>Mes</th><th>Ingresos</th><th>Pagado a profesionales</th><th>Reembolsos</th>
+                    <th>Margen bruto</th><th>Impuesto est.</th><th>Utilidad neta est.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model.MonthlySeries)
+                {
+                    <tr>
+                        <td class="text-capitalize">@m.Label</td>
+                        <td>$@m.Revenue.ToString("N0")</td>
+                        <td>$@m.Payouts.ToString("N0")</td>
+                        <td>$@m.Refunds.ToString("N0")</td>
+                        <td>$@m.Margin.ToString("N0")</td>
+                        <td>$@m.EstimatedTax.ToString("N0")</td>
+                        <td>$@m.EstimatedNetProfit.ToString("N0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/chartjs/chart.umd.min.js"></script>
+    <script>
+        const cpGreen = '#2f6f6a';
+        const cpAmber = '#e0a800';
+        const cpRed = '#c0392b';
+
+        new Chart(document.getElementById('dailyChart'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(JsonSerializer.Serialize(dailyLabels, jsonOptions)),
+                datasets: [
+                    { label: 'Ingresos', data: @Html.Raw(JsonSerializer.Serialize(dailyRevenue, jsonOptions)), backgroundColor: cpGreen },
+                    { label: 'Pagado a profesionales', data: @Html.Raw(JsonSerializer.Serialize(dailyPayouts, jsonOptions)), backgroundColor: cpAmber },
+                    { label: 'Margen', data: @Html.Raw(JsonSerializer.Serialize(dailyMargin, jsonOptions)), type: 'line', borderColor: cpRed, backgroundColor: cpRed, tension: .3 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { maxRotation: 90, minRotation: 90 } } } }
+        });
+
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(JsonSerializer.Serialize(monthlyLabels, jsonOptions)),
+                datasets: [
+                    { label: 'Ingresos', data: @Html.Raw(JsonSerializer.Serialize(monthlyRevenue, jsonOptions)), backgroundColor: cpGreen },
+                    { label: 'Pagado a profesionales', data: @Html.Raw(JsonSerializer.Serialize(monthlyPayouts, jsonOptions)), backgroundColor: cpAmber },
+                    { label: 'Margen', data: @Html.Raw(JsonSerializer.Serialize(monthlyMargin, jsonOptions)), type: 'line', borderColor: cpRed, backgroundColor: cpRed, tension: .3 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    </script>
+}
