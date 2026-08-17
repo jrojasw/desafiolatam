@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = Model.Professional.FullName;
     var culture = new System.Globalization.CultureInfo("es-CL");
+    var bookingEnabled = (bool)(ViewBag.BookingEnabled ?? true);
 }
 
 <section class="cp-section">
@@ -24,7 +25,15 @@
             <div class="col-lg-8">
                 <div class="cp-form-card">
                     <h4 class="mb-3">Elige un horario disponible</h4>
-                    @if (Model.SlotGroups.Count == 0)
+                    @if (!bookingEnabled)
+                    {
+                        <div class="cp-crisis-notice" style="background:#fff4e5;color:#8a5300;">
+                            <strong>Agendamiento disponible próximamente.</strong> Estamos afinando los últimos
+                            detalles del sistema de pago antes de habilitar la reserva de horas. Mientras tanto,
+                            puedes conocer a nuestros profesionales — vuelve pronto para agendar tu sesión.
+                        </div>
+                    }
+                    else if (Model.SlotGroups.Count == 0)
                     {
                         <p class="text-muted">Este profesional no tiene horarios disponibles por el momento.</p>
                     }

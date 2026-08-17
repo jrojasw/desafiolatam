@@ -25,4 +25,9 @@ public class AppOptions
 
     /// <summary>Maximum business days for the manual refund to be processed.</summary>
     public int RefundProcessingBusinessDays { get; set; } = 4;
+
+    /// <summary>Global on/off switch for actually booking a session - turned off while showing the site to
+    /// professionals before Transbank's production merchant account is connected, so nobody can pay for a
+    /// session that can't yet be collected. Professionals and their profiles stay fully visible either way.</summary>
+    public bool BookingEnabled { get; set; } = true;
 }

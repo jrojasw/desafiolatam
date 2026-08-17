@@ -44,6 +44,12 @@ public class BookingController : Controller
     [HttpGet("nueva")]
     public async Task<IActionResult> Start(Guid professionalId, DateTime startUtc)
     {
+        if (!_appOptions.BookingEnabled)
+        {
+            TempData["ErrorMessage"] = "El agendamiento estará disponible próximamente.";
+            return RedirectToAction("Details", "Professionals", new { id = professionalId });
+        }
+
         var professional = await _db.Professionals
             .FirstOrDefaultAsync(p => p.Id == professionalId && p.Status == ProfessionalStatus.Verified);
         if (professional is null) return NotFound();
@@ -80,6 +86,12 @@ public class BookingController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Confirm(BookingStartViewModel model)
     {
+        if (!_appOptions.BookingEnabled)
+        {
+            TempData["ErrorMessage"] = "El agendamiento estará disponible próximamente.";
+            return RedirectToAction("Details", "Professionals", new { id = model.ProfessionalId });
+        }
+
         var professional = await _db.Professionals
             .FirstOrDefaultAsync(p => p.Id == model.ProfessionalId && p.Status == ProfessionalStatus.Verified);
         if (professional is null) return NotFound();

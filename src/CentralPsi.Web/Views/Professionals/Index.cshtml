@@ -1,6 +1,7 @@
 @model CentralPsi.Web.Models.ViewModels.ProfessionalListViewModel
 @{
     ViewData["Title"] = "Nuestros profesionales";
+    var bookingEnabled = (bool)(ViewBag.BookingEnabled ?? true);
 }
 
 <section class="cp-section">
@@ -32,7 +33,7 @@
                                 }
                                 <div class="small mb-2"><strong>Orientación:</strong> @professional.Orientation</div>
                                 <p class="small text-muted mb-3">@(professional.Experience.Length > 140 ? professional.Experience[..140] + "…" : professional.Experience)</p>
-                                <a asp-action="Details" asp-route-id="@professional.Id" class="btn cp-btn-primary w-100">Ver perfil y agendar</a>
+                                <a asp-action="Details" asp-route-id="@professional.Id" class="btn cp-btn-primary w-100">@(bookingEnabled ? "Ver perfil y agendar" : "Ver perfil")</a>
                             </div>
                         </div>
                     </div>

@@ -1,9 +1,11 @@
 using CentralPsi.Web.Data;
 using CentralPsi.Web.Models.Entities;
 using CentralPsi.Web.Models.ViewModels;
+using CentralPsi.Web.Options;
 using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace CentralPsi.Web.Controllers;
 
@@ -16,6 +18,7 @@ public class ProfessionalsController : Controller
     private readonly INotificationService _notifications;
     private readonly ISlotAvailabilityService _slots;
     private readonly ITimeZoneService _timeZoneService;
+    private readonly AppOptions _appOptions;
     private readonly ILogger<ProfessionalsController> _logger;
 
     public ProfessionalsController(
@@ -25,6 +28,7 @@ public class ProfessionalsController : Controller
         INotificationService notifications,
         ISlotAvailabilityService slots,
         ITimeZoneService timeZoneService,
+        IOptions<AppOptions> appOptions,
         ILogger<ProfessionalsController> logger)
     {
         _db = db;
@@ -33,6 +37,7 @@ public class ProfessionalsController : Controller
         _notifications = notifications;
         _slots = slots;
         _timeZoneService = timeZoneService;
+        _appOptions = appOptions.Value;
         _logger = logger;
     }
 
@@ -43,6 +48,7 @@ public class ProfessionalsController : Controller
             .Where(p => p.Status == ProfessionalStatus.Verified)
             .OrderBy(p => p.FullName)
             .ToListAsync();
+        ViewBag.BookingEnabled = _appOptions.BookingEnabled;
         return View(new ProfessionalListViewModel { Professionals = professionals });
     }
 
@@ -52,6 +58,12 @@ public class ProfessionalsController : Controller
         var professional = await _db.Professionals
             .FirstOrDefaultAsync(p => p.Id == id && p.Status == ProfessionalStatus.Verified);
         if (professional is null) return NotFound();
+
+        ViewBag.BookingEnabled = _appOptions.BookingEnabled;
+        if (!_appOptions.BookingEnabled)
+        {
+            return View(new ProfessionalDetailsViewModel { Professional = professional, SlotGroups = new List<AvailableSlotGroup>() });
+        }
 
         var slots = await _slots.GetAvailableSlotsAsync(id);
         var groups = slots
