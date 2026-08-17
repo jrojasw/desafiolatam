@@ -95,3 +95,23 @@ Objetivo: Generación de leads / Tráfico al sitio (según haya o no formulario 
 3. **Pixel de Meta:** instalar el Meta Pixel en https://desafiolatam-1.onrender.com antes de lanzar, para poder optimizar y hacer remarketing.
 4. **Exclusión cruzada:** excluir a quienes ya convirtieron como paciente del Ad Set de psicólogos y viceversa, una vez haya datos de conversión.
 5. **Duración de prueba:** correr ambos Ad Sets mínimo 5-7 días antes de pausar anuncios de bajo rendimiento, para que el algoritmo de Meta salga de fase de aprendizaje.
+
+---
+
+## Preguntas frecuentes para arrancar
+
+### ¿Facebook o Instagram?
+No hay que elegir: en la misma campaña se configuran ambos con "ubicación automática/Advantage+" y Meta reparte el gasto según dónde rinda mejor cada anuncio. Como referencia: Instagram suele rendir mejor para el público de pacientes (más visual, Stories/Reels) y Facebook para el público de psicólogos (rango etario mayor, uso más profesional).
+
+### ¿Cuánto presupuesto mínimo?
+Meta permite desde ~$1.500–$2.000 CLP/día por conjunto de anuncios, pero con eso casi no hay datos. Para tener resultados usables, lo mínimo recomendable es **$10.000 CLP/día** (~$70.000 CLP/semana), repartido entre los dos Ad Sets, corriendo al menos 5-7 días antes de sacar conclusiones.
+
+### ¿Qué objetivo de campaña usar?
+**"Clientes potenciales" (Leads)**: genera un formulario dentro de la misma Meta (nombre, teléfono, si es paciente o psicólogo) sin depender de que la persona navegue el sitio. Es más simple, más barato por resultado y entrega el contacto directo. Usar un formulario distinto para cada Ad Set ("Quiero atenderme" vs. "Quiero postular como psicólogo"). Más adelante, con el Pixel instalado y datos de conversión reales, se puede migrar a objetivo "Conversiones".
+
+### ¿Qué cuentas se necesitan?
+1. **Página de Facebook** del negocio (gratis) — vinculada a la web.
+2. **Cuenta de Instagram profesional/empresa** (opcional pero recomendada) — vinculada a la Página.
+3. **Meta Business Suite / Business Manager** (gratis) — panel central donde se conectan Página, Instagram, cuenta publicitaria (moneda CLP, zona horaria Chile) y método de pago (tarjeta de crédito/débito).
+
+Orden sugerido: Página de Facebook → cuenta de Instagram vinculada → Business Manager con cuenta publicitaria y pago configurados → crear la campaña en Ads Manager.
