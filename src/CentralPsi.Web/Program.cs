@@ -28,6 +28,7 @@ builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOpt
 builder.Services.Configure<SuperSaludOptions>(builder.Configuration.GetSection(SuperSaludOptions.SectionName));
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection(StorageOptions.SectionName));
 builder.Services.Configure<PaymentsInboxOptions>(builder.Configuration.GetSection(PaymentsInboxOptions.SectionName));
+builder.Services.Configure<WhatsAppOptions>(builder.Configuration.GetSection(WhatsAppOptions.SectionName));
 
 // ---- Data ----
 // Render's managed Postgres hands out a single DATABASE_URL (postgres://user:pass@host:port/db) rather than
@@ -95,6 +96,7 @@ builder.Services.AddScoped<IPaymentService, TransbankWebpayService>();
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 builder.Services.AddHostedService<AttendanceConfirmationBackgroundService>();
 builder.Services.AddScoped<IPaymentInboxSyncService, PaymentInboxSyncService>();
+builder.Services.AddScoped<IWhatsAppNotificationService, WhatsAppNotificationService>();
 builder.Services.AddHostedService<PaymentInboxSyncBackgroundService>();
 
 builder.Services.AddControllersWithViews();

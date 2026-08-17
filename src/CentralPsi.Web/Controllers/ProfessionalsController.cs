@@ -18,6 +18,7 @@ public class ProfessionalsController : Controller
     private readonly INotificationService _notifications;
     private readonly ISlotAvailabilityService _slots;
     private readonly ITimeZoneService _timeZoneService;
+    private readonly IWhatsAppNotificationService _whatsApp;
     private readonly AppOptions _appOptions;
     private readonly ILogger<ProfessionalsController> _logger;
 
@@ -28,6 +29,7 @@ public class ProfessionalsController : Controller
         INotificationService notifications,
         ISlotAvailabilityService slots,
         ITimeZoneService timeZoneService,
+        IWhatsAppNotificationService whatsApp,
         IOptions<AppOptions> appOptions,
         ILogger<ProfessionalsController> logger)
     {
@@ -37,6 +39,7 @@ public class ProfessionalsController : Controller
         _notifications = notifications;
         _slots = slots;
         _timeZoneService = timeZoneService;
+        _whatsApp = whatsApp;
         _appOptions = appOptions.Value;
         _logger = logger;
     }
@@ -168,6 +171,9 @@ public class ProfessionalsController : Controller
 
         _db.Professionals.Add(professional);
         await _db.SaveChangesAsync();
+
+        await _whatsApp.SendAsync(
+            $"🆕 Nuevo profesional inscrito en CentralPsi: {professional.FullName} ({professional.Email}). Revísalo en el panel admin.");
 
         await TryAutoValidateAsync(professional);
 
