@@ -273,6 +273,21 @@ a:hover {
 
 .validation-summary-valid { display: none; }
 
+.cp-cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1080;
+  background: var(--cp-primary-dark, #204e4a);
+  color: #f3f8f7;
+  padding: .9rem 0;
+  box-shadow: 0 -2px 12px rgba(0,0,0,.15);
+}
+.cp-cookie-banner a {
+  color: #9fd6cc;
+}
+
 /* ---- Forms ---- */
 .cp-form-card {
   background: #ffffff;

@@ -95,6 +95,7 @@
                         <li><a asp-controller="Home" asp-action="Terms">Términos y condiciones</a></li>
                         <li><a asp-controller="Home" asp-action="Terms" asp-fragment="reembolsos">Política de reembolsos</a></li>
                         <li><a asp-controller="Home" asp-action="Terms" asp-fragment="privacidad">Política de privacidad</a></li>
+                        <li><a asp-controller="Home" asp-action="Terms" asp-fragment="cookies">Cookies</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3">
@@ -118,9 +119,34 @@
         </div>
     </footer>
 
+    <div id="cpCookieBanner" class="cp-cookie-banner d-none">
+        <div class="container d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <p class="mb-0 small">
+                Usamos solo cookies estrictamente necesarias para que el sitio funcione (sesión del panel admin,
+                seguridad de formularios y mensajes de confirmación) — no usamos cookies de publicidad ni analítica.
+                <a asp-controller="Home" asp-action="Terms" asp-fragment="cookies" class="text-decoration-underline">Más información</a>.
+            </p>
+            <button type="button" id="cpCookieAccept" class="btn cp-btn-primary btn-sm text-nowrap">Entendido</button>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var STORAGE_KEY = 'cpCookieConsentAccepted';
+            var banner = document.getElementById('cpCookieBanner');
+            if (!banner) return;
+            if (localStorage.getItem(STORAGE_KEY) !== 'true') {
+                banner.classList.remove('d-none');
+            }
+            document.getElementById('cpCookieAccept').addEventListener('click', function () {
+                localStorage.setItem(STORAGE_KEY, 'true');
+                banner.classList.add('d-none');
+            });
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
