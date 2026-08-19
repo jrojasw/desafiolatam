@@ -93,11 +93,27 @@
 
             <hr />
             <h5>Documentos</h5>
-            <div class="d-flex gap-2 flex-wrap">
-                <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="cedula-frente">Cédula (frente)</a>
-                <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="cedula-reverso">Cédula (reverso)</a>
-                <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="certificado">Certificado Minsal</a>
-            </div>
+            @if (string.IsNullOrEmpty(Model.CedulaFrontPath) && string.IsNullOrEmpty(Model.CedulaBackPath) && string.IsNullOrEmpty(Model.CertificateFilePath))
+            {
+                <p class="text-muted small mb-0">Sin documentos (datos personales anonimizados).</p>
+            }
+            else
+            {
+                <div class="d-flex gap-2 flex-wrap">
+                    @if (!string.IsNullOrEmpty(Model.CedulaFrontPath))
+                    {
+                        <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="cedula-frente">Cédula (frente)</a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.CedulaBackPath))
+                    {
+                        <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="cedula-reverso">Cédula (reverso)</a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.CertificateFilePath))
+                    {
+                        <a class="btn btn-sm cp-btn-outline" target="_blank" asp-action="Document" asp-route-id="@Model.Id" asp-route-type="certificado">Certificado Minsal</a>
+                    }
+                </div>
+            }
         </div>
     </div>
 
@@ -151,6 +167,13 @@
                 {
                     <form asp-action="Reactivate" asp-route-id="@Model.Id" method="post">
                         <button type="submit" class="btn cp-btn-primary w-100">Reactivar</button>
+                    </form>
+                }
+                @if (!hasActiveAppointments && !Model.Email.StartsWith("eliminado-"))
+                {
+                    var anonMessage = "¿Anonimizar los datos personales de este profesional (nombre, RUT, teléfono, banco, documentos)? Se conserva el historial de citas y montos sin datos identificatorios, por obligación tributaria (SII). Esta acción no se puede deshacer.";
+                    <form asp-action="Anonymize" asp-route-id="@Model.Id" method="post" onsubmit="@($"return confirm('{anonMessage}');")">
+                        <button type="submit" class="btn btn-outline-warning w-100">Anonimizar datos personales (derecho al olvido)</button>
                     </form>
                 }
                 <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar definitivamente este profesional? Solo es posible si nunca tuvo citas. Si tuvo citas, usa \'Forzar eliminación\' (solo para perfiles de prueba) o \'Desactivar\'.');">

@@ -24,6 +24,7 @@ public class PaymentsController : Controller
     private readonly IFileStorageService _fileStorage;
     private readonly ITimeZoneService _timeZoneService;
     private readonly AppOptions _appOptions;
+    private readonly IAuditLogService _auditLog;
     private readonly ILogger<PaymentsController> _logger;
 
     public PaymentsController(
@@ -31,12 +32,14 @@ public class PaymentsController : Controller
         IFileStorageService fileStorage,
         ITimeZoneService timeZoneService,
         IOptions<AppOptions> appOptions,
+        IAuditLogService auditLog,
         ILogger<PaymentsController> logger)
     {
         _db = db;
         _fileStorage = fileStorage;
         _timeZoneService = timeZoneService;
         _appOptions = appOptions.Value;
+        _auditLog = auditLog;
         _logger = logger;
     }
 
@@ -163,6 +166,8 @@ public class PaymentsController : Controller
 
         var physicalPath = _fileStorage.GetPrivatePhysicalPath(appointment.ProfessionalPaymentReceiptPath);
         if (!System.IO.File.Exists(physicalPath)) return NotFound();
+
+        await _auditLog.LogAsync("Ver comprobante de pago", "Appointment", id.ToString());
 
         var contentType = Path.GetExtension(physicalPath).ToLowerInvariant() switch
         {

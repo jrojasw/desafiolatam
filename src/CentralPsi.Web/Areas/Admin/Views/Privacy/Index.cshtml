@@ -1,0 +1,64 @@
+@using CentralPsi.Web.Models.Entities
+@{
+    ViewData["Title"] = "Privacidad y protección de datos";
+    var logs = ViewBag.RecentLogs as List<AuditLog> ?? new List<AuditLog>();
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
+    Herramientas para cumplir con la Ley 21.719 (Protección de Datos Personales, vigente desde el
+    1 de diciembre de 2026): derecho al olvido de pacientes y bitácora de auditoría de accesos a datos
+    sensibles. La anonimización de profesionales se hace desde la ficha de cada uno
+    (<a asp-controller="Professionals" asp-action="Index">Admin/Professionals</a>).
+</div>
+
+<div class="cp-form-card mb-4">
+    <h5>Anonimizar datos de un paciente</h5>
+    <p class="text-muted small">
+        Busca por el correo con el que agendó. Se reemplazan su nombre, correo y teléfono en todas sus citas
+        — se conservan los montos, fechas y estados por obligación tributaria (SII). No se puede deshacer.
+    </p>
+    <form asp-action="AnonymizePatient" method="post" class="d-flex gap-2 flex-wrap" onsubmit="return confirm('¿Anonimizar todos los datos personales de este paciente? Esta acción no se puede deshacer.');">
+        <input type="email" name="email" class="form-control" style="max-width:340px;" placeholder="correo@paciente.cl" required />
+        <button type="submit" class="btn cp-btn-primary">Anonimizar</button>
+    </form>
+</div>
+
+<div class="cp-form-card">
+    <h5>Bitácora de auditoría</h5>
+    <p class="text-muted small">
+        Registro inmutable de accesos a documentos privados y acciones sensibles (últimas 100). Nadie puede
+        editar ni borrar estas entradas, ni siquiera un administrador.
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Admin</th>
+                    <th>Acción</th>
+                    <th>Sobre</th>
+                    <th>Detalle</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in logs)
+                {
+                    <tr>
+                        <td class="text-nowrap small">@log.OccurredAtUtc.ToLocalTime().ToString("dd-MM-yyyy HH:mm", culture)</td>
+                        <td class="small">@log.AdminEmail</td>
+                        <td class="small">@log.Action</td>
+                        <td class="small">@log.EntityType @(string.IsNullOrEmpty(log.EntityId) ? "" : $"({log.EntityId})")</td>
+                        <td class="small text-muted">@log.Details</td>
+                        <td class="small text-muted">@log.IpAddress</td>
+                    </tr>
+                }
+                @if (logs.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-3">Todavía no hay entradas registradas.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

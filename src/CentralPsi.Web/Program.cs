@@ -73,8 +73,10 @@ builder.Services.AddDataProtection()
 
 // ---- Application services ----
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
 builder.Services.AddScoped<ISlotAvailabilityService, SlotAvailabilityService>();
 builder.Services.AddScoped<IRefundCalculationService, RefundCalculationService>();

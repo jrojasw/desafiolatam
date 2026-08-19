@@ -18,6 +18,7 @@ public class ProfessionalsController : Controller
     private readonly INotificationService _notifications;
     private readonly ICertificateValidationService _certificateValidation;
     private readonly IGoogleCalendarService _googleCalendar;
+    private readonly IAuditLogService _auditLog;
     private readonly ILogger<ProfessionalsController> _logger;
 
     public ProfessionalsController(
@@ -26,6 +27,7 @@ public class ProfessionalsController : Controller
         INotificationService notifications,
         ICertificateValidationService certificateValidation,
         IGoogleCalendarService googleCalendar,
+        IAuditLogService auditLog,
         ILogger<ProfessionalsController> logger)
     {
         _db = db;
@@ -33,6 +35,7 @@ public class ProfessionalsController : Controller
         _notifications = notifications;
         _certificateValidation = certificateValidation;
         _googleCalendar = googleCalendar;
+        _auditLog = auditLog;
         _logger = logger;
     }
 
@@ -96,6 +99,8 @@ public class ProfessionalsController : Controller
 
         var physicalPath = _fileStorage.GetPrivatePhysicalPath(relativePath);
         if (!System.IO.File.Exists(physicalPath)) return NotFound();
+
+        await _auditLog.LogAsync("Ver documento privado", "Professional", id.ToString(), $"Tipo: {type}");
 
         var contentType = Path.GetExtension(physicalPath).ToLowerInvariant() switch
         {
@@ -279,9 +284,73 @@ public class ProfessionalsController : Controller
         _db.Appointments.RemoveRange(appointments);
         _db.Professionals.Remove(professional);
         await _db.SaveChangesAsync();
+        await _auditLog.LogAsync("Forzar eliminación", "Professional", id.ToString(), professional.FullName);
 
         TempData["SuccessMessage"] = $"{professional.FullName} y sus citas fueron eliminados definitivamente.";
         return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>
+    /// "Right to be forgotten" (Ley 21.719): scrubs the professional's personal data and deletes their private
+    /// documents, but - unlike ForceDelete - keeps the Professional row and every Appointment intact, since
+    /// financial/tax records (amounts, dates, payout status) must be retained for SII purposes even after the
+    /// person's identity is erased. Blocked while there's an active appointment, same reasoning as ForceDelete:
+    /// erasing the name/contact info out from under a session a patient is still expecting would be worse than
+    /// just asking the requester to wait until it's resolved.
+    /// </summary>
+    [HttpPost("{id:guid}/Anonimizar")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Anonymize(Guid id)
+    {
+        var professional = await _db.Professionals.FindAsync(id);
+        if (professional is null) return NotFound();
+
+        var hasActive = await _db.Appointments.AnyAsync(a =>
+            a.ProfessionalId == id && (a.Status == AppointmentStatus.PendingPayment || a.Status == AppointmentStatus.Confirmed));
+        if (hasActive)
+        {
+            TempData["ErrorMessage"] = "No se puede anonimizar: aún tiene citas activas (pendientes de pago o confirmadas). Resuélvelas primero.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        foreach (var path in new[] { professional.CedulaFrontPath, professional.CedulaBackPath, professional.CertificateFilePath, professional.ProfilePhotoPath })
+        {
+            if (string.IsNullOrWhiteSpace(path)) continue;
+            try
+            {
+                var physicalPath = _fileStorage.GetPrivatePhysicalPath(path);
+                if (System.IO.File.Exists(physicalPath)) System.IO.File.Delete(physicalPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "No se pudo borrar el archivo {Path} al anonimizar al profesional {ProfessionalId}", path, id);
+            }
+        }
+
+        var anonymizedName = $"Profesional eliminado ({id.ToString()[..8]})";
+        professional.FullName = anonymizedName;
+        professional.Email = $"eliminado-{id}@centralpsi.cl";
+        professional.Phone = string.Empty;
+        professional.Rut = null;
+        professional.Experience = "Datos eliminados a solicitud del profesional.";
+        professional.CedulaFrontPath = string.Empty;
+        professional.CedulaBackPath = string.Empty;
+        professional.CertificateFilePath = string.Empty;
+        professional.ProfilePhotoPath = null;
+        professional.CertificateQrRawData = null;
+        professional.BankName = string.Empty;
+        professional.BankAccountType = string.Empty;
+        professional.BankAccountNumber = string.Empty;
+        professional.BankAccountHolderName = string.Empty;
+        professional.BankAccountHolderRut = string.Empty;
+        professional.Status = ProfessionalStatus.Inactive;
+        professional.DeactivatedAt ??= DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+        await _auditLog.LogAsync("Anonimizar (derecho al olvido)", "Professional", id.ToString(), "Datos personales eliminados; se conservan citas y montos para el SII.");
+
+        TempData["SuccessMessage"] = $"Datos personales de {anonymizedName} eliminados. Se conservó el historial de citas y pagos (sin datos identificatorios) por obligación tributaria.";
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     [HttpPost("{id:guid}/Eliminar")]
