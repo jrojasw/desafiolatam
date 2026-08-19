@@ -22,16 +22,22 @@
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index" title="Inicio">
                     <img src="~/images/logo.svg" alt="CentralPsi" height="42" />
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#cpNavbar" aria-controls="cpNavbar" aria-expanded="false" aria-label="Abrir menú">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                <div class="d-flex align-items-center gap-2 order-lg-3">
+                    <!-- CTA de campaña de reclutamiento: visible junto al logo en móvil/tablet mientras
+                         reclutamos profesionales. Cambiar a "Agendar" (Professionals/Index) cuando haya
+                         al menos 15 profesionales inscritos. -->
+                    <a class="btn cp-btn-accent btn-sm d-lg-none" asp-area="" asp-controller="Professionals" asp-action="Register">Soy psicólogo/a</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#cpNavbar" aria-controls="cpNavbar" aria-expanded="false" aria-label="Abrir menú">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
                 <div class="collapse navbar-collapse" id="cpNavbar">
                     <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Professionals" asp-action="Index">Agenda tu hora</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Professionals" asp-action="Index">Profesionales</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a></li>
-                        <li class="nav-item ms-lg-2">
+                        <li class="nav-item ms-lg-2 d-none d-lg-block">
                             <a class="btn cp-btn-primary btn-sm" asp-area="" asp-controller="Professionals" asp-action="Register">Soy psicólogo/a</a>
                         </li>
                     </ul>

@@ -57,6 +57,20 @@ a:hover {
   color: #ffffff;
 }
 
+.cp-btn-accent, .btn.cp-btn-accent {
+  background-color: var(--cp-accent);
+  border-color: var(--cp-accent);
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: .4rem 1rem;
+}
+.cp-btn-accent:hover, .btn.cp-btn-accent:hover {
+  background-color: #a3672f;
+  border-color: #a3672f;
+  color: #ffffff;
+}
+
 .cp-btn-outline {
   border: 2px solid var(--cp-primary);
   color: var(--cp-primary);
@@ -93,12 +107,18 @@ a:hover {
   font-size: 2.4rem;
   font-weight: 800;
   color: #ffffff;
-  text-shadow: 0 1px 0 rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.55);
+  text-shadow:
+    -1.5px -1.5px 0 rgba(0,0,0,.75), 1.5px -1.5px 0 rgba(0,0,0,.75),
+    -1.5px 1.5px 0 rgba(0,0,0,.75), 1.5px 1.5px 0 rgba(0,0,0,.75),
+    0 2px 16px rgba(0,0,0,.55);
 }
 .cp-hero .carousel-caption p {
   font-size: 1.15rem;
   color: #f2f6f5;
-  text-shadow: 0 1px 0 rgba(0,0,0,.5), 0 2px 10px rgba(0,0,0,.5);
+  text-shadow:
+    -1px -1px 0 rgba(0,0,0,.7), 1px -1px 0 rgba(0,0,0,.7),
+    -1px 1px 0 rgba(0,0,0,.7), 1px 1px 0 rgba(0,0,0,.7),
+    0 2px 10px rgba(0,0,0,.5);
 }
 
 @media (max-width: 576px) {
