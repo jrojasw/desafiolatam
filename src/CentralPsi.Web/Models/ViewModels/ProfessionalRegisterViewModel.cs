@@ -23,7 +23,7 @@ public class ProfessionalRegisterViewModel
 
     [Required(ErrorMessage = "Ingresa tu teléfono")]
     [Display(Name = "Teléfono")]
-    public string Phone { get; set; } = string.Empty;
+    public string Phone { get; set; } = "+56 9 ";
 
     [Required(ErrorMessage = "Ingresa tu RUT")]
     [Display(Name = "RUT")]

@@ -81,13 +81,6 @@ a:hover {
   min-height: 380px;
   object-fit: cover;
 }
-.cp-hero .carousel-item::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, rgba(8, 16, 14, .86) 0%, rgba(8, 16, 14, .74) 30%, rgba(8, 16, 14, .55) 48%, rgba(8, 16, 14, .2) 68%, rgba(8, 16, 14, 0) 82%);
-  pointer-events: none;
-}
 .cp-hero .carousel-caption {
   text-align: left;
   left: 5%;
