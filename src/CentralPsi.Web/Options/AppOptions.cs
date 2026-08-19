@@ -7,7 +7,7 @@ public class AppOptions
     public decimal AppointmentPriceClp { get; set; } = 38000m;
 
     /// <summary>Flat amount CentralPsi pays the professional per session, out of AppointmentPriceClp.</summary>
-    public decimal ProfessionalPayoutClp { get; set; } = 11699m;
+    public decimal ProfessionalPayoutClp { get; set; } = 13274m;
 
     /// <summary>Business days CentralPsi commits to for paying the professional after a session, once the
     /// boleta arrives - drives the pending-payments "traffic light" in Admin/Pagos.</summary>

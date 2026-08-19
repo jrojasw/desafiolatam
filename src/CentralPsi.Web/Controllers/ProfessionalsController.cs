@@ -93,6 +93,9 @@ public class ProfessionalsController : Controller
     [HttpGet("inicio-de-actividades")]
     public IActionResult IniciacionActividades() => View();
 
+    [HttpGet("como-funcionan-los-pagos")]
+    public IActionResult CondicionesPago() => View(_appOptions);
+
     [HttpPost("inscripcion")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(ProfessionalRegisterViewModel model)

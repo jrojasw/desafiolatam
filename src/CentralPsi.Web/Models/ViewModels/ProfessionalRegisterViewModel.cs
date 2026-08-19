@@ -76,7 +76,7 @@ public class ProfessionalRegisterViewModel
     [Display(Name = "Código de validación del certificado")]
     public string CertificateValidationCode { get; set; } = string.Empty;
 
-    [Display(Name = "Declaro contar con Inicio de Actividades vigente en el SII y entiendo que debo emitir mi boleta de honorarios a nombre del paciente y enviar una copia a pagos@centralpsi.cl para recibir el pago de cada sesión dentro de 3 días hábiles")]
+    [Display(Name = "Declaro contar con Inicio de Actividades vigente en el SII y entiendo que debo emitir mi boleta de honorarios al paciente por el monto total de la sesión, enviar una copia a pagos@centralpsi.cl y que recién ahí se libera mi pago (ver detalle abajo)")]
     public bool TaxComplianceAccepted { get; set; }
 
     [Required(ErrorMessage = "Indica el banco")]
