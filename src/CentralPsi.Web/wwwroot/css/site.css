@@ -84,6 +84,80 @@ a:hover {
   color: #ffffff;
 }
 
+/* ---- Audience gate (elegir paciente / psicólogo) ---- */
+.cp-audience-gate {
+  position: relative;
+  display: flex;
+  min-height: calc(100vh - 74px);
+  overflow: hidden;
+}
+.cp-audience-gate__bg {
+  position: absolute;
+  inset: -20px;
+  background-image: url('/images/seed/slide-espacio-seguro.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: blur(14px) saturate(1.05);
+  transform: scale(1.08);
+}
+.cp-audience-gate__half {
+  position: relative;
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #ffffff;
+  text-decoration: none;
+  background-color: rgba(32, 78, 74, 0.58);
+  backdrop-filter: blur(2px);
+  transition: background-color .25s ease;
+}
+.cp-audience-gate__half:hover,
+.cp-audience-gate__half:focus-visible {
+  background-color: rgba(32, 78, 74, 0.74);
+  color: #ffffff;
+}
+.cp-audience-gate__half--patient {
+  border-right: 1px solid rgba(255, 255, 255, .3);
+}
+.cp-audience-gate__eyebrow {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  letter-spacing: .04em;
+  color: #e7efed;
+  text-shadow: 0 1px 8px rgba(0,0,0,.4);
+}
+.cp-audience-gate__label {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-weight: 700;
+  font-size: 2.4rem;
+  line-height: 1.15;
+  text-shadow: 0 2px 14px rgba(0,0,0,.45);
+}
+.cp-audience-gate__arrow {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 1.4rem;
+  opacity: .85;
+}
+@media (max-width: 767.98px) {
+  .cp-audience-gate {
+    flex-direction: column;
+    min-height: calc(100vh - 64px);
+  }
+  .cp-audience-gate__half--patient {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, .3);
+  }
+  .cp-audience-gate__label {
+    font-size: 1.7rem;
+  }
+}
+
 /* ---- Hero slider ---- */
 .cp-hero {
   position: relative;

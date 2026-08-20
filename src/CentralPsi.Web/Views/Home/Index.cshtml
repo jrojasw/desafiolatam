@@ -3,6 +3,20 @@
     ViewData["Title"] = "Inicio";
 }
 
+<section class="cp-audience-gate">
+    <div class="cp-audience-gate__bg"></div>
+    <a class="cp-audience-gate__half cp-audience-gate__half--patient" asp-controller="Professionals" asp-action="Index">
+        <span class="cp-audience-gate__eyebrow">Soy paciente</span>
+        <span class="cp-audience-gate__label">Quiero tomar<br />una hora</span>
+        <span class="cp-audience-gate__arrow">→</span>
+    </a>
+    <a class="cp-audience-gate__half cp-audience-gate__half--pro" asp-controller="Professionals" asp-action="Register">
+        <span class="cp-audience-gate__eyebrow">Soy profesional</span>
+        <span class="cp-audience-gate__label">Soy<br />psicólogo/a</span>
+        <span class="cp-audience-gate__arrow">→</span>
+    </a>
+</section>
+
 <section class="cp-hero">
     @if (Model.Slides.Count > 0)
     {
