@@ -108,34 +108,65 @@ public class FlowPaymentService : IPaymentService
 
         using (doc)
         {
-            var root = doc.RootElement;
-            var statusCode = root.TryGetProperty("status", out var statusEl) ? statusEl.GetInt32() : 0;
-            // Flow status codes: 1 pending, 2 paid, 3 rejected, 4 cancelled/nulled.
-            var isApproved = statusCode == 2;
-            var statusName = statusCode switch
+            try
             {
-                1 => "PENDING",
-                2 => "PAID",
-                3 => "REJECTED",
-                4 => "CANCELLED",
-                _ => "UNKNOWN"
-            };
+                var root = doc.RootElement;
+                var statusCode = ReadInt(root, "status");
+                // Flow status codes: 1 pending, 2 paid, 3 rejected, 4 cancelled/nulled.
+                var isApproved = statusCode == 2;
+                var statusName = statusCode switch
+                {
+                    1 => "PENDING",
+                    2 => "PAID",
+                    3 => "REJECTED",
+                    4 => "CANCELLED",
+                    _ => "UNKNOWN"
+                };
 
-            decimal? paidAmount = null;
-            DateTime? paidAtUtc = null;
-            if (root.TryGetProperty("paymentData", out var paymentData))
-            {
-                if (paymentData.TryGetProperty("amount", out var amountEl) && amountEl.TryGetDecimal(out var amt))
+                decimal? paidAmount = null;
+                DateTime? paidAtUtc = null;
+                if (root.TryGetProperty("paymentData", out var paymentData))
                 {
-                    paidAmount = amt;
+                    paidAmount = ReadDecimalOrNull(paymentData, "amount");
+                    if (paymentData.TryGetProperty("date", out var dateEl) && dateEl.ValueKind == JsonValueKind.String
+                        && DateTime.TryParse(dateEl.GetString(), out var parsedDate))
+                    {
+                        paidAtUtc = DateTime.SpecifyKind(parsedDate, DateTimeKind.Local).ToUniversalTime();
+                    }
                 }
-                if (paymentData.TryGetProperty("date", out var dateEl) && DateTime.TryParse(dateEl.GetString(), out var parsedDate))
-                {
-                    paidAtUtc = DateTime.SpecifyKind(parsedDate, DateTimeKind.Local).ToUniversalTime();
-                }
+
+                return new PaymentCommitResult(isApproved, statusName, statusCode, null, paidAtUtc, paidAmount, json);
             }
-
-            return new PaymentCommitResult(isApproved, statusName, statusCode, null, paidAtUtc, paidAmount, json);
+            catch (Exception ex)
+            {
+                // Flow's getStatus payload didn't match the expected shape (e.g. "status" as a string instead
+                // of a number) - log the raw body so the actual shape can be fixed, but never let a paying
+                // patient see a raw 500 over a JSON-shape mismatch.
+                _logger.LogError(ex, "No se pudo interpretar la respuesta de Flow payment/getStatus para el token {Token}: {Body}", token, json);
+                return new PaymentCommitResult(false, "UNKNOWN", null, null, null, null, json);
+            }
         }
+    }
+
+    private static int ReadInt(JsonElement root, string propertyName)
+    {
+        if (!root.TryGetProperty(propertyName, out var el)) return 0;
+        return el.ValueKind switch
+        {
+            JsonValueKind.Number => el.GetInt32(),
+            JsonValueKind.String => int.TryParse(el.GetString(), out var parsed) ? parsed : 0,
+            _ => 0
+        };
+    }
+
+    private static decimal? ReadDecimalOrNull(JsonElement obj, string propertyName)
+    {
+        if (!obj.TryGetProperty(propertyName, out var el)) return null;
+        return el.ValueKind switch
+        {
+            JsonValueKind.Number when el.TryGetDecimal(out var num) => num,
+            JsonValueKind.String when decimal.TryParse(el.GetString(), out var num) => num,
+            _ => null
+        };
     }
 }
