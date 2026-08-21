@@ -12,6 +12,9 @@
 html, body {
   height: 100%;
 }
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: "Nunito Sans", "Segoe UI", Arial, sans-serif;

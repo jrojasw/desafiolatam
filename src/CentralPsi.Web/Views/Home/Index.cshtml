@@ -5,7 +5,7 @@
 
 <section class="cp-audience-gate">
     <div class="cp-audience-gate__bg"></div>
-    <a class="cp-audience-gate__half cp-audience-gate__half--patient" asp-controller="Professionals" asp-action="Index">
+    <a class="cp-audience-gate__half cp-audience-gate__half--patient" href="#cp-hero">
         <span class="cp-audience-gate__eyebrow">Soy paciente</span>
         <span class="cp-audience-gate__label">Quiero tomar<br />una hora</span>
         <span class="cp-audience-gate__arrow">→</span>
@@ -17,7 +17,7 @@
     </a>
 </section>
 
-<section class="cp-hero">
+<section class="cp-hero" id="cp-hero">
     @if (Model.Slides.Count > 0)
     {
         <div id="cpCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
