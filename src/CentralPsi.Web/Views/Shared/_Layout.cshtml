@@ -144,8 +144,13 @@
             var STORAGE_KEY = 'cpCookieConsentAccepted';
             var banner = document.getElementById('cpCookieBanner');
             if (!banner) return;
+            // Estas cookies son estrictamente necesarias (no hay analítica ni publicidad), así que el aviso
+            // es solo informativo y no un gate de consentimiento - se puede mostrar unos segundos después de
+            // entrar en vez de tapar la pantalla inicial (ej. la de elegir paciente/psicólogo).
             if (localStorage.getItem(STORAGE_KEY) !== 'true') {
-                banner.classList.remove('d-none');
+                setTimeout(function () {
+                    banner.classList.remove('d-none');
+                }, 3000);
             }
             document.getElementById('cpCookieAccept').addEventListener('click', function () {
                 localStorage.setItem(STORAGE_KEY, 'true');
