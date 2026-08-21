@@ -163,12 +163,13 @@ public class BookingController : Controller
         await _db.SaveChangesAsync();
 
         var returnUrl = Url.Action(nameof(PaymentReturn), "Booking", null, Request.Scheme)!;
+        var confirmationUrl = Url.Action(nameof(PaymentConfirmation), "Booking", null, Request.Scheme)!;
         var buyOrder = appointment.Id.ToString("N")[..24];
         var sessionId = appointment.Id.ToString("N");
 
         try
         {
-            var created = await _paymentService.CreateTransactionAsync(buyOrder, sessionId, appointment.Amount, returnUrl);
+            var created = await _paymentService.CreateTransactionAsync(buyOrder, sessionId, appointment.Amount, returnUrl, confirmationUrl, appointment.PatientEmail);
             _db.Payments.Add(new Payment
             {
                 AppointmentId = appointment.Id,
@@ -180,7 +181,7 @@ public class BookingController : Controller
             });
             await _db.SaveChangesAsync();
 
-            return View("Redirect", new WebpayRedirectViewModel { Token = created.Token, RedirectUrl = created.RedirectUrl });
+            return View("Redirect", new WebpayRedirectViewModel { Token = created.Token, RedirectUrl = created.RedirectUrl, RedirectMethod = created.RedirectMethod });
         }
         catch (Exception ex)
         {
@@ -192,24 +193,56 @@ public class BookingController : Controller
 
     [HttpPost("retorno-pago")]
     [HttpGet("retorno-pago")]
-    public async Task<IActionResult> PaymentReturn(string? token_ws, string? TBK_TOKEN)
+    public async Task<IActionResult> PaymentReturn(string? token_ws, string? TBK_TOKEN, string? token)
     {
-        if (string.IsNullOrEmpty(token_ws))
+        // Transbank sends token_ws; Flow sends token. TBK_TOKEN present (or nothing) means the user
+        // cancelled/aborted on Transbank's page.
+        var providerToken = token_ws ?? token;
+        if (string.IsNullOrEmpty(providerToken))
         {
-            // TBK_TOKEN present (or nothing) means the user cancelled/aborted on Transbank's page.
             ViewData["Aborted"] = true;
             return View("PaymentResult");
         }
 
+        var result = await ProcessPaymentResultAsync(providerToken);
+        if (result is null) return NotFound();
+
+        ViewData["Aborted"] = false;
+        ViewData["Approved"] = result.Value.Approved;
+        ViewData["Appointment"] = result.Value.Appointment;
+        ViewData["Professional"] = result.Value.Professional;
+        return View("PaymentResult");
+    }
+
+    /// <summary>Flow's server-to-server confirmation webhook (urlConfirmation) - Transbank doesn't use this,
+    /// it only relies on the browser's return-url. Reuses the same idempotent processing as PaymentReturn so
+    /// whichever channel arrives first (webhook or browser redirect) does the actual work.</summary>
+    [HttpPost("confirmacion-pago")]
+    public async Task<IActionResult> PaymentConfirmation(string? token)
+    {
+        if (string.IsNullOrEmpty(token)) return BadRequest();
+        var result = await ProcessPaymentResultAsync(token);
+        return result is null ? NotFound() : Ok();
+    }
+
+    private async Task<(Appointment Appointment, Professional Professional, bool Approved)?> ProcessPaymentResultAsync(string providerToken)
+    {
         var payment = await _db.Payments.Include(p => p.Appointment)
             .ThenInclude(a => a!.Professional)
-            .FirstOrDefaultAsync(p => p.Token == token_ws);
-        if (payment?.Appointment is null) return NotFound();
+            .FirstOrDefaultAsync(p => p.Token == providerToken);
+        if (payment?.Appointment is null) return null;
 
         var appointment = payment.Appointment;
         var professional = appointment.Professional!;
 
-        var commit = await _paymentService.CommitTransactionAsync(token_ws);
+        // Idempotent: the browser return-url and Flow's confirmation webhook can both land for the same
+        // payment - only the first one to arrive does the actual commit/notify work.
+        if (payment.Status is PaymentStatus.Authorized or PaymentStatus.Failed)
+        {
+            return (appointment, professional, payment.Status == PaymentStatus.Authorized);
+        }
+
+        var commit = await _paymentService.CommitTransactionAsync(providerToken);
         payment.Status = commit.IsApproved ? PaymentStatus.Authorized : PaymentStatus.Failed;
         payment.AuthorizationCode = commit.AuthorizationCode;
         payment.ResponseCode = commit.ResponseCode;
@@ -243,11 +276,7 @@ public class BookingController : Controller
             await _db.SaveChangesAsync();
         }
 
-        ViewData["Aborted"] = false;
-        ViewData["Approved"] = commit.IsApproved;
-        ViewData["Appointment"] = appointment;
-        ViewData["Professional"] = professional;
-        return View("PaymentResult");
+        return (appointment, professional, commit.IsApproved);
     }
 
     [HttpGet("cancelar/{token}")]

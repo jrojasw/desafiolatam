@@ -58,6 +58,9 @@ public class WebpayRedirectViewModel
 {
     public string Token { get; set; } = string.Empty;
     public string RedirectUrl { get; set; } = string.Empty;
+
+    /// <summary>"POST" (Transbank: posts token_ws to RedirectUrl) or "GET" (Flow: RedirectUrl already has ?token=...).</summary>
+    public string RedirectMethod { get; set; } = "POST";
 }
 
 public class CancellationViewModel

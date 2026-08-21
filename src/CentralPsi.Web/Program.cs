@@ -23,6 +23,7 @@ if (!string.IsNullOrEmpty(platformPort))
 // ---- Configuration ----
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.SectionName));
 builder.Services.Configure<TransbankOptions>(builder.Configuration.GetSection(TransbankOptions.SectionName));
+builder.Services.Configure<FlowOptions>(builder.Configuration.GetSection(FlowOptions.SectionName));
 builder.Services.Configure<GoogleCalendarOptions>(builder.Configuration.GetSection(GoogleCalendarOptions.SectionName));
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
 builder.Services.Configure<SuperSaludOptions>(builder.Configuration.GetSection(SuperSaludOptions.SectionName));
@@ -94,7 +95,16 @@ else
 }
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICertificateValidationService, SuperSaludCertificateValidationService>();
-builder.Services.AddScoped<IPaymentService, TransbankWebpayService>();
+builder.Services.AddHttpClient();
+var paymentProvider = builder.Configuration["App:PaymentProvider"] ?? "Transbank";
+if (paymentProvider.Equals("Flow", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<IPaymentService, FlowPaymentService>();
+}
+else
+{
+    builder.Services.AddScoped<IPaymentService, TransbankWebpayService>();
+}
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 builder.Services.AddHostedService<AttendanceConfirmationBackgroundService>();
 builder.Services.AddScoped<IPaymentInboxSyncService, PaymentInboxSyncService>();

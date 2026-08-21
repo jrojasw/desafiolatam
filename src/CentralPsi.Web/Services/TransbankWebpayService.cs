@@ -23,7 +23,7 @@ public class TransbankWebpayService : IPaymentService
             : Transaction.buildForIntegration(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY);
     }
 
-    public Task<PaymentCreateResult> CreateTransactionAsync(string buyOrder, string sessionId, decimal amount, string returnUrl, CancellationToken ct = default)
+    public Task<PaymentCreateResult> CreateTransactionAsync(string buyOrder, string sessionId, decimal amount, string returnUrl, string? confirmationUrl = null, string? payerEmail = null, CancellationToken ct = default)
     {
         var response = _transaction.Create(buyOrder, sessionId, amount, returnUrl);
         return Task.FromResult(new PaymentCreateResult(response.Token, response.Url));

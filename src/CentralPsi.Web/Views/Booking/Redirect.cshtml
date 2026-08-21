@@ -1,24 +1,34 @@
 @model CentralPsi.Web.Models.ViewModels.WebpayRedirectViewModel
 @{
-    ViewData["Title"] = "Redirigiendo a Webpay";
+    ViewData["Title"] = "Redirigiendo al pago";
     Layout = null;
 }
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <title>Redirigiendo a Webpay…</title>
+    <title>Redirigiendo a pagar…</title>
 </head>
 <body style="font-family:Arial,sans-serif;text-align:center;padding-top:15vh;">
-    <p>Redirigiendo a Webpay Plus para completar tu pago…</p>
-    <form id="webpayForm" action="@Model.RedirectUrl" method="POST">
-        <input type="hidden" name="token_ws" value="@Model.Token" />
-        <noscript>
-            <button type="submit">Continuar</button>
-        </noscript>
-    </form>
-    <script>
-        document.getElementById('webpayForm').submit();
-    </script>
+    <p>Redirigiendo para completar tu pago…</p>
+    @if (Model.RedirectMethod == "GET")
+    {
+        <p><a id="cpPayLink" href="@Model.RedirectUrl">Continuar</a></p>
+        <script>
+            window.location.href = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RedirectUrl));
+        </script>
+    }
+    else
+    {
+        <form id="webpayForm" action="@Model.RedirectUrl" method="POST">
+            <input type="hidden" name="token_ws" value="@Model.Token" />
+            <noscript>
+                <button type="submit">Continuar</button>
+            </noscript>
+        </form>
+        <script>
+            document.getElementById('webpayForm').submit();
+        </script>
+    }
 </body>
 </html>

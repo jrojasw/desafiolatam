@@ -30,4 +30,8 @@ public class AppOptions
     /// professionals before Transbank's production merchant account is connected, so nobody can pay for a
     /// session that can't yet be collected. Professionals and their profiles stay fully visible either way.</summary>
     public bool BookingEnabled { get; set; } = true;
+
+    /// <summary>Which IPaymentService implementation to register: "Transbank" or "Flow". Swap while waiting
+    /// on Transbank's production API key, or if Flow ends up staying as the primary processor.</summary>
+    public string PaymentProvider { get; set; } = "Transbank";
 }
