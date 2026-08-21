@@ -204,14 +204,27 @@ public class BookingController : Controller
             return View("PaymentResult");
         }
 
-        var result = await ProcessPaymentResultAsync(providerToken);
-        if (result is null) return NotFound();
+        try
+        {
+            var result = await ProcessPaymentResultAsync(providerToken);
+            if (result is null) return NotFound();
 
-        ViewData["Aborted"] = false;
-        ViewData["Approved"] = result.Value.Approved;
-        ViewData["Appointment"] = result.Value.Appointment;
-        ViewData["Professional"] = result.Value.Professional;
-        return View("PaymentResult");
+            ViewData["Aborted"] = false;
+            ViewData["Approved"] = result.Value.Approved;
+            ViewData["Appointment"] = result.Value.Appointment;
+            ViewData["Professional"] = result.Value.Professional;
+            return View("PaymentResult");
+        }
+        catch (Exception ex)
+        {
+            // A provider error here (e.g. Flow's getStatus rejecting a token from a purchase the payer
+            // anulled before ever entering card data) must not surface as a raw 500 to a paying patient -
+            // show the same "no fue aprobado" message they'd see for a declined card.
+            _logger.LogError(ex, "Error confirmando el pago con token {Token}", providerToken);
+            ViewData["Aborted"] = false;
+            ViewData["Approved"] = false;
+            return View("PaymentResult");
+        }
     }
 
     /// <summary>Flow's server-to-server confirmation webhook (urlConfirmation) - Transbank doesn't use this,
@@ -221,8 +234,16 @@ public class BookingController : Controller
     public async Task<IActionResult> PaymentConfirmation(string? token)
     {
         if (string.IsNullOrEmpty(token)) return BadRequest();
-        var result = await ProcessPaymentResultAsync(token);
-        return result is null ? NotFound() : Ok();
+        try
+        {
+            var result = await ProcessPaymentResultAsync(token);
+            return result is null ? NotFound() : Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error procesando el webhook de confirmación de pago para el token {Token}", token);
+            return StatusCode(500);
+        }
     }
 
     private async Task<(Appointment Appointment, Professional Professional, bool Approved)?> ProcessPaymentResultAsync(string providerToken)

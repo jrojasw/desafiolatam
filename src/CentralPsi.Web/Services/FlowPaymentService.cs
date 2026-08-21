@@ -85,40 +85,57 @@ public class FlowPaymentService : IPaymentService
         var http = _httpClientFactory.CreateClient();
         var response = await http.GetAsync($"{BaseUrl}/payment/getStatus?{query}", ct);
         var json = await response.Content.ReadAsStringAsync(ct);
-        if (!response.IsSuccessStatusCode)
+
+        // A purchase the payer anulled before ever entering payment data, or one Flow otherwise never fully
+        // created, can make getStatus answer with a non-2xx or a non-JSON error body instead of a normal
+        // status payload. Treat that the same as "not approved" instead of throwing - a failed lookup here
+        // must never turn into a raw 500 for a paying patient.
+        JsonDocument doc;
+        try
         {
-            _logger.LogError("Flow payment/getStatus devolvió {Status}: {Body}", response.StatusCode, json);
-            throw new InvalidOperationException($"Flow payment/getStatus falló con {response.StatusCode}: {json}");
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Flow payment/getStatus devolvió {Status} para el token {Token}: {Body}", response.StatusCode, token, json);
+                return new PaymentCommitResult(false, "UNKNOWN", (int)response.StatusCode, null, null, null, json);
+            }
+            doc = JsonDocument.Parse(json);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Flow payment/getStatus devolvió un cuerpo no-JSON para el token {Token}: {Body}", token, json);
+            return new PaymentCommitResult(false, "UNKNOWN", null, null, null, null, json);
         }
 
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
-        var statusCode = root.TryGetProperty("status", out var statusEl) ? statusEl.GetInt32() : 0;
-        // Flow status codes: 1 pending, 2 paid, 3 rejected, 4 cancelled/nulled.
-        var isApproved = statusCode == 2;
-        var statusName = statusCode switch
+        using (doc)
         {
-            1 => "PENDING",
-            2 => "PAID",
-            3 => "REJECTED",
-            4 => "CANCELLED",
-            _ => "UNKNOWN"
-        };
+            var root = doc.RootElement;
+            var statusCode = root.TryGetProperty("status", out var statusEl) ? statusEl.GetInt32() : 0;
+            // Flow status codes: 1 pending, 2 paid, 3 rejected, 4 cancelled/nulled.
+            var isApproved = statusCode == 2;
+            var statusName = statusCode switch
+            {
+                1 => "PENDING",
+                2 => "PAID",
+                3 => "REJECTED",
+                4 => "CANCELLED",
+                _ => "UNKNOWN"
+            };
 
-        decimal? paidAmount = null;
-        DateTime? paidAtUtc = null;
-        if (root.TryGetProperty("paymentData", out var paymentData))
-        {
-            if (paymentData.TryGetProperty("amount", out var amountEl) && amountEl.TryGetDecimal(out var amt))
+            decimal? paidAmount = null;
+            DateTime? paidAtUtc = null;
+            if (root.TryGetProperty("paymentData", out var paymentData))
             {
-                paidAmount = amt;
+                if (paymentData.TryGetProperty("amount", out var amountEl) && amountEl.TryGetDecimal(out var amt))
+                {
+                    paidAmount = amt;
+                }
+                if (paymentData.TryGetProperty("date", out var dateEl) && DateTime.TryParse(dateEl.GetString(), out var parsedDate))
+                {
+                    paidAtUtc = DateTime.SpecifyKind(parsedDate, DateTimeKind.Local).ToUniversalTime();
+                }
             }
-            if (paymentData.TryGetProperty("date", out var dateEl) && DateTime.TryParse(dateEl.GetString(), out var parsedDate))
-            {
-                paidAtUtc = DateTime.SpecifyKind(parsedDate, DateTimeKind.Local).ToUniversalTime();
-            }
+
+            return new PaymentCommitResult(isApproved, statusName, statusCode, null, paidAtUtc, paidAmount, json);
         }
-
-        return new PaymentCommitResult(isApproved, statusName, statusCode, null, paidAtUtc, paidAmount, json);
     }
 }
