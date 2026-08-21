@@ -4,10 +4,11 @@ public class AppOptions
 {
     public const string SectionName = "App";
 
-    public decimal AppointmentPriceClp { get; set; } = 38000m;
+    public decimal AppointmentPriceClp { get; set; } = 37944m;
 
-    /// <summary>Flat amount CentralPsi pays the professional per session, out of AppointmentPriceClp.</summary>
-    public decimal ProfessionalPayoutClp { get; set; } = 13274m;
+    /// <summary>Flat amount CentralPsi pays the professional per session, out of AppointmentPriceClp. Already
+    /// nets out the professional's 50% share of Flow's transaction commission (see the financial model).</summary>
+    public decimal ProfessionalPayoutClp { get; set; } = 12622m;
 
     /// <summary>Business days CentralPsi commits to for paying the professional after a session, once the
     /// boleta arrives - drives the pending-payments "traffic light" in Admin/Pagos.</summary>

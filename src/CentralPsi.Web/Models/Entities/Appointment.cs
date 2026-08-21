@@ -25,7 +25,7 @@ public class Appointment
     public DateTime ScheduledEndUtc { get; set; }
 
     public AppointmentStatus Status { get; set; } = AppointmentStatus.PendingPayment;
-    public decimal Amount { get; set; } = 38000m;
+    public decimal Amount { get; set; } = 37944m;
 
     public bool TermsAccepted { get; set; }
     public DateTime? TermsAcceptedAtUtc { get; set; }
