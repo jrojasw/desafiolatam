@@ -5,12 +5,14 @@ using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace CentralPsi.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("Admin/Account")]
+[EnableRateLimiting("auth")]
 public class AccountController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;

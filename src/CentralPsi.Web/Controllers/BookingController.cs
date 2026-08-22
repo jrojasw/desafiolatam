@@ -4,6 +4,7 @@ using CentralPsi.Web.Models.ViewModels;
 using CentralPsi.Web.Options;
 using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -84,6 +85,7 @@ public class BookingController : Controller
 
     [HttpPost("nueva")]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("sensitive")]
     public async Task<IActionResult> Confirm(BookingStartViewModel model)
     {
         if (!_appOptions.BookingEnabled)
@@ -325,6 +327,7 @@ public class BookingController : Controller
 
     [HttpPost("cancelar/{token}")]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("sensitive")]
     public async Task<IActionResult> CancelConfirm(string token, string? reason)
     {
         var appointment = await _db.Appointments
@@ -397,6 +400,7 @@ public class BookingController : Controller
 
     [HttpPost("confirmar-asistencia/{token}")]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("sensitive")]
     public async Task<IActionResult> ConfirmAttendanceSubmit(string token, bool sessionHappened)
     {
         var appointment = await _db.Appointments

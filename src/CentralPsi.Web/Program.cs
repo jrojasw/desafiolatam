@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using CentralPsi.Web.Data;
 using CentralPsi.Web.Data.Seed;
 using CentralPsi.Web.Models.Entities;
@@ -6,6 +7,7 @@ using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -114,6 +116,44 @@ builder.Services.AddHostedService<PaymentInboxSyncBackgroundService>();
 
 builder.Services.AddControllersWithViews();
 
+// ---- Rate limiting ----
+// Protects against traffic spikes/bots/brute-force without needing an external WAF. Partitioned by client IP
+// (relies on UseForwardedHeaders below already having rewritten RemoteIpAddress to the real client IP behind
+// Render's proxy). Static files are served before this middleware runs, so they're never rate-limited.
+static string ClientIpKey(HttpContext httpContext) => httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Generous baseline for all dynamic (non-static-file) requests.
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(ClientIpKey(httpContext), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 300,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+
+    // Tight limit for login/password endpoints to slow down brute-force attempts.
+    options.AddPolicy("auth", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(ClientIpKey(httpContext), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+
+    // Moderate limit for patient-facing actions that mutate state (booking, cancelling, confirming attendance).
+    options.AddPolicy("sensitive", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(ClientIpKey(httpContext), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 15,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -160,6 +200,7 @@ if (!string.IsNullOrWhiteSpace(storageRootPath))
 }
 
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

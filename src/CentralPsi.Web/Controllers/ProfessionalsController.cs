@@ -4,6 +4,7 @@ using CentralPsi.Web.Models.ViewModels;
 using CentralPsi.Web.Options;
 using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -102,6 +103,7 @@ public class ProfessionalsController : Controller
 
     [HttpPost("inscripcion")]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("sensitive")]
     public async Task<IActionResult> Register(ProfessionalRegisterViewModel model)
     {
         if (await _db.Professionals.AnyAsync(p => p.Email == model.Email))
