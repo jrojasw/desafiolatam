@@ -16,6 +16,33 @@
     <div class="col-lg-7">
         <div class="cp-form-card">
             <h5>Datos personales</h5>
+            <div class="d-flex align-items-start gap-3 mb-3">
+                @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                {
+                    <img src="@Url.Content(Model.ProfilePhotoPath)" alt="Foto de perfil de @Model.FullName" class="cp-admin-avatar cp-admin-avatar--lg" />
+                }
+                else
+                {
+                    <div class="cp-admin-avatar cp-admin-avatar--lg cp-admin-avatar--empty d-flex align-items-center justify-content-center text-muted small text-center px-2">
+                        Sin foto<br />(se muestra la genérica)
+                    </div>
+                }
+                <div class="flex-grow-1">
+                    <form asp-action="UpdateProfilePhoto" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-2">
+                        <label class="form-label small mb-0">Subir o reemplazar foto (ej. si el profesional te la envió por correo, o si la actual es inapropiada)</label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp" class="form-control form-control-sm" style="max-width:260px;" required />
+                            <button type="submit" class="btn btn-sm cp-btn-outline">Subir foto</button>
+                        </div>
+                    </form>
+                    @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                    {
+                        <form asp-action="RemoveProfilePhoto" asp-route-id="@Model.Id" method="post" class="mt-2" onsubmit="return confirm('¿Quitar la foto actual? El perfil público mostrará la foto genérica hasta que subas otra.');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Quitar foto (usar genérica)</button>
+                        </form>
+                    }
+                </div>
+            </div>
             <p><strong>Nombre:</strong> @Model.FullName</p>
             <p><strong>RUT:</strong> @Model.Rut</p>
             <p><strong>Correo:</strong> @Model.Email</p>

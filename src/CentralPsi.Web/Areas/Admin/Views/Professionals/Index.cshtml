@@ -14,7 +14,7 @@
 
 <div class="table-responsive">
     <table class="table cp-admin-table align-middle bg-white">
-        <thead><tr><th>Nombre</th><th>Correo</th><th>Especialidad</th><th>Estado</th><th>Inscrito</th><th></th></tr></thead>
+        <thead><tr><th></th><th>Nombre</th><th>Correo</th><th>Especialidad</th><th>Estado</th><th>Inscrito</th><th></th></tr></thead>
         <tbody>
             @foreach (var p in Model)
             {
@@ -26,6 +26,16 @@
                     _ => "cp-status-inactive"
                 };
                 <tr>
+                    <td>
+                        @if (string.IsNullOrEmpty(p.ProfilePhotoPath))
+                        {
+                            <div class="cp-admin-avatar cp-admin-avatar--empty" title="Sin foto de perfil"></div>
+                        }
+                        else
+                        {
+                            <img src="@Url.Content(p.ProfilePhotoPath)" alt="Foto de @p.FullName" class="cp-admin-avatar" />
+                        }
+                    </td>
                     <td>@p.FullName</td>
                     <td>@p.Email</td>
                     <td>@p.Specialty</td>

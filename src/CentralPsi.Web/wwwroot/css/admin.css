@@ -61,6 +61,23 @@
 .cp-status-inactive { background:#e6e6e6; color:#666; }
 .cp-status-warning { background:#ffe6b3; color:#8a5300; }
 
+.cp-admin-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background: var(--cp-primary-light, #7fb6ad);
+}
+.cp-admin-avatar--empty {
+  border: 1px dashed var(--cp-border, #e1eae8);
+  background: #f4f7f6;
+}
+.cp-admin-avatar--lg {
+  width: 120px;
+  height: 120px;
+}
+
 /* Payout-deadline "traffic light": a text label with a colored dot underneath, used in the Pagos a
    profesionales "Plazo" column. The dot (not the text) flashes red/blue once the 3-business-day commitment
    is overdue - meant to be impossible to miss in the pendientes list. */

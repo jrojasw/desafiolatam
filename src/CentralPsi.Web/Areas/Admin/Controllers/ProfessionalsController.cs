@@ -177,6 +177,52 @@ public class ProfessionalsController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    private static readonly HashSet<string> AllowedPhotoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg", ".jpeg", ".png", ".webp"
+    };
+
+    [HttpPost("{id:guid}/Foto")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfilePhoto(Guid id, IFormFile? photo)
+    {
+        var professional = await _db.Professionals.FindAsync(id);
+        if (professional is null) return NotFound();
+
+        if (photo is null || photo.Length == 0)
+        {
+            TempData["ErrorMessage"] = "Selecciona una imagen antes de subir.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        if (!AllowedPhotoExtensions.Contains(Path.GetExtension(photo.FileName)))
+        {
+            TempData["ErrorMessage"] = "Formato no permitido. Usa una imagen JPG, PNG o WEBP.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        professional.ProfilePhotoPath = await _fileStorage.SavePublicAsync(photo, "profesionales");
+        await _db.SaveChangesAsync();
+        await _auditLog.LogAsync("Reemplazar foto de perfil", "Professional", id.ToString(), professional.FullName);
+
+        TempData["SuccessMessage"] = $"Foto de perfil de {professional.FullName} actualizada.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost("{id:guid}/QuitarFoto")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveProfilePhoto(Guid id)
+    {
+        var professional = await _db.Professionals.FindAsync(id);
+        if (professional is null) return NotFound();
+
+        professional.ProfilePhotoPath = null;
+        await _db.SaveChangesAsync();
+        await _auditLog.LogAsync("Quitar foto de perfil", "Professional", id.ToString(), professional.FullName);
+
+        TempData["SuccessMessage"] = $"Se quitó la foto de {professional.FullName}; ahora se muestra la foto genérica en su perfil público.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
     [HttpPost("{id:guid}/Desactivar")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Deactivate(Guid id)
