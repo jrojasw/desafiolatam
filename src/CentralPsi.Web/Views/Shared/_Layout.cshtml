@@ -138,7 +138,7 @@
                 <p class="mb-0 small">
                     Usamos cookies estrictamente necesarias para que el sitio funcione, y cookies de analítica
                     (Google Analytics@(string.IsNullOrWhiteSpace(metaPixelId) ? "" : " y Meta Pixel")) para entender
-                    cómo se usa el sitio y medir nuestras campañas. Solo activamos estas últimas si las aceptas.
+                    cómo se usa el sitio y medir nuestras campañas. Puedes rechazarlas si prefieres no ser medido/a.
                     <a asp-controller="Home" asp-action="Terms" asp-fragment="cookies" class="text-decoration-underline">Más información</a>.
                 </p>
                 <div class="d-flex gap-2 flex-shrink-0">
@@ -199,15 +199,16 @@
                 loadMetaPixel();
             }
 
+            var consent = localStorage.getItem(STORAGE_KEY);
+            // Modelo opt-out: la analítica se activa de inmediato salvo que la persona ya la haya rechazado
+            // antes. El aviso es informativo y ofrece "Rechazar" para quien prefiera no ser medido/a.
+            if (consent !== 'denied') {
+                loadAnalytics();
+            }
+
             if (!banner) return;
 
-            var consent = localStorage.getItem(STORAGE_KEY);
-            if (consent === 'granted') {
-                loadAnalytics();
-            } else if (consent !== 'denied') {
-                // Aún sin decisión: el banner es solo informativo si no hay analítica configurada, o un gate de
-                // consentimiento real si sí la hay - se muestra unos segundos después de entrar en vez de tapar
-                // la pantalla inicial (ej. la de elegir paciente/psicólogo).
+            if (consent !== 'granted' && consent !== 'denied') {
                 setTimeout(function () {
                     banner.classList.remove('d-none');
                 }, 3000);
