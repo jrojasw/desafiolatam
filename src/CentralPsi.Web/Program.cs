@@ -30,6 +30,7 @@ builder.Services.Configure<SuperSaludOptions>(builder.Configuration.GetSection(S
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection(StorageOptions.SectionName));
 builder.Services.Configure<PaymentsInboxOptions>(builder.Configuration.GetSection(PaymentsInboxOptions.SectionName));
 builder.Services.Configure<WhatsAppOptions>(builder.Configuration.GetSection(WhatsAppOptions.SectionName));
+builder.Services.Configure<AnalyticsOptions>(builder.Configuration.GetSection(AnalyticsOptions.SectionName));
 
 // ---- Data ----
 // Render's managed Postgres hands out a single DATABASE_URL (postgres://user:pass@host:port/db) rather than

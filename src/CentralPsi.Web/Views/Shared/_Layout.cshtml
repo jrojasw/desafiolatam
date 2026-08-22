@@ -1,3 +1,9 @@
+@inject Microsoft.Extensions.Options.IOptions<CentralPsi.Web.Options.AnalyticsOptions> AnalyticsOpts
+@{
+    var gaId = AnalyticsOpts.Value.GoogleAnalyticsId;
+    var metaPixelId = AnalyticsOpts.Value.MetaPixelId;
+    var hasAnalytics = !string.IsNullOrWhiteSpace(gaId) || !string.IsNullOrWhiteSpace(metaPixelId);
+}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -127,12 +133,28 @@
 
     <div id="cpCookieBanner" class="cp-cookie-banner d-none">
         <div class="container d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-            <p class="mb-0 small">
-                Usamos solo cookies estrictamente necesarias para que el sitio funcione (seguridad de formularios
-                y mensajes de confirmación) — no usamos cookies de publicidad ni analítica.
-                <a asp-controller="Home" asp-action="Terms" asp-fragment="cookies" class="text-decoration-underline">Más información</a>.
-            </p>
-            <button type="button" id="cpCookieAccept" class="btn cp-btn-primary btn-sm text-nowrap">Entendido</button>
+            @if (hasAnalytics)
+            {
+                <p class="mb-0 small">
+                    Usamos cookies estrictamente necesarias para que el sitio funcione, y cookies de analítica
+                    (Google Analytics@(string.IsNullOrWhiteSpace(metaPixelId) ? "" : " y Meta Pixel")) para entender
+                    cómo se usa el sitio y medir nuestras campañas. Solo activamos estas últimas si las aceptas.
+                    <a asp-controller="Home" asp-action="Terms" asp-fragment="cookies" class="text-decoration-underline">Más información</a>.
+                </p>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <button type="button" id="cpCookieReject" class="btn cp-btn-outline btn-sm text-nowrap">Rechazar</button>
+                    <button type="button" id="cpCookieAccept" class="btn cp-btn-primary btn-sm text-nowrap">Aceptar</button>
+                </div>
+            }
+            else
+            {
+                <p class="mb-0 small">
+                    Usamos solo cookies estrictamente necesarias para que el sitio funcione (seguridad de formularios
+                    y mensajes de confirmación) — no usamos cookies de publicidad ni analítica.
+                    <a asp-controller="Home" asp-action="Terms" asp-fragment="cookies" class="text-decoration-underline">Más información</a>.
+                </p>
+                <button type="button" id="cpCookieAccept" class="btn cp-btn-primary btn-sm text-nowrap">Entendido</button>
+            }
         </div>
     </div>
 
@@ -141,21 +163,71 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         (function () {
-            var STORAGE_KEY = 'cpCookieConsentAccepted';
+            var STORAGE_KEY = 'cpCookieConsent';
             var banner = document.getElementById('cpCookieBanner');
+            var gaId = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(gaId));
+            var pixelId = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metaPixelId));
+
+            function loadGoogleAnalytics() {
+                if (!gaId) return;
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+                document.head.appendChild(s);
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function () { window.dataLayer.push(arguments); };
+                window.gtag('js', new Date());
+                window.gtag('config', gaId);
+            }
+
+            function loadMetaPixel() {
+                if (!pixelId) return;
+                !function (f, b, e, v, n, t, s) {
+                    if (f.fbq) return; n = f.fbq = function () {
+                        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+                    };
+                    if (!f._fbq) f._fbq = n; n.push = n; n.loaded = true; n.version = '2.0';
+                    n.queue = []; t = b.createElement(e); t.async = true; t.src = v;
+                    s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+                }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+                window.fbq('init', pixelId);
+                window.fbq('track', 'PageView');
+            }
+
+            function loadAnalytics() {
+                loadGoogleAnalytics();
+                loadMetaPixel();
+            }
+
             if (!banner) return;
-            // Estas cookies son estrictamente necesarias (no hay analítica ni publicidad), así que el aviso
-            // es solo informativo y no un gate de consentimiento - se puede mostrar unos segundos después de
-            // entrar en vez de tapar la pantalla inicial (ej. la de elegir paciente/psicólogo).
-            if (localStorage.getItem(STORAGE_KEY) !== 'true') {
+
+            var consent = localStorage.getItem(STORAGE_KEY);
+            if (consent === 'granted') {
+                loadAnalytics();
+            } else if (consent !== 'denied') {
+                // Aún sin decisión: el banner es solo informativo si no hay analítica configurada, o un gate de
+                // consentimiento real si sí la hay - se muestra unos segundos después de entrar en vez de tapar
+                // la pantalla inicial (ej. la de elegir paciente/psicólogo).
                 setTimeout(function () {
                     banner.classList.remove('d-none');
                 }, 3000);
             }
-            document.getElementById('cpCookieAccept').addEventListener('click', function () {
-                localStorage.setItem(STORAGE_KEY, 'true');
-                banner.classList.add('d-none');
-            });
+
+            var acceptBtn = document.getElementById('cpCookieAccept');
+            var rejectBtn = document.getElementById('cpCookieReject');
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', function () {
+                    localStorage.setItem(STORAGE_KEY, 'granted');
+                    banner.classList.add('d-none');
+                    loadAnalytics();
+                });
+            }
+            if (rejectBtn) {
+                rejectBtn.addEventListener('click', function () {
+                    localStorage.setItem(STORAGE_KEY, 'denied');
+                    banner.classList.add('d-none');
+                });
+            }
         })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)
