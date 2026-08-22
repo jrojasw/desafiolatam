@@ -88,7 +88,11 @@ public class ProfessionalsController : Controller
     }
 
     [HttpGet("inscripcion")]
-    public IActionResult Register() => View(new ProfessionalRegisterViewModel());
+    public IActionResult Register()
+    {
+        ViewBag.AppOptions = _appOptions;
+        return View(new ProfessionalRegisterViewModel());
+    }
 
     [HttpGet("inicio-de-actividades")]
     public IActionResult IniciacionActividades() => View();

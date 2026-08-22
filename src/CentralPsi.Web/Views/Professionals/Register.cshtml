@@ -11,7 +11,31 @@
         [DayOfWeek.Saturday] = "Sábado",
         [DayOfWeek.Sunday] = "Domingo",
     };
+    var appOptions = (CentralPsi.Web.Options.AppOptions)ViewBag.AppOptions;
+    var clCulture = new System.Globalization.CultureInfo("es-CL");
 }
+
+<div class="modal fade" id="cpPagoInfoModal" tabindex="-1" aria-labelledby="cpPagoInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content cp-pago-modal">
+            <div class="cp-pago-modal__bar">
+                <span id="cpPagoInfoModalLabel">Las cuentas claras conservan la amistad</span>
+                <button type="button" class="btn-close btn-close-white cp-pago-modal__close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="cp-pago-modal__body">
+                <p class="mb-3">
+                    Por cada sesión, tú recibes <strong>$@appOptions.ProfessionalPayoutClp.ToString("N0", clCulture) líquidos</strong>.
+                </p>
+                <p class="mb-4">
+                    Ese pago se transfiere a tu cuenta en un plazo máximo de
+                    <strong>@appOptions.ProfessionalPayoutBusinessDays días hábiles</strong>, una vez que nos envíes
+                    la misma boleta de honorarios que le entregaste al paciente.
+                </p>
+                <button type="button" class="btn cp-btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <section class="cp-section">
     <div class="container" style="max-width:820px;">
@@ -215,6 +239,12 @@
             }
             select.addEventListener('change', toggle);
             toggle();
+        })();
+        (function () {
+            var modalEl = document.getElementById('cpPagoInfoModal');
+            if (modalEl && window.bootstrap) {
+                new bootstrap.Modal(modalEl).show();
+            }
         })();
     </script>
 }
