@@ -1,8 +1,13 @@
 @inject Microsoft.Extensions.Options.IOptions<CentralPsi.Web.Options.AnalyticsOptions> AnalyticsOpts
+@inject Microsoft.Extensions.Options.IOptions<CentralPsi.Web.Options.AppOptions> LayoutAppOpts
 @{
     var gaId = AnalyticsOpts.Value.GoogleAnalyticsId;
     var metaPixelId = AnalyticsOpts.Value.MetaPixelId;
     var hasAnalytics = !string.IsNullOrWhiteSpace(gaId) || !string.IsNullOrWhiteSpace(metaPixelId);
+    // Canonical siempre se arma desde la BaseUrl configurada (https://www.centralpsi.cl), nunca desde el host
+    // real de la request - así nunca puede apuntar accidentalmente a la versión sin "www" (hoy da 404) ni a
+    // http, sin importar cómo haya llegado la visita. Se excluye el query string a propósito.
+    var canonicalUrl = $"{LayoutAppOpts.Value.BaseUrl.TrimEnd('/')}{Context.Request.Path}";
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -11,6 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CentralPsi</title>
     <meta name="description" content="CentralPsi conecta pacientes con psicólogos verificados por el Ministerio de Salud. Agenda tu hora online de forma simple y segura." />
+    <link rel="canonical" href="@canonicalUrl" />
     <link rel="icon" type="image/svg+xml" href="~/images/favicon-mark.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="~/images/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="~/images/favicon-16.png" />
@@ -19,6 +25,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>

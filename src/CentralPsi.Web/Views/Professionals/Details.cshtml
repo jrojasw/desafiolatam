@@ -1,8 +1,37 @@
 @model CentralPsi.Web.Models.ViewModels.ProfessionalDetailsViewModel
+@inject Microsoft.Extensions.Options.IOptions<CentralPsi.Web.Options.AppOptions> DetailsAppOpts
 @{
     ViewData["Title"] = Model.Professional.FullName;
     var culture = new System.Globalization.CultureInfo("es-CL");
     var bookingEnabled = (bool)(ViewBag.BookingEnabled ?? true);
+
+    var baseUrl = DetailsAppOpts.Value.BaseUrl.TrimEnd('/');
+    // knowsAbout se arma solo con campos reales del profesional (Specialty, Orientation) - no se inventan temas.
+    // jobTitle queda genérico ("Psicólogo/a") porque no hay un campo de título/universidad en el modelo hoy;
+    // agregar "alumniOf" requeriría primero guardar esa info al inscribirse, no se fabrica aquí.
+    var knowsAbout = new[] { Model.Professional.Specialty, Model.Professional.Orientation }
+        .Where(v => !string.IsNullOrWhiteSpace(v))
+        .ToArray();
+    var personJsonLd = System.Text.Json.JsonSerializer.Serialize(new
+    {
+        context = "https://schema.org",
+        type = "Person",
+        name = Model.Professional.FullName,
+        jobTitle = "Psicólogo/a",
+        url = $"{baseUrl}/profesionales/{Model.Professional.Id}",
+        worksFor = new { type = "Organization", name = "CentralPsi", url = $"{baseUrl}/" },
+        knowsAbout
+    });
+    personJsonLd = personJsonLd
+        .Replace("\"context\"", "\"@context\"")
+        .Replace("\"type\":\"Person\"", "\"@type\":\"Person\"")
+        .Replace("\"type\":\"Organization\"", "\"@type\":\"Organization\"");
+}
+
+@section Head {
+    <script type="application/ld+json">
+        @Html.Raw(personJsonLd)
+    </script>
 }
 
 <section class="cp-section">

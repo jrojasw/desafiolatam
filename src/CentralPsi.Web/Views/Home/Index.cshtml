@@ -1,6 +1,29 @@
 @model CentralPsi.Web.Models.ViewModels.HomeIndexViewModel
+@inject Microsoft.Extensions.Options.IOptions<CentralPsi.Web.Options.AppOptions> HomeAppOpts
 @{
     ViewData["Title"] = "Inicio";
+    var baseUrl = HomeAppOpts.Value.BaseUrl.TrimEnd('/');
+    // Sin "sameAs": no hay ningún link real de Instagram/Facebook/LinkedIn configurado en el sitio todavía
+    // (los íconos del footer son placeholders "#") - se agrega apenas existan URLs reales, no se inventan aquí.
+    var medicalBusinessJsonLd = System.Text.Json.JsonSerializer.Serialize(new
+    {
+        context = "https://schema.org",
+        type = "MedicalBusiness",
+        name = "CentralPsi",
+        url = $"{baseUrl}/",
+        description = "CentralPsi conecta pacientes con psicólogos verificados por el Ministerio de Salud. Agenda tu hora online de forma simple y segura.",
+        areaServed = "CL",
+        priceRange = "$$"
+    });
+    // System.Text.Json no permite nombres de propiedad "@context"/"@type" directo en un objeto anónimo, así que
+    // se corrigen con un reemplazo simple después de serializar.
+    medicalBusinessJsonLd = medicalBusinessJsonLd.Replace("\"context\"", "\"@context\"").Replace("\"type\"", "\"@type\"");
+}
+
+@section Head {
+    <script type="application/ld+json">
+        @Html.Raw(medicalBusinessJsonLd)
+    </script>
 }
 
 <section class="cp-audience-gate">
