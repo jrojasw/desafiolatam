@@ -24,6 +24,7 @@ public class SitemapController : Controller
     }
 
     [HttpGet("/sitemap.xml")]
+    [HttpHead("/sitemap.xml")]
     public async Task<IActionResult> Index()
     {
         var baseUrl = _appOptions.BaseUrl.TrimEnd('/');
