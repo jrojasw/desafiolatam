@@ -26,19 +26,29 @@
     </script>
 }
 
-<section class="cp-audience-gate">
-    <div class="cp-audience-gate__bg"></div>
-    <a class="cp-audience-gate__half cp-audience-gate__half--patient" href="#cp-hero">
-        <span class="cp-audience-gate__eyebrow">Soy paciente</span>
-        <span class="cp-audience-gate__label">Quiero tomar<br />una hora</span>
-        <span class="cp-audience-gate__arrow">→</span>
-    </a>
-    <a class="cp-audience-gate__half cp-audience-gate__half--pro" asp-controller="Professionals" asp-action="Register">
-        <span class="cp-audience-gate__eyebrow">Soy profesional</span>
-        <span class="cp-audience-gate__label">Soy<br />psicólogo/a</span>
-        <span class="cp-audience-gate__arrow">→</span>
-    </a>
-</section>
+<div class="modal fade" id="cpAudienceModal" tabindex="-1" aria-labelledby="cpAudienceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content cp-audience-modal">
+            <button type="button" class="btn-close cp-audience-modal__close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="cp-audience-modal__header">
+                <img src="~/images/logo.svg" alt="CentralPsi" height="30" />
+                <h2 id="cpAudienceModalLabel">¿Qué te trae por aquí?</h2>
+            </div>
+            <div class="cp-audience-modal__options">
+                <a class="cp-audience-modal__option" href="#cp-hero" data-bs-dismiss="modal">
+                    <span class="cp-audience-modal__label">Quiero tomar una hora</span>
+                    <span class="cp-audience-modal__eyebrow">Soy paciente</span>
+                    <span class="cp-audience-modal__arrow">→</span>
+                </a>
+                <a class="cp-audience-modal__option" asp-controller="Professionals" asp-action="Register">
+                    <span class="cp-audience-modal__label">Soy psicólogo/a</span>
+                    <span class="cp-audience-modal__eyebrow">Quiero inscribirme</span>
+                    <span class="cp-audience-modal__arrow">→</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <section class="cp-hero" id="cp-hero">
     @if (Model.Slides.Count > 0)
@@ -178,3 +188,14 @@
         <a asp-controller="Professionals" asp-action="Index" class="btn cp-btn-primary btn-lg">Agenda tu hora</a>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (function () {
+            var modalEl = document.getElementById('cpAudienceModal');
+            if (modalEl && window.bootstrap) {
+                new bootstrap.Modal(modalEl).show();
+            }
+        })();
+    </script>
+}

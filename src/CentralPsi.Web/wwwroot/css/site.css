@@ -87,77 +87,79 @@ a:hover {
   color: #ffffff;
 }
 
-/* ---- Audience gate (elegir paciente / psicólogo) ---- */
-.cp-audience-gate {
-  position: relative;
-  display: flex;
-  min-height: calc(100vh - 74px);
+/* ---- Popup de bienvenida (elegir paciente / psicólogo) ---- */
+.cp-audience-modal {
+  border: none;
+  border-radius: 1.25rem;
   overflow: hidden;
 }
-.cp-audience-gate__bg {
+.cp-audience-modal__close {
   position: absolute;
-  inset: -20px;
-  background-image: url('/images/seed/slide-espacio-seguro.jpg');
-  background-size: cover;
-  background-position: center;
-  filter: blur(14px) saturate(1.05);
-  transform: scale(1.08);
+  top: .9rem;
+  right: .9rem;
+  z-index: 2;
 }
-.cp-audience-gate__half {
-  position: relative;
+.cp-audience-modal__header {
+  padding: 2.25rem 2rem 1.25rem;
+  text-align: center;
+}
+.cp-audience-modal__header img {
+  margin-bottom: 1rem;
+}
+.cp-audience-modal__header h2 {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cp-text);
+  margin: 0;
+}
+.cp-audience-modal__options {
+  display: flex;
+  border-top: 1px solid var(--cp-border);
+}
+.cp-audience-modal__option {
   flex: 1 1 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: .6rem;
+  gap: .3rem;
+  padding: 1.5rem 1rem 1.75rem;
   text-align: center;
-  padding: 3rem 1.5rem;
-  color: #ffffff;
   text-decoration: none;
-  background-color: rgba(32, 78, 74, 0.58);
-  backdrop-filter: blur(2px);
-  transition: background-color .25s ease;
+  color: var(--cp-text);
+  transition: background-color .15s ease;
 }
-.cp-audience-gate__half:hover,
-.cp-audience-gate__half:focus-visible {
-  background-color: rgba(32, 78, 74, 0.74);
-  color: #ffffff;
+.cp-audience-modal__option:hover,
+.cp-audience-modal__option:focus-visible {
+  background-color: var(--cp-bg);
+  color: var(--cp-text);
 }
-.cp-audience-gate__half--patient {
-  border-right: 1px solid rgba(255, 255, 255, .3);
+.cp-audience-modal__option:first-child {
+  border-right: 1px solid var(--cp-border);
 }
-.cp-audience-gate__eyebrow {
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-style: italic;
-  font-size: 1.05rem;
-  letter-spacing: .04em;
-  color: #e7efed;
-  text-shadow: 0 1px 8px rgba(0,0,0,.4);
-}
-.cp-audience-gate__label {
-  font-family: Georgia, "Times New Roman", Times, serif;
+.cp-audience-modal__eyebrow {
+  font-size: .78rem;
   font-weight: 700;
-  font-size: 2.4rem;
-  line-height: 1.15;
-  text-shadow: 0 2px 14px rgba(0,0,0,.45);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--cp-muted);
 }
-.cp-audience-gate__arrow {
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 1.4rem;
-  opacity: .85;
+.cp-audience-modal__label {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--cp-primary-dark);
 }
-@media (max-width: 767.98px) {
-  .cp-audience-gate {
+.cp-audience-modal__arrow {
+  color: var(--cp-primary);
+  font-size: 1.1rem;
+}
+@media (max-width: 480px) {
+  .cp-audience-modal__options {
     flex-direction: column;
-    min-height: calc(100vh - 64px);
   }
-  .cp-audience-gate__half--patient {
+  .cp-audience-modal__option:first-child {
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, .3);
-  }
-  .cp-audience-gate__label {
-    font-size: 1.7rem;
+    border-bottom: 1px solid var(--cp-border);
   }
 }
 
