@@ -17,12 +17,13 @@
     <div class="cp-admin-shell">
         <aside class="cp-admin-sidebar">
             <div class="cp-admin-brand">
-                <img src="~/images/logo.svg" alt="CentralPsi" height="34" />
-                <span>Panel admin</span>
+                <div class="cp-admin-brand__title">CentralPsi</div>
+                <div class="cp-admin-brand__subtitle">Panel de administración</div>
+                <img src="~/images/logo-on-dark.svg" alt="CentralPsi" height="30" class="cp-admin-brand__icon" />
             </div>
             <nav class="nav flex-column">
                 <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Resumen</a>
-                <a class="nav-link" asp-area="Admin" asp-controller="Links" asp-action="Index">🔗 Enlaces / Accesos</a>
+                <a class="nav-link" asp-area="Admin" asp-controller="Links" asp-action="Index">Enlaces / Accesos</a>
                 <a class="nav-link" asp-area="Admin" asp-controller="Professionals" asp-action="Index">Profesionales</a>
                 <a class="nav-link" asp-area="Admin" asp-controller="Payments" asp-action="Index">Pagos a profesionales</a>
                 <a class="nav-link" asp-area="Admin" asp-controller="PaymentInbox" asp-action="Index">Bandeja de pagos</a>
