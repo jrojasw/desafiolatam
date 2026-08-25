@@ -36,7 +36,7 @@
             <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="mt-4">
                 <button type="submit" class="btn btn-outline-light btn-sm w-100">Cerrar sesión</button>
             </form>
-            <a href="/" class="cp-admin-back-link">← Volver al sitio público</a>
+            <a href="/" class="nav-link cp-admin-back-link">🏠 Volver al sitio público</a>
         </aside>
         <main class="cp-admin-content">
             @if (TempData["SuccessMessage"] is string successMessage)

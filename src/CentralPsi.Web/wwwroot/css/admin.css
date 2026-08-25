@@ -36,7 +36,13 @@
   color: #9fc0bc;
   font-size: .85rem;
   margin-top: 1.5rem;
-  display: inline-block;
+}
+/* Especificidad (0,2,0) a propósito: le gana a la regla global "a:hover { color: var(--cp-primary-dark) }"
+   de site.css, que sin esto dejaba el texto del mismo color que el fondo de la barra lateral al pasar el
+   mouse - por eso "desaparecía". */
+.cp-admin-back-link:hover {
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
 }
 .cp-admin-content {
   flex: 1;
