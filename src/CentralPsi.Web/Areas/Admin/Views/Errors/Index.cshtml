@@ -1,0 +1,61 @@
+@using CentralPsi.Web.Models.Entities
+@{
+    ViewData["Title"] = "Errores del sitio";
+    var logs = ViewBag.Logs as List<ErrorLog> ?? new List<ErrorLog>();
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
+    Cada vez que un usuario ve la página genérica de error del sitio (por una excepción no controlada),
+    queda registrado aquí con el detalle técnico completo — sin necesidad de revisar los logs de Render.
+    Se muestran los últimos 200 registros.
+</div>
+
+<div class="cp-form-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Errores capturados</h5>
+        @if (logs.Count > 0)
+        {
+            <form asp-action="Clear" method="post" onsubmit="return confirm('¿Eliminar todos los registros de error? Esta acción no se puede deshacer.');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Limpiar todo</button>
+            </form>
+        }
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Mensaje</th>
+                    <th>Ruta</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in logs)
+                {
+                    <tr>
+                        <td class="text-nowrap small">@log.OccurredAtUtc.ToLocalTime().ToString("dd-MM-yyyy HH:mm", culture)</td>
+                        <td class="small">@log.ExceptionType</td>
+                        <td class="small">@log.Message</td>
+                        <td class="small text-muted">@log.Method @log.Path@log.QueryString</td>
+                        <td class="small">
+                            @if (!string.IsNullOrWhiteSpace(log.StackTrace))
+                            {
+                                <details>
+                                    <summary class="text-muted" style="cursor:pointer;">Ver stack trace</summary>
+                                    <pre class="small mt-2 mb-0" style="white-space:pre-wrap;max-width:520px;">@log.StackTrace</pre>
+                                </details>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (logs.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-3">No hay errores registrados. 🎉</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

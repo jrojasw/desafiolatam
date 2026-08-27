@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using CentralPsi.Web.Data;
 using CentralPsi.Web.Models;
+using CentralPsi.Web.Models.Entities;
 using CentralPsi.Web.Models.ViewModels;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,8 +42,32 @@ public class HomeController : Controller
     public IActionResult Terms() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public async Task<IActionResult> Error()
     {
+        var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+        if (exceptionFeature?.Error is { } ex)
+        {
+            _logger.LogError(ex, "Excepción no controlada en {Path}", exceptionFeature.Path);
+            try
+            {
+                _db.ErrorLogs.Add(new ErrorLog
+                {
+                    ExceptionType = ex.GetType().FullName ?? ex.GetType().Name,
+                    Message = ex.Message,
+                    StackTrace = ex.StackTrace,
+                    Path = exceptionFeature.Path,
+                    Method = Request.Method,
+                    QueryString = Request.QueryString.HasValue ? Request.QueryString.Value : null
+                });
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception logEx)
+            {
+                // Never let a failure to persist the error log break the error page itself.
+                _logger.LogError(logEx, "No se pudo guardar el registro de error en la base de datos.");
+            }
+        }
+
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
