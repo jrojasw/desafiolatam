@@ -43,7 +43,7 @@
         <p class="cp-section-subtitle">
             Completa tus datos y adjunta tu documentación. Validaremos automáticamente tu certificado del
             Ministerio de Salud contra la Superintendencia de Salud; si todo está en orden, tu perfil se publicará
-            en <strong>Nuestros profesionales</strong> y te avisaremos por correo.
+            en <strong>Profesionales disponibles</strong> y te avisaremos por correo.
         </p>
 
         <div class="cp-crisis-notice mb-4" style="background:#eef6f5;color:var(--cp-primary-dark);">
@@ -133,7 +133,7 @@
                     <label asp-for="CertificateFile" class="form-label"></label>
                     <input asp-for="CertificateFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf" />
                     <span asp-validation-for="CertificateFile" class="text-danger small"></span>
-                    <div class="form-text">Sube el certificado emitido por la Superintendencia de Salud (idealmente en imagen, para poder leer su código QR automáticamente).</div>
+                    <div class="form-text">Sube el certificado emitido por la Superintendencia de Salud (idealmente en imagen, para poder leer su código QR automáticamente). Debe estar <strong>vigente y actualizado</strong>.</div>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="CertificateValidationCode" class="form-label"></label>
