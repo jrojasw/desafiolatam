@@ -274,19 +274,4 @@ public class NotificationService : INotificationService
         await _email.SendAsync(appointment.PatientEmail, appointment.PatientFullName,
             "CentralPsi - Confirmación de cancelación", patientBody);
     }
-
-    public async Task SendFonasaConfirmationRequestAsync(Professional professional)
-    {
-        var link = $"{_options.BaseUrl}/profesionales/fonasa/{professional.FonasaConfirmationToken}";
-        var body = Wrap(
-            Heading("Confirma tu inscripción en Fonasa") +
-            Paragraph($"Hola {professional.FullName},") +
-            Paragraph(@"Estamos actualizando los perfiles públicos de nuestros profesionales para indicar si
-                están inscritos en Fonasa. Ayúdanos confirmando tu situación con un clic — no necesitas
-                iniciar sesión, el enlace es de un solo uso.") +
-            Button(link, "Confirmar mi situación en Fonasa") +
-            Paragraph("Equipo CentralPsi"));
-        await _email.SendAsync(professional.Email, professional.FullName,
-            "CentralPsi - Confirma tu inscripción en Fonasa", body);
-    }
 }

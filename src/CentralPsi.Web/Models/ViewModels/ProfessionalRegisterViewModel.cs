@@ -39,10 +39,6 @@ public class ProfessionalRegisterViewModel
     [Display(Name = "Especifica tu orientación")]
     public string? OrientationOther { get; set; }
 
-    [Required(ErrorMessage = "Indica si estás inscrito/a en Fonasa")]
-    [Display(Name = "¿Estás inscrito/a en Fonasa?")]
-    public bool? IsFonasaRegistered { get; set; }
-
     [Required(ErrorMessage = "Cuéntanos tu formación y forma de trabajar (mínimo 40 caracteres)")]
     [MinLength(40, ErrorMessage = "Cuéntanos un poco más sobre tu formación y forma de trabajar (mínimo 40 caracteres)")]
     [Display(Name = "Experiencia y forma de trabajar")]

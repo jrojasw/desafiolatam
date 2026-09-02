@@ -2,20 +2,14 @@
 @{
     ViewData["Title"] = "Profesionales";
     var current = ViewData["StatusFilter"] as ProfessionalStatus?;
-    var pendingFonasa = (int)(ViewBag.PendingFonasaCount ?? 0);
 }
 
-<div class="mb-3 d-flex gap-2 flex-wrap justify-content-between align-items-center">
-    <div class="d-flex gap-2 flex-wrap">
-        <a asp-action="Index" class="btn btn-sm @(current is null ? "cp-btn-primary" : "cp-btn-outline")">Todos</a>
-        <a asp-action="Index" asp-route-status="PendingVerification" class="btn btn-sm @(current == ProfessionalStatus.PendingVerification ? "cp-btn-primary" : "cp-btn-outline")">Pendientes</a>
-        <a asp-action="Index" asp-route-status="Verified" class="btn btn-sm @(current == ProfessionalStatus.Verified ? "cp-btn-primary" : "cp-btn-outline")">Publicados</a>
-        <a asp-action="Index" asp-route-status="Rejected" class="btn btn-sm @(current == ProfessionalStatus.Rejected ? "cp-btn-primary" : "cp-btn-outline")">Rechazados</a>
-        <a asp-action="Index" asp-route-status="Inactive" class="btn btn-sm @(current == ProfessionalStatus.Inactive ? "cp-btn-primary" : "cp-btn-outline")">Inactivos</a>
-    </div>
-    <form asp-action="SendFonasaConfirmationEmails" method="post" onsubmit="return confirm('¿Enviar el correo de confirmación de Fonasa a todos los profesionales publicados que aún no han respondido?');">
-        <button type="submit" class="btn btn-sm cp-btn-outline">✉️ Pedir confirmación de Fonasa (@pendingFonasa pendiente@(pendingFonasa == 1 ? "" : "s"))</button>
-    </form>
+<div class="mb-3 d-flex gap-2 flex-wrap">
+    <a asp-action="Index" class="btn btn-sm @(current is null ? "cp-btn-primary" : "cp-btn-outline")">Todos</a>
+    <a asp-action="Index" asp-route-status="PendingVerification" class="btn btn-sm @(current == ProfessionalStatus.PendingVerification ? "cp-btn-primary" : "cp-btn-outline")">Pendientes</a>
+    <a asp-action="Index" asp-route-status="Verified" class="btn btn-sm @(current == ProfessionalStatus.Verified ? "cp-btn-primary" : "cp-btn-outline")">Publicados</a>
+    <a asp-action="Index" asp-route-status="Rejected" class="btn btn-sm @(current == ProfessionalStatus.Rejected ? "cp-btn-primary" : "cp-btn-outline")">Rechazados</a>
+    <a asp-action="Index" asp-route-status="Inactive" class="btn btn-sm @(current == ProfessionalStatus.Inactive ? "cp-btn-primary" : "cp-btn-outline")">Inactivos</a>
 </div>
 
 <div class="table-responsive">

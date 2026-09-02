@@ -24,10 +24,3 @@ public class TimeSlotOption
     public DateTime StartUtc { get; set; }
     public string DisplayTime { get; set; } = string.Empty;
 }
-
-public class ProfessionalFonasaConfirmationViewModel
-{
-    public Professional Professional { get; set; } = null!;
-    public bool AlreadyAnswered { get; set; }
-    public bool LinkInvalid { get; set; }
-}
