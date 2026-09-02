@@ -101,6 +101,38 @@ public class ProfessionalsController : Controller
     [HttpGet("como-funcionan-los-pagos")]
     public IActionResult CondicionesPago() => View(_appOptions);
 
+    [HttpGet("fonasa/{token}")]
+    public async Task<IActionResult> FonasaConfirm(string token)
+    {
+        var professional = await _db.Professionals.FirstOrDefaultAsync(p => p.FonasaConfirmationToken == token);
+        if (professional is null)
+        {
+            return View(new ProfessionalFonasaConfirmationViewModel { Professional = new Professional(), LinkInvalid = true });
+        }
+
+        return View(new ProfessionalFonasaConfirmationViewModel
+        {
+            Professional = professional,
+            AlreadyAnswered = professional.FonasaConfirmedAtUtc.HasValue
+        });
+    }
+
+    [HttpPost("fonasa/{token}")]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("sensitive")]
+    public async Task<IActionResult> FonasaConfirmSubmit(string token, bool isFonasaRegistered)
+    {
+        var professional = await _db.Professionals.FirstOrDefaultAsync(p => p.FonasaConfirmationToken == token);
+        if (professional is null) return NotFound();
+
+        professional.IsFonasaRegistered = isFonasaRegistered;
+        professional.FonasaConfirmedAtUtc = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "¡Gracias por confirmar! Tu perfil público fue actualizado.";
+        return RedirectToAction(nameof(FonasaConfirm), new { token });
+    }
+
     [HttpPost("inscripcion")]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("sensitive")]
@@ -146,6 +178,7 @@ public class ProfessionalsController : Controller
             Orientation = resolvedOrientation,
             Experience = model.Experience.Trim(),
             IsFonasaRegistered = model.IsFonasaRegistered ?? false,
+            FonasaConfirmedAtUtc = DateTime.UtcNow,
             CertificateValidationCode = model.CertificateValidationCode.Trim(),
             Status = ProfessionalStatus.PendingVerification,
             TaxComplianceAcceptedAtUtc = DateTime.UtcNow,

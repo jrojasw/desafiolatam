@@ -62,8 +62,39 @@ public class ProfessionalsController : Controller
             query = query.Where(p => p.Status == status.Value);
         }
         ViewData["StatusFilter"] = status;
+        ViewBag.PendingFonasaCount = await _db.Professionals
+            .CountAsync(p => p.Status == ProfessionalStatus.Verified && p.FonasaConfirmedAtUtc == null);
         var professionals = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
         return View(professionals);
+    }
+
+    /// <summary>
+    /// Bulk-sends the "confirm your Fonasa status" email to every verified professional who hasn't answered
+    /// yet (registered before the Fonasa field existed, so it currently defaults to "No"). Skips anyone who
+    /// already confirmed - either through this same email, or by answering the question when they registered.
+    /// </summary>
+    [HttpPost("EnviarConfirmacionFonasa")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SendFonasaConfirmationEmails()
+    {
+        var pending = await _db.Professionals
+            .Where(p => p.Status == ProfessionalStatus.Verified && p.FonasaConfirmedAtUtc == null)
+            .ToListAsync();
+
+        var sent = 0;
+        foreach (var professional in pending)
+        {
+            professional.FonasaConfirmationToken = Guid.NewGuid().ToString("N");
+            professional.FonasaConfirmationSentAtUtc = DateTime.UtcNow;
+            await TrySendNotificationAsync(() => _notifications.SendFonasaConfirmationRequestAsync(professional), professional.Id);
+            sent++;
+        }
+        await _db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = sent == 0
+            ? "No hay profesionales pendientes de confirmar su situación en Fonasa."
+            : $"Se envió el correo de confirmación a {sent} profesional(es).";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet("{id:guid}")]

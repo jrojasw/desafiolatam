@@ -9,4 +9,5 @@ public interface INotificationService
     Task SendAppointmentConfirmedAsync(Appointment appointment, Professional professional);
     Task SendAttendanceConfirmationRequestAsync(Appointment appointment, Professional professional);
     Task SendCancellationRefundNoticeAsync(Appointment appointment, Professional professional, CancellationRequest request);
+    Task SendFonasaConfirmationRequestAsync(Professional professional);
 }

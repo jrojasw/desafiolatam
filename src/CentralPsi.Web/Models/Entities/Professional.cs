@@ -25,6 +25,12 @@ public class Professional
     /// <summary>Declared by the professional at registration; shown publicly on their profile.</summary>
     public bool IsFonasaRegistered { get; set; }
 
+    /// <summary>Set when an admin sends the "confirm your Fonasa status" email to a professional who registered
+    /// before this field existed; cleared once they answer through the one-time link, so it can't be reused.</summary>
+    public string? FonasaConfirmationToken { get; set; }
+    public DateTime? FonasaConfirmationSentAtUtc { get; set; }
+    public DateTime? FonasaConfirmedAtUtc { get; set; }
+
     // Documents (stored outside wwwroot, never public - served through authenticated admin action only)
     public string CedulaFrontPath { get; set; } = string.Empty;
     public string CedulaBackPath { get; set; } = string.Empty;
