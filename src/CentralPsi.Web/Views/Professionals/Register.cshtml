@@ -100,6 +100,21 @@
                     <input asp-for="OrientationOther" class="form-control" placeholder="Escribe tu orientación" />
                     <span asp-validation-for="OrientationOther" class="text-danger small"></span>
                 </div>
+                <div class="col-md-6">
+                    <label asp-for="IsFonasaRegistered" class="form-label"></label>
+                    <div class="form-text mb-1">Esta información se mostrará públicamente en tu perfil.</div>
+                    <div class="d-flex gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="IsFonasaRegistered" id="fonasaSi" value="true" />
+                            <label class="form-check-label" for="fonasaSi">Sí</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="IsFonasaRegistered" id="fonasaNo" value="false" />
+                            <label class="form-check-label" for="fonasaNo">No</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="IsFonasaRegistered" class="text-danger small"></span>
+                </div>
                 <div class="col-12">
                     <label asp-for="Experience" class="form-label"></label>
                     <div class="form-text mb-1">

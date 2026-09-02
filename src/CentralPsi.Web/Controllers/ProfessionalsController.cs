@@ -145,6 +145,7 @@ public class ProfessionalsController : Controller
             Specialty = string.IsNullOrWhiteSpace(model.Specialty) ? null : model.Specialty.Trim(),
             Orientation = resolvedOrientation,
             Experience = model.Experience.Trim(),
+            IsFonasaRegistered = model.IsFonasaRegistered ?? false,
             CertificateValidationCode = model.CertificateValidationCode.Trim(),
             Status = ProfessionalStatus.PendingVerification,
             TaxComplianceAcceptedAtUtc = DateTime.UtcNow,

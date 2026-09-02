@@ -22,6 +22,9 @@ public class Professional
     public string Experience { get; set; } = string.Empty;
     public string? ProfilePhotoPath { get; set; }
 
+    /// <summary>Declared by the professional at registration; shown publicly on their profile.</summary>
+    public bool IsFonasaRegistered { get; set; }
+
     // Documents (stored outside wwwroot, never public - served through authenticated admin action only)
     public string CedulaFrontPath { get; set; } = string.Empty;
     public string CedulaBackPath { get; set; } = string.Empty;

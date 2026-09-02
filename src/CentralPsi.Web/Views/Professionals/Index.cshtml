@@ -32,6 +32,16 @@
                                     <div class="text-muted small mb-1">@professional.Specialty</div>
                                 }
                                 <div class="small mb-2"><strong>Orientación:</strong> @professional.Orientation</div>
+                                <div class="small mb-2">
+                                    @if (professional.IsFonasaRegistered)
+                                    {
+                                        <span class="badge" style="background:var(--cp-primary-light);color:var(--cp-primary-dark);">Inscrito/a en Fonasa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">No inscrito/a en Fonasa</span>
+                                    }
+                                </div>
                                 <p class="small text-muted mb-3">@(professional.Experience.Length > 140 ? professional.Experience[..140] + "…" : professional.Experience)</p>
                                 <a asp-action="Details" asp-route-id="@professional.Id" class="btn cp-btn-primary w-100">@(bookingEnabled ? "Ver perfil y agendar" : "Ver perfil")</a>
                             </div>
