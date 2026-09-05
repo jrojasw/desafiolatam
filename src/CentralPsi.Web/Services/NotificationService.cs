@@ -84,6 +84,11 @@ public class NotificationService : INotificationService
           {html}
         </div>";
 
+    private static string WarningBox(string html) => $@"
+        <div style=""background-color:#fff4e5;border:1px solid #f3cf9a;border-radius:8px;padding:16px 18px;margin:0 0 20px;font-size:14px;color:#8a5300;"">
+          {html}
+        </div>";
+
     private static string SessionTipsBox(bool forProfessional)
     {
         var items = forProfessional
@@ -141,6 +146,9 @@ public class NotificationService : INotificationService
             Paragraph("No fue posible validar automáticamente tu certificado contra la Superintendencia de Salud.") +
             InfoBox($"<strong>Motivo:</strong> {reason}") +
             Paragraph("Puedes volver a enviar tus documentos con un clic, sin necesidad de iniciar sesión:") +
+            WarningBox(@"<strong>Importante:</strong> ten tus documentos (cédula de identidad y certificado)
+                <strong>listos y a la mano antes de abrir el enlace</strong>. Si lo abres y no alcanzas a
+                completar el envío, deberás solicitar un enlace nuevo.") +
             Button(resubmitLink, "Volver a subir mis documentos") +
             Paragraph("Equipo CentralPsi"));
         await _email.SendAsync(professional.Email, professional.FullName,
