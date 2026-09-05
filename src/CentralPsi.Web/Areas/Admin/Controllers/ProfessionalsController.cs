@@ -168,6 +168,7 @@ public class ProfessionalsController : Controller
         if (professional is null) return NotFound();
 
         professional.Status = ProfessionalStatus.Rejected;
+        professional.DocumentResubmissionToken = Guid.NewGuid().ToString("N");
         await _db.SaveChangesAsync();
         await TrySendNotificationAsync(
             () => _notifications.SendProfessionalRejectedAsync(professional, reason ?? "No cumple los requisitos de validación."),

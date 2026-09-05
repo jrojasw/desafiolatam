@@ -35,6 +35,11 @@ public class Professional
 
     public ProfessionalStatus Status { get; set; } = ProfessionalStatus.PendingVerification;
 
+    /// <summary>Set when an admin rejects the professional, so the rejection email can link them straight to a
+    /// self-service page to re-upload their documents - no login required. Cleared once they resubmit (a fresh
+    /// one is issued on every rejection), so an old email link can't be reused after that.</summary>
+    public string? DocumentResubmissionToken { get; set; }
+
     /// <summary>When the professional confirmed having an active SII "Inicio de Actividades" and understanding
     /// they must send their boleta de honorarios to pagos@centralpsi.cl to get paid for each session.</summary>
     public DateTime? TaxComplianceAcceptedAtUtc { get; set; }

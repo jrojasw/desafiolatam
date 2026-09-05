@@ -101,6 +101,72 @@ public class ProfessionalsController : Controller
     [HttpGet("como-funcionan-los-pagos")]
     public IActionResult CondicionesPago() => View(_appOptions);
 
+    [HttpGet("reenviar-documentos/{token}")]
+    public async Task<IActionResult> ResubmitDocuments(string token)
+    {
+        var professional = await _db.Professionals.FirstOrDefaultAsync(p => p.DocumentResubmissionToken == token);
+        if (professional is null)
+        {
+            return View(new ProfessionalDocumentResubmissionViewModel { Professional = new Professional(), LinkInvalid = true });
+        }
+
+        return View(new ProfessionalDocumentResubmissionViewModel { Professional = professional });
+    }
+
+    [HttpPost("reenviar-documentos/{token}")]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("sensitive")]
+    public async Task<IActionResult> ResubmitDocumentsSubmit(string token, ProfessionalDocumentResubmissionViewModel model)
+    {
+        var professional = await _db.Professionals.FirstOrDefaultAsync(p => p.DocumentResubmissionToken == token);
+        if (professional is null) return NotFound();
+
+        if (model.CedulaFront is null or { Length: 0 })
+        {
+            ModelState.AddModelError(nameof(model.CedulaFront), "Debes adjuntar el frente de tu cédula");
+        }
+        if (model.CedulaBack is null or { Length: 0 })
+        {
+            ModelState.AddModelError(nameof(model.CedulaBack), "Debes adjuntar el reverso de tu cédula");
+        }
+        if (model.CertificateFile is null or { Length: 0 })
+        {
+            ModelState.AddModelError(nameof(model.CertificateFile), "Debes adjuntar tu certificado del Ministerio de Salud");
+        }
+        if (string.IsNullOrWhiteSpace(model.CertificateValidationCode))
+        {
+            ModelState.AddModelError(nameof(model.CertificateValidationCode), "Ingresa el código de validación del certificado");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            model.Professional = professional;
+            return View(nameof(ResubmitDocuments), model);
+        }
+
+        professional.CedulaFrontPath = await _fileStorage.SavePrivateAsync(model.CedulaFront!, "cedulas");
+        professional.CedulaBackPath = await _fileStorage.SavePrivateAsync(model.CedulaBack!, "cedulas");
+        professional.CertificateFilePath = await _fileStorage.SavePrivateAsync(model.CertificateFile!, "certificados");
+        professional.CertificateValidationCode = model.CertificateValidationCode!.Trim();
+        professional.Status = ProfessionalStatus.PendingVerification;
+        professional.CertificateVerificationNotes = null;
+        professional.CertificateVerifiedAt = null;
+        professional.CertificateQrRawData = null;
+        professional.DocumentResubmissionToken = null;
+        await _db.SaveChangesAsync();
+
+        await _whatsApp.SendAsync(
+            $"🔁 {professional.FullName} volvió a subir su documentación en CentralPsi. Revísalo en el panel admin.");
+
+        await TryAutoValidateAsync(professional);
+
+        TempData["SuccessMessage"] = "¡Gracias! Volvimos a revisar tu documentación.";
+        TempData["SuccessMessageHtmlSuffix"] = professional.Status == ProfessionalStatus.Verified
+            ? " <strong>¡Tu perfil ya está publicado!</strong>"
+            : " Te avisaremos por correo apenas quede publicado tu perfil.";
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost("inscripcion")]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("sensitive")]
@@ -207,13 +273,17 @@ public class ProfessionalsController : Controller
             if (result.IsValid && !result.Inconclusive)
             {
                 professional.Status = ProfessionalStatus.Verified;
+                professional.DocumentResubmissionToken = null;
                 await _db.SaveChangesAsync();
                 await _notifications.SendProfessionalVerifiedAsync(professional);
             }
             else
             {
                 // Left as PendingVerification either way (never auto-reject) so an inconclusive automated
-                // check always falls back to a human decision in the admin dashboard.
+                // check always falls back to a human decision in the admin dashboard. Still issues a fresh
+                // resubmission link so the professional isn't stuck waiting on that human review to fix an
+                // obvious problem (wrong file, mistyped code, expired certificate) themselves.
+                professional.DocumentResubmissionToken = Guid.NewGuid().ToString("N");
                 await _db.SaveChangesAsync();
                 await _notifications.SendProfessionalRejectedAsync(professional, result.Notes);
             }

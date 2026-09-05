@@ -1,0 +1,62 @@
+@model CentralPsi.Web.Models.ViewModels.ProfessionalDocumentResubmissionViewModel
+@{
+    ViewData["Title"] = "Vuelve a subir tu documentación";
+}
+
+<section class="cp-section">
+    <div class="container" style="max-width:640px;">
+        <h1 class="cp-section-title">Vuelve a subir tu documentación</h1>
+
+        @if (Model.LinkInvalid)
+        {
+            <div class="cp-form-card">
+                <div class="alert alert-warning mb-0">
+                    Este enlace ya no es válido — puede que ya hayas reenviado tus documentos, o que tu perfil ya
+                    esté publicado. Si necesitas ayuda, escríbenos a
+                    <a href="mailto:admin@centralpsi.cl">admin@centralpsi.cl</a>.
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="cp-section-subtitle">
+                Hola @Model.Professional.FullName, no pudimos validar tu documentación anterior.
+                @if (!string.IsNullOrWhiteSpace(Model.Professional.CertificateVerificationNotes))
+                {
+                    <text> Motivo: <strong>@Model.Professional.CertificateVerificationNotes</strong>.</text>
+                }
+                Vuelve a adjuntar tus documentos abajo y los revisaremos de nuevo.
+            </p>
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <form asp-action="ResubmitDocumentsSubmit" method="post" enctype="multipart/form-data" class="cp-form-card">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="CedulaFront" class="form-label"></label>
+                        <input asp-for="CedulaFront" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf" />
+                        <span asp-validation-for="CedulaFront" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CedulaBack" class="form-label"></label>
+                        <input asp-for="CedulaBack" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf" />
+                        <span asp-validation-for="CedulaBack" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CertificateFile" class="form-label"></label>
+                        <input asp-for="CertificateFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf" />
+                        <span asp-validation-for="CertificateFile" class="text-danger small"></span>
+                        <div class="form-text">Debe estar <strong>vigente y actualizado</strong>.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CertificateValidationCode" class="form-label"></label>
+                        <input asp-for="CertificateValidationCode" class="form-control" />
+                        <span asp-validation-for="CertificateValidationCode" class="text-danger small"></span>
+                        <div class="form-text">Es el código que aparece en tu certificado para validarlo en emisorcertificados.superdesalud.gob.cl</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn cp-btn-primary btn-lg mt-4">Reenviar documentación</button>
+            </form>
+        }
+    </div>
+</section>

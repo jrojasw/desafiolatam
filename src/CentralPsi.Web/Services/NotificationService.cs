@@ -134,13 +134,14 @@ public class NotificationService : INotificationService
 
     public async Task SendProfessionalRejectedAsync(Professional professional, string reason)
     {
+        var resubmitLink = $"{_options.BaseUrl}/profesionales/reenviar-documentos/{professional.DocumentResubmissionToken}";
         var body = Wrap(
             Heading("No pudimos validar tu certificado") +
             Paragraph($"Hola {professional.FullName},") +
             Paragraph("No fue posible validar automáticamente tu certificado contra la Superintendencia de Salud.") +
             InfoBox($"<strong>Motivo:</strong> {reason}") +
-            Paragraph(@"Nuestro equipo revisará tu caso manualmente. Si crees que se trata de un error,
-                responde este correo adjuntando nuevamente tu certificado.") +
+            Paragraph("Puedes volver a enviar tus documentos con un clic, sin necesidad de iniciar sesión:") +
+            Button(resubmitLink, "Volver a subir mis documentos") +
             Paragraph("Equipo CentralPsi"));
         await _email.SendAsync(professional.Email, professional.FullName,
             "CentralPsi - No pudimos validar tu certificado", body);
