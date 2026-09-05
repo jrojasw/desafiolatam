@@ -177,11 +177,13 @@
                         <button type="submit" class="btn cp-btn-primary w-100">Aprobar y publicar</button>
                     </form>
                 }
-                @if (Model.Status == ProfessionalStatus.PendingVerification)
+                @if (Model.Status is ProfessionalStatus.PendingVerification or ProfessionalStatus.Rejected)
                 {
                     <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
                         <input type="text" name="reason" class="form-control mb-2" placeholder="Motivo del rechazo (opcional)" />
-                        <button type="submit" class="btn btn-outline-danger w-100">Rechazar</button>
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            @(Model.Status == ProfessionalStatus.Rejected ? "Rechazar de nuevo (envía un enlace nuevo)" : "Rechazar")
+                        </button>
                     </form>
                 }
                 @if (Model.Status == ProfessionalStatus.Verified)
