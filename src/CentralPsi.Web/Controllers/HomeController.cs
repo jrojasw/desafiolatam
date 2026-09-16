@@ -44,6 +44,9 @@ public class HomeController : Controller
     [HttpGet("/como-funciona")]
     public IActionResult ComoFunciona() => View();
 
+    [HttpGet("/precio-y-reembolsos")]
+    public IActionResult PrecioYReembolsos() => View();
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> Error()
     {
