@@ -41,6 +41,9 @@ public class HomeController : Controller
 
     public IActionResult Terms() => View();
 
+    [HttpGet("/como-funciona")]
+    public IActionResult ComoFunciona() => View();
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> Error()
     {

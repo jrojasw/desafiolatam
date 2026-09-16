@@ -1,0 +1,53 @@
+@{
+    ViewData["Title"] = "Cómo funciona";
+}
+
+<section class="cp-section">
+    <div class="container">
+        <h1 class="cp-section-title">Cómo funciona CentralPsi</h1>
+        <p class="cp-section-subtitle">
+            Agendar tu primera sesión con un psicólogo/a toma pocos minutos. Así funciona, paso a paso.
+        </p>
+
+        <div class="row gy-4">
+            <div class="col-sm-6 col-lg-3 d-flex gap-3">
+                <div class="cp-feature-icon">1</div>
+                <div>
+                    <strong>Explora profesionales</strong>
+                    <p class="mb-0 text-muted">Revisa el listado de psicólogos y psicólogas, todos verificados ante la Superintendencia de Salud.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3 d-flex gap-3">
+                <div class="cp-feature-icon">2</div>
+                <div>
+                    <strong>Elige un horario</strong>
+                    <p class="mb-0 text-muted">Cada profesional publica sus horarios disponibles; eliges el día y la hora que más te acomode.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3 d-flex gap-3">
+                <div class="cp-feature-icon">3</div>
+                <div>
+                    <strong>Paga de forma segura</strong>
+                    <p class="mb-0 text-muted">Un valor único de $37.944 por sesión, procesado con Webpay Plus. Recibes boleta de honorarios.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3 d-flex gap-3">
+                <div class="cp-feature-icon">4</div>
+                <div>
+                    <strong>Asiste a tu sesión</strong>
+                    <p class="mb-0 text-muted">Te llega el enlace de la videollamada (Google Meet) por correo, listo para conectarte a la hora agendada.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cp-crisis-notice mt-5" style="background:#eef6f5;color:var(--cp-primary-dark);">
+            CentralPsi actúa solo como agendador (box virtual) entre tú y el profesional — no presta servicios
+            de salud ni almacena antecedentes clínicos. Puedes revisar la
+            <a asp-controller="Home" asp-action="Terms">política de reembolsos y condiciones</a> antes de agendar.
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="/agenda-tu-hora" class="btn cp-btn-primary btn-lg">Agenda tu hora</a>
+        </div>
+    </div>
+</section>
