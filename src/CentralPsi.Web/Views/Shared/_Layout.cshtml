@@ -7,7 +7,11 @@
     // Canonical siempre se arma desde la BaseUrl configurada (https://www.centralpsi.cl), nunca desde el host
     // real de la request - así nunca puede apuntar accidentalmente a la versión sin "www" (hoy da 404) ni a
     // http, sin importar cómo haya llegado la visita. Se excluye el query string a propósito.
-    var canonicalUrl = $"{LayoutAppOpts.Value.BaseUrl.TrimEnd('/')}{Context.Request.Path}";
+    // Una vista puede forzar una ruta canónica distinta a la que realmente se visitó (ViewData["CanonicalPath"])
+    // cuando el mismo contenido es accesible desde más de una URL (ej. /agenda-tu-hora y /profesionales),
+    // para que buscadores no las traten como contenido duplicado.
+    var canonicalPath = ViewData["CanonicalPath"] as string ?? Context.Request.Path.Value;
+    var canonicalUrl = $"{LayoutAppOpts.Value.BaseUrl.TrimEnd('/')}{canonicalPath}";
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -47,7 +51,7 @@
                 <div class="collapse navbar-collapse" id="cpNavbar">
                     <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Professionals" asp-action="Index">Agenda tu hora</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/agenda-tu-hora">Agenda tu hora</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Professionals" asp-action="Index">Profesionales</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a></li>
                         <li class="nav-item ms-lg-2 d-none d-lg-block">

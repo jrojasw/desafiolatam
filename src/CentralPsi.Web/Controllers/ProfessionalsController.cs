@@ -46,6 +46,7 @@ public class ProfessionalsController : Controller
     }
 
     [HttpGet("")]
+    [HttpGet("/agenda-tu-hora")]
     public async Task<IActionResult> Index()
     {
         var professionals = await _db.Professionals
@@ -53,6 +54,9 @@ public class ProfessionalsController : Controller
             .OrderBy(p => p.FullName)
             .ToListAsync();
         ViewBag.BookingEnabled = _appOptions.BookingEnabled;
+        // Accesible también desde /agenda-tu-hora (mismo contenido) - siempre se declara /profesionales como
+        // la URL canónica para que buscadores no la traten como contenido duplicado.
+        ViewData["CanonicalPath"] = "/profesionales";
         return View(new ProfessionalListViewModel { Professionals = professionals });
     }
 
