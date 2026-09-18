@@ -35,3 +35,22 @@
         }
     </div>
 </section>
+
+@section Scripts {
+    @if (approved && appointment is not null)
+    {
+        <script>
+            // Solo se dispara cuando el pago quedó realmente aprobado (nunca en un intento cancelado o
+            // rechazado), y usa el ID de la cita como transaction_id para que Google Ads no cuente la misma
+            // reserva dos veces si la persona recarga esta página.
+            if (typeof gtag === 'function') {
+                gtag('event', 'conversion', {
+                    'send_to': 'AW-846452720/pI68CL2J0fMcEPCvz5MD',
+                    'value': @appointment.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    'currency': 'CLP',
+                    'transaction_id': '@appointment.Id'
+                });
+            }
+        </script>
+    }
+}
