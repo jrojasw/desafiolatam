@@ -10,6 +10,10 @@ public class AnalyticsOptions
     /// <summary>GA4 measurement ID, format "G-XXXXXXXXXX". Empty disables Google Analytics entirely.</summary>
     public string GoogleAnalyticsId { get; set; } = "";
 
+    /// <summary>Google Ads conversion tag ID, format "AW-XXXXXXXXX". Empty disables Google Ads conversion
+    /// tracking entirely. Shares the same gtag.js loader as GoogleAnalyticsId when both are set.</summary>
+    public string GoogleAdsId { get; set; } = "";
+
     /// <summary>Meta Pixel ID (numeric). Empty disables the Meta Pixel entirely.</summary>
     public string MetaPixelId { get; set; } = "";
 }

@@ -2,8 +2,19 @@
 @inject Microsoft.Extensions.Options.IOptions<CentralPsi.Web.Options.AppOptions> LayoutAppOpts
 @{
     var gaId = AnalyticsOpts.Value.GoogleAnalyticsId;
+    var googleAdsId = AnalyticsOpts.Value.GoogleAdsId;
     var metaPixelId = AnalyticsOpts.Value.MetaPixelId;
-    var hasAnalytics = !string.IsNullOrWhiteSpace(gaId) || !string.IsNullOrWhiteSpace(metaPixelId);
+    var hasAnalytics = !string.IsNullOrWhiteSpace(gaId) || !string.IsNullOrWhiteSpace(googleAdsId) || !string.IsNullOrWhiteSpace(metaPixelId);
+    var analyticsToolNames = new List<string>();
+    if (!string.IsNullOrWhiteSpace(gaId)) analyticsToolNames.Add("Google Analytics");
+    if (!string.IsNullOrWhiteSpace(googleAdsId)) analyticsToolNames.Add("Google Ads");
+    if (!string.IsNullOrWhiteSpace(metaPixelId)) analyticsToolNames.Add("Meta Pixel");
+    var analyticsToolsLabel = analyticsToolNames.Count switch
+    {
+        0 => "",
+        1 => analyticsToolNames[0],
+        _ => string.Join(", ", analyticsToolNames.Take(analyticsToolNames.Count - 1)) + " y " + analyticsToolNames[^1]
+    };
     // Canonical siempre se arma desde la BaseUrl configurada (https://www.centralpsi.cl), nunca desde el host
     // real de la request - así nunca puede apuntar accidentalmente a la versión sin "www" (hoy da 404) ni a
     // http, sin importar cómo haya llegado la visita. Se excluye el query string a propósito.
@@ -137,7 +148,7 @@
             </div>
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
                 <span class="cp-copyright">&copy; @DateTime.Now.Year CentralPsi. Todos los derechos reservados.</span>
-                <span class="cp-copyright">Pago seguro con Webpay Plus (Transbank) · Valor de la sesión: $37.944 CLP</span>
+                <span class="cp-copyright">Pago seguro con Flow · Valor de la sesión: $37.944 CLP</span>
             </div>
         </div>
     </footer>
@@ -148,7 +159,7 @@
             {
                 <p class="mb-0 small">
                     Usamos cookies estrictamente necesarias para que el sitio funcione, y cookies de analítica
-                    (Google Analytics@(string.IsNullOrWhiteSpace(metaPixelId) ? "" : " y Meta Pixel")) para entender
+                    (@analyticsToolsLabel) para entender
                     cómo se usa el sitio y medir nuestras campañas. Puedes rechazarlas si prefieres no ser medido/a.
                     <a asp-controller="Home" asp-action="Terms" asp-fragment="cookies" class="text-decoration-underline">Más información</a>.
                 </p>
@@ -177,18 +188,20 @@
             var STORAGE_KEY = 'cpCookieConsent';
             var banner = document.getElementById('cpCookieBanner');
             var gaId = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(gaId));
+            var googleAdsId = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(googleAdsId));
             var pixelId = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metaPixelId));
 
             function loadGoogleAnalytics() {
-                if (!gaId) return;
+                if (!gaId && !googleAdsId) return;
                 var s = document.createElement('script');
                 s.async = true;
-                s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=' + (gaId || googleAdsId);
                 document.head.appendChild(s);
                 window.dataLayer = window.dataLayer || [];
                 window.gtag = function () { window.dataLayer.push(arguments); };
                 window.gtag('js', new Date());
-                window.gtag('config', gaId);
+                if (gaId) window.gtag('config', gaId);
+                if (googleAdsId) window.gtag('config', googleAdsId);
             }
 
             function loadMetaPixel() {
