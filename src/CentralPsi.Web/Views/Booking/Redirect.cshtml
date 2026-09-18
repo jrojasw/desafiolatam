@@ -26,8 +26,17 @@
                 <button type="submit">Continuar</button>
             </noscript>
         </form>
+        <p style="font-size:12px;color:#888;">Token: <code>@Model.Token</code></p>
+        <p><button type="button" id="cpContinueNow" style="border:none;background:none;color:#2f6f6a;text-decoration:underline;cursor:pointer;">Continuar ahora</button></p>
         <script>
-            document.getElementById('webpayForm').submit();
+            var submitted = false;
+            function submitNow() {
+                if (submitted) return;
+                submitted = true;
+                document.getElementById('webpayForm').submit();
+            }
+            document.getElementById('cpContinueNow').addEventListener('click', submitNow);
+            setTimeout(submitNow, 4000);
         </script>
     }
 </body>
