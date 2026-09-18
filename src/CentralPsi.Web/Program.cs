@@ -99,15 +99,12 @@ else
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICertificateValidationService, SuperSaludCertificateValidationService>();
 builder.Services.AddHttpClient();
-var paymentProvider = builder.Configuration["App:PaymentProvider"] ?? "Transbank";
-if (paymentProvider.Equals("Flow", StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services.AddScoped<IPaymentService, FlowPaymentService>();
-}
-else
-{
-    builder.Services.AddScoped<IPaymentService, TransbankWebpayService>();
-}
+// Both providers are registered so the patient can choose between Flow and Transbank at checkout
+// (App:PaymentProvider now only decides which one is pre-selected by default in the booking form) -
+// IPaymentServiceFactory resolves the right one per request based on that choice.
+builder.Services.AddScoped<FlowPaymentService>();
+builder.Services.AddScoped<TransbankWebpayService>();
+builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 builder.Services.AddHostedService<AttendanceConfirmationBackgroundService>();
 builder.Services.AddScoped<IPaymentInboxSyncService, PaymentInboxSyncService>();

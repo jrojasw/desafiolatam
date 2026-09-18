@@ -79,6 +79,23 @@
                 </div>
             </div>
 
+            <div class="mb-4">
+                <label class="form-label d-block">Elige tu medio de pago</label>
+                <div class="cp-payment-options">
+                    <label class="cp-payment-option">
+                        <input class="visually-hidden" type="radio" asp-for="PaymentProvider" value="Flow" />
+                        <span class="cp-payment-badge cp-payment-badge--flow">Flow</span>
+                        <span class="cp-payment-option-label">Tarjetas, transferencia y más</span>
+                    </label>
+                    <label class="cp-payment-option">
+                        <input class="visually-hidden" type="radio" asp-for="PaymentProvider" value="Transbank" />
+                        <span class="cp-payment-badge cp-payment-badge--transbank">WebPay Plus</span>
+                        <span class="cp-payment-option-label">Tarjetas de crédito y débito</span>
+                    </label>
+                </div>
+                <span asp-validation-for="PaymentProvider" class="text-danger small"></span>
+            </div>
+
             <div class="form-check my-4">
                 <input asp-for="TermsAccepted" class="form-check-input" />
                 <label asp-for="TermsAccepted" class="form-check-label small">

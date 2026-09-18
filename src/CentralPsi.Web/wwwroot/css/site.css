@@ -450,3 +450,46 @@ a:hover {
   color: #fff;
   border-color: var(--cp-primary);
 }
+
+.cp-payment-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  margin-top: .5rem;
+}
+.cp-payment-option {
+  border: 2px solid var(--cp-border);
+  border-radius: .75rem;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s ease, background .15s ease;
+}
+.cp-payment-option:hover {
+  border-color: var(--cp-primary-light);
+}
+.cp-payment-option:has(input:checked) {
+  border-color: var(--cp-primary);
+  background: #f2f8f7;
+}
+.cp-payment-badge {
+  font-weight: 800;
+  font-size: .9rem;
+  letter-spacing: .02em;
+  padding: .45rem 1.1rem;
+  border-radius: .5rem;
+  color: #fff;
+}
+.cp-payment-badge--flow { background: #1a9a4e; }
+.cp-payment-badge--transbank { background: #002e5f; }
+.cp-payment-option-label {
+  font-size: .8rem;
+  color: var(--cp-muted);
+}
+@media (max-width: 480px) {
+  .cp-payment-options { grid-template-columns: 1fr; }
+}

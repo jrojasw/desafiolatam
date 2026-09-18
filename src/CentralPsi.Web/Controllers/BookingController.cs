@@ -15,7 +15,7 @@ public class BookingController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly ITimeZoneService _timeZoneService;
-    private readonly IPaymentService _paymentService;
+    private readonly IPaymentServiceFactory _paymentServiceFactory;
     private readonly IGoogleCalendarService _googleCalendar;
     private readonly INotificationService _notifications;
     private readonly IRefundCalculationService _refundCalculation;
@@ -25,7 +25,7 @@ public class BookingController : Controller
     public BookingController(
         ApplicationDbContext db,
         ITimeZoneService timeZoneService,
-        IPaymentService paymentService,
+        IPaymentServiceFactory paymentServiceFactory,
         IGoogleCalendarService googleCalendar,
         INotificationService notifications,
         IRefundCalculationService refundCalculation,
@@ -34,7 +34,7 @@ public class BookingController : Controller
     {
         _db = db;
         _timeZoneService = timeZoneService;
-        _paymentService = paymentService;
+        _paymentServiceFactory = paymentServiceFactory;
         _googleCalendar = googleCalendar;
         _notifications = notifications;
         _refundCalculation = refundCalculation;
@@ -78,7 +78,8 @@ public class BookingController : Controller
             ProfessionalName = professional.FullName,
             StartUtc = startUtc,
             StartLocal = _timeZoneService.ToLocal(startUtc),
-            Amount = _appOptions.AppointmentPriceClp
+            Amount = _appOptions.AppointmentPriceClp,
+            PaymentProvider = _appOptions.PaymentProvider
         };
         return View(vm);
     }
@@ -115,6 +116,11 @@ public class BookingController : Controller
         if (!model.TermsAccepted)
         {
             ModelState.AddModelError(nameof(model.TermsAccepted), "Debes aceptar los términos y condiciones para continuar");
+        }
+
+        if (model.PaymentProvider != "Flow" && model.PaymentProvider != "Transbank")
+        {
+            ModelState.AddModelError(nameof(model.PaymentProvider), "Elige un medio de pago");
         }
 
         if (model.IsForMinor)
@@ -171,10 +177,12 @@ public class BookingController : Controller
 
         try
         {
-            var created = await _paymentService.CreateTransactionAsync(buyOrder, sessionId, appointment.Amount, returnUrl, confirmationUrl, appointment.PatientEmail);
+            var paymentService = _paymentServiceFactory.Get(model.PaymentProvider!);
+            var created = await paymentService.CreateTransactionAsync(buyOrder, sessionId, appointment.Amount, returnUrl, confirmationUrl, appointment.PatientEmail);
             _db.Payments.Add(new Payment
             {
                 AppointmentId = appointment.Id,
+                Provider = model.PaymentProvider!,
                 BuyOrder = buyOrder,
                 SessionId = sessionId,
                 Token = created.Token,
@@ -187,7 +195,7 @@ public class BookingController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creando transacción Webpay para la cita {AppointmentId}", appointment.Id);
+            _logger.LogError(ex, "Error creando transacción de pago ({Provider}) para la cita {AppointmentId}", model.PaymentProvider, appointment.Id);
             TempData["ErrorMessage"] = "No pudimos iniciar el pago en este momento. Intenta nuevamente en unos minutos.";
             return RedirectToAction("Details", "Professionals", new { id = professional.Id });
         }
@@ -265,7 +273,7 @@ public class BookingController : Controller
             return (appointment, professional, payment.Status == PaymentStatus.Authorized);
         }
 
-        var commit = await _paymentService.CommitTransactionAsync(providerToken);
+        var commit = await _paymentServiceFactory.Get(payment.Provider).CommitTransactionAsync(providerToken);
         payment.Status = commit.IsApproved ? PaymentStatus.Authorized : PaymentStatus.Failed;
         payment.AuthorizationCode = commit.AuthorizationCode;
         payment.ResponseCode = commit.ResponseCode;

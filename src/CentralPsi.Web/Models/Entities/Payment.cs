@@ -8,13 +8,19 @@ public enum PaymentStatus
     Reversed = 3
 }
 
-/// <summary>Transbank Webpay Plus transaction record, kept as the backup/audit trail for a payment.</summary>
+/// <summary>Payment transaction record (Transbank Webpay Plus or Flow), kept as the backup/audit trail for a
+/// payment.</summary>
 public class Payment
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public Guid AppointmentId { get; set; }
     public Appointment? Appointment { get; set; }
+
+    /// <summary>Which payment provider processed this transaction - "Flow" or "Transbank". The patient
+    /// chooses this at checkout; it decides which IPaymentService implementation is used to commit the
+    /// transaction later (each provider's token is only valid against its own API).</summary>
+    public string Provider { get; set; } = string.Empty;
 
     public string BuyOrder { get; set; } = string.Empty;
     public string SessionId { get; set; } = string.Empty;

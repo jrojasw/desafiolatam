@@ -45,6 +45,10 @@ public class BookingStartViewModel
     [Display(Name = "Declaro ser madre, padre o tutor/a legal y autorizo esta sesión de terapia para la persona indicada arriba")]
     public bool GuardianConsentAccepted { get; set; }
 
+    [Required(ErrorMessage = "Elige un medio de pago")]
+    [Display(Name = "Medio de pago")]
+    public string? PaymentProvider { get; set; }
+
     public static readonly string[] GuardianRelationshipOptions =
     {
         "Madre",
