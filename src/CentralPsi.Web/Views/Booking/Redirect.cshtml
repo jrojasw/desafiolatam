@@ -26,28 +26,8 @@
                 <button type="submit">Continuar</button>
             </noscript>
         </form>
-        <p style="font-size:12px;color:#888;">Token (haz clic para copiar solo el código, sin texto extra):</p>
-        <p>
-            <input id="cpTokenValue" type="text" readonly value="@Model.Token" style="font-family:monospace;font-size:12px;width:320px;text-align:center;" onclick="this.select();" />
-            <button type="button" id="cpCopyToken" style="border:1px solid #2f6f6a;background:none;color:#2f6f6a;border-radius:4px;padding:2px 8px;cursor:pointer;">Copiar</button>
-        </p>
-        <p><button type="button" id="cpContinueNow" style="border:none;background:none;color:#2f6f6a;text-decoration:underline;cursor:pointer;">Continuar ahora</button></p>
         <script>
-            var submitted = false;
-            function submitNow() {
-                if (submitted) return;
-                submitted = true;
-                document.getElementById('webpayForm').submit();
-            }
-            document.getElementById('cpCopyToken').addEventListener('click', function () {
-                var input = document.getElementById('cpTokenValue');
-                input.select();
-                navigator.clipboard.writeText(input.value).catch(function () {
-                    document.execCommand('copy');
-                });
-            });
-            document.getElementById('cpContinueNow').addEventListener('click', submitNow);
-            setTimeout(submitNow, 8000);
+            document.getElementById('webpayForm').submit();
         </script>
     }
 </body>
