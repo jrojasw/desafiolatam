@@ -307,6 +307,21 @@ a:hover {
 .cp-footer-top {
   border-bottom: 1px solid #4d7d78;
 }
+.cp-payment-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  background: #ffffff;
+  border-radius: .4rem;
+  padding: .3rem .5rem;
+}
+.cp-payment-logo img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
 .cp-crisis-notice {
   background: rgba(255,255,255,0.08);
   border-radius: .75rem;
