@@ -292,13 +292,11 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid #4d7d78;
   margin-right: .5rem;
-  font-size: .75rem;
-  font-weight: 800;
+}
+.cp-footer-social a img {
+  width: 30px;
+  height: 30px;
 }
 .cp-footer-divider {
   border-color: #4d7d78;
