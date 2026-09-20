@@ -87,83 +87,19 @@ a:hover {
   color: #ffffff;
 }
 
-/* ---- Popup de bienvenida (elegir paciente / psicólogo) ---- */
-.cp-audience-modal {
-  border: none;
-  border-radius: 1.25rem;
-  overflow: hidden;
-}
-.cp-audience-modal__close {
-  position: absolute;
-  top: .9rem;
-  right: .9rem;
-  z-index: 2;
-}
-.cp-audience-modal__header {
-  padding: 2.25rem 2rem 1.25rem;
-  text-align: center;
-}
-.cp-audience-modal__header img {
-  margin-bottom: 1rem;
-}
-.cp-audience-modal__header h2 {
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--cp-text);
-  margin: 0;
-}
-.cp-audience-modal__options {
-  display: flex;
-  border-top: 1px solid var(--cp-border);
-}
-.cp-audience-modal__option {
-  flex: 1 1 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .3rem;
-  padding: 1.5rem 1rem 1.75rem;
-  text-align: center;
-  text-decoration: none;
-  color: var(--cp-text);
-  transition: background-color .15s ease;
-}
-.cp-audience-modal__option:hover,
-.cp-audience-modal__option:focus-visible {
-  background-color: var(--cp-bg);
-  color: var(--cp-text);
-}
-.cp-audience-modal__option:first-child {
-  border-right: 1px solid var(--cp-border);
-}
-.cp-audience-modal__eyebrow {
-  font-size: .78rem;
-  font-weight: 700;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-  color: var(--cp-muted);
-}
-.cp-audience-modal__label {
-  font-weight: 800;
-  font-size: 1.05rem;
-  color: var(--cp-primary-dark);
-}
-.cp-audience-modal__arrow {
-  color: var(--cp-primary);
-  font-size: 1.1rem;
-}
-@media (max-width: 480px) {
-  .cp-audience-modal__options {
-    flex-direction: column;
-  }
-  .cp-audience-modal__option:first-child {
-    border-right: none;
-    border-bottom: 1px solid var(--cp-border);
-  }
-}
-
 /* ---- Hero slider ---- */
+.cp-hero-eyebrow {
+  background: var(--cp-primary-dark);
+  padding: .6rem 0;
+}
+.cp-hero-eyebrow h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: .02em;
+}
 .cp-hero {
   position: relative;
   overflow: hidden;
@@ -189,7 +125,7 @@ a:hover {
   max-width: 620px;
   z-index: 3;
 }
-.cp-hero .carousel-caption h1 {
+.cp-hero .carousel-caption h2 {
   font-size: 2.4rem;
   font-weight: 800;
   color: #ffffff;
@@ -227,7 +163,7 @@ a:hover {
     max-width: none;
     bottom: 14%;
   }
-  .cp-hero .carousel-caption h1 {
+  .cp-hero .carousel-caption h2 {
     font-size: 1.5rem;
     line-height: 1.25;
   }

@@ -26,31 +26,12 @@
     </script>
 }
 
-<div class="modal fade" id="cpAudienceModal" tabindex="-1" aria-labelledby="cpAudienceModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content cp-audience-modal">
-            <button type="button" class="btn-close cp-audience-modal__close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            <div class="cp-audience-modal__header">
-                <img src="~/images/logo.svg" alt="CentralPsi" height="30" />
-                <h2 id="cpAudienceModalLabel">¿Qué te trae por aquí?</h2>
-            </div>
-            <div class="cp-audience-modal__options">
-                <a class="cp-audience-modal__option" asp-controller="Professionals" asp-action="Index">
-                    <span class="cp-audience-modal__label">Quiero tomar una hora</span>
-                    <span class="cp-audience-modal__eyebrow">Soy paciente</span>
-                    <span class="cp-audience-modal__arrow">→</span>
-                </a>
-                <a class="cp-audience-modal__option" asp-controller="Professionals" asp-action="Register">
-                    <span class="cp-audience-modal__label">Soy psicólogo/a</span>
-                    <span class="cp-audience-modal__eyebrow">Quiero inscribirme</span>
-                    <span class="cp-audience-modal__arrow">→</span>
-                </a>
-            </div>
+<section class="cp-hero" id="cp-hero">
+    <div class="cp-hero-eyebrow">
+        <div class="container">
+            <h1>Psicólogos Online en Chile</h1>
         </div>
     </div>
-</div>
-
-<section class="cp-hero" id="cp-hero">
     @if (Model.Slides.Count > 0)
     {
         <div id="cpCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
@@ -75,7 +56,7 @@
                         @if (!string.IsNullOrWhiteSpace(slide.Title))
                         {
                             <div class="carousel-caption">
-                                <h1>@slide.Title</h1>
+                                <h2>@slide.Title</h2>
                                 @if (!string.IsNullOrWhiteSpace(slide.Subtitle))
                                 {
                                     <p>@slide.Subtitle</p>
@@ -188,14 +169,3 @@
         <a href="/agenda-tu-hora" class="btn cp-btn-primary btn-lg">Agenda tu hora</a>
     </div>
 </section>
-
-@section Scripts {
-    <script>
-        (function () {
-            var modalEl = document.getElementById('cpAudienceModal');
-            if (modalEl && window.bootstrap) {
-                new bootstrap.Modal(modalEl).show();
-            }
-        })();
-    </script>
-}
