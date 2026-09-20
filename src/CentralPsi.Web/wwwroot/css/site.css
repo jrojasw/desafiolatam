@@ -304,6 +304,9 @@ a:hover {
   border-color: #4d7d78;
   opacity: .5;
 }
+.cp-footer-top {
+  border-bottom: 1px solid #4d7d78;
+}
 .cp-crisis-notice {
   background: rgba(255,255,255,0.08);
   border-radius: .75rem;
