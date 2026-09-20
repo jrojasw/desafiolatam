@@ -51,10 +51,6 @@
                     <img src="~/images/logo.svg" alt="CentralPsi" height="42" />
                 </a>
                 <div class="d-flex align-items-center gap-2 order-lg-3">
-                    <!-- CTA de campaña de reclutamiento: visible junto al logo en móvil/tablet mientras
-                         reclutamos profesionales. Cambiar a "Agendar" (Professionals/Index) cuando haya
-                         al menos 15 profesionales inscritos. -->
-                    <a class="btn cp-btn-accent btn-sm d-lg-none" asp-area="" asp-controller="Professionals" asp-action="Register">Soy psicólogo/a</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#cpNavbar" aria-controls="cpNavbar" aria-expanded="false" aria-label="Abrir menú">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -65,7 +61,7 @@
                         <li class="nav-item"><a class="nav-link" href="/agenda-tu-hora">Agenda tu hora</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Professionals" asp-action="Index">Profesionales</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contacto</a></li>
-                        <li class="nav-item ms-lg-2 d-none d-lg-block">
+                        <li class="nav-item ms-lg-2">
                             <a class="btn cp-btn-primary btn-sm" asp-area="" asp-controller="Professionals" asp-action="Register">Soy psicólogo/a</a>
                         </li>
                     </ul>
