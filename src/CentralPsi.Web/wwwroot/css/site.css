@@ -45,6 +45,10 @@ a:hover {
 .cp-navbar .nav-link:hover {
   color: var(--cp-primary);
 }
+.cp-nav-social img {
+  width: 24px;
+  height: 24px;
+}
 
 .cp-btn-primary, .btn.cp-btn-primary {
   background-color: var(--cp-primary);
