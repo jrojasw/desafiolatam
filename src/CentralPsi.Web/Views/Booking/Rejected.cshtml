@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Pago no aprobado";
+    var aborted = ViewData["Aborted"] is true;
+}
+
+<section class="cp-section text-center">
+    <div class="container" style="max-width:640px;">
+        @if (aborted)
+        {
+            <h1 class="cp-section-title">Pago no completado</h1>
+            <p class="cp-section-subtitle">Cancelaste el proceso de pago en Webpay. Tu hora no quedó reservada; puedes intentarlo nuevamente cuando quieras.</p>
+        }
+        else
+        {
+            <h1 class="cp-section-title">El pago no fue aprobado</h1>
+            <p class="cp-section-subtitle">Tu banco rechazó la transacción. No se realizó ningún cobro. Puedes intentarlo nuevamente.</p>
+        }
+        <a asp-controller="Professionals" asp-action="Index" class="btn cp-btn-primary btn-lg">Volver a profesionales</a>
+    </div>
+</section>

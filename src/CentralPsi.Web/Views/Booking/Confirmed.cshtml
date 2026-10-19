@@ -1,0 +1,37 @@
+@using CentralPsi.Web.Models.Entities
+@inject CentralPsi.Web.Services.ITimeZoneService TimeZoneService
+@{
+    ViewData["Title"] = "Pago exitoso";
+    var appointment = ViewData["Appointment"] as Appointment;
+    var professional = ViewData["Professional"] as Professional;
+    var buyOrder = ViewData["BuyOrder"] as string;
+    var culture = new System.Globalization.CultureInfo("es-CL");
+}
+
+<section class="cp-section text-center">
+    <div class="container" style="max-width:640px;">
+        <h1 class="cp-section-title">¡Pago exitoso!</h1>
+        <p class="cp-section-subtitle">
+            Tu hora con <strong>@professional!.FullName</strong> quedó confirmada para el
+            @TimeZoneService.ToLocal(appointment!.ScheduledStartUtc).ToString("dddd d 'de' MMMM, HH:mm 'hrs'", culture).
+            Te enviamos el detalle y el enlace de la sesión a @appointment.PatientEmail.
+        </p>
+        <a asp-controller="Home" asp-action="Index" class="btn cp-btn-primary btn-lg">Volver al inicio</a>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Solo se renderiza esta página cuando ProcessPaymentResultAsync confirmó un pago AUTHORIZED, así
+        // que esta conversión nunca cuenta un intento cancelado o rechazado. transaction_id usa el buy_order
+        // de la transacción (no el Id de la cita) para que Google Ads deduplique si la persona recarga.
+        if (typeof gtag === 'function') {
+            gtag('event', 'conversion', {
+                'send_to': 'AW-846452720/pI68CL2J0fMcEPCvz5MD',
+                'value': @appointment.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                'currency': 'CLP',
+                'transaction_id': '@buyOrder'
+            });
+        }
+    </script>
+}

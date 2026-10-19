@@ -210,8 +210,7 @@ public class BookingController : Controller
         var providerToken = token_ws ?? token;
         if (string.IsNullOrEmpty(providerToken))
         {
-            ViewData["Aborted"] = true;
-            return View("PaymentResult");
+            return RedirectToAction(nameof(Rejected));
         }
 
         try
@@ -219,11 +218,12 @@ public class BookingController : Controller
             var result = await ProcessPaymentResultAsync(providerToken);
             if (result is null) return NotFound();
 
-            ViewData["Aborted"] = false;
-            ViewData["Approved"] = result.Value.Approved;
-            ViewData["Appointment"] = result.Value.Appointment;
-            ViewData["Professional"] = result.Value.Professional;
-            return View("PaymentResult");
+            // Redirect (PRG pattern) instead of rendering directly: Confirmed/Rejected only read the
+            // already-committed result from the database, so reloading the landing page never re-runs
+            // CommitTransactionAsync against the provider.
+            return result.Value.Approved
+                ? RedirectToAction(nameof(Confirmed), new { id = result.Value.Appointment.Id })
+                : RedirectToAction(nameof(Rejected), new { id = result.Value.Appointment.Id });
         }
         catch (Exception ex)
         {
@@ -231,10 +231,35 @@ public class BookingController : Controller
             // anulled before ever entering card data) must not surface as a raw 500 to a paying patient -
             // show the same "no fue aprobado" message they'd see for a declined card.
             _logger.LogError(ex, "Error confirmando el pago con token {Token}", providerToken);
-            ViewData["Aborted"] = false;
-            ViewData["Approved"] = false;
-            return View("PaymentResult");
+            return RedirectToAction(nameof(Rejected));
         }
+    }
+
+    [HttpGet("confirmada/{id:guid}")]
+    public async Task<IActionResult> Confirmed(Guid id)
+    {
+        var appointment = await _db.Appointments
+            .Include(a => a.Professional)
+            .FirstOrDefaultAsync(a => a.Id == id && a.Status == AppointmentStatus.Confirmed);
+        if (appointment?.Professional is null) return NotFound();
+
+        var payment = await _db.Payments
+            .Where(p => p.AppointmentId == id && p.Status == PaymentStatus.Authorized)
+            .OrderByDescending(p => p.CreatedAtUtc)
+            .FirstOrDefaultAsync();
+        if (payment is null) return NotFound();
+
+        ViewData["Appointment"] = appointment;
+        ViewData["Professional"] = appointment.Professional;
+        ViewData["BuyOrder"] = payment.BuyOrder;
+        return View();
+    }
+
+    [HttpGet("rechazada/{id:guid?}")]
+    public IActionResult Rejected(Guid? id)
+    {
+        ViewData["Aborted"] = id is null;
+        return View();
     }
 
     /// <summary>Flow's server-to-server confirmation webhook (urlConfirmation) - Transbank doesn't use this,
