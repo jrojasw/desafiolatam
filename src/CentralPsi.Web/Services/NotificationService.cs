@@ -212,6 +212,18 @@ public class NotificationService : INotificationService
             Paragraph("Equipo CentralPsi"));
         await _email.SendAsync(professional.Email, professional.FullName,
             "CentralPsi - Nueva sesión confirmada", professionalBody);
+
+        var adminBody = Wrap(
+            Heading("Nueva reserva pagada") +
+            Paragraph($@"<strong>{professionalAttendee}</strong> agendó y pagó una sesión con
+                <strong>{professional.FullName}</strong> para el <strong>{when}</strong> (hora de Chile).") +
+            (appointment.IsForMinor
+                ? Paragraph($@"Contacto responsable: {appointment.PatientFullName} ({appointment.GuardianRelationship}) -
+                    {appointment.PatientEmail}, {appointment.PatientPhone}.")
+                : Paragraph($"Paciente: {appointment.PatientEmail}, {appointment.PatientPhone}.")) +
+            Paragraph($@"Monto: ${appointment.Amount:N0} CLP. Profesional: {professional.Email}."));
+        await _email.SendAsync(_options.AdminEmail, "Administrador CentralPsi",
+            "Nueva reserva pagada en CentralPsi", adminBody);
     }
 
     public async Task SendAttendanceConfirmationRequestAsync(Appointment appointment, Professional professional)
