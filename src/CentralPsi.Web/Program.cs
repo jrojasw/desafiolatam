@@ -107,6 +107,7 @@ builder.Services.AddScoped<TransbankWebpayService>();
 builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 builder.Services.AddHostedService<AttendanceConfirmationBackgroundService>();
+builder.Services.AddHostedService<StalePendingPaymentCleanupBackgroundService>();
 builder.Services.AddScoped<IPaymentInboxSyncService, PaymentInboxSyncService>();
 builder.Services.AddScoped<IWhatsAppNotificationService, WhatsAppNotificationService>();
 builder.Services.AddHostedService<PaymentInboxSyncBackgroundService>();

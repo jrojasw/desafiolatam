@@ -206,10 +206,14 @@ public class BookingController : Controller
     public async Task<IActionResult> PaymentReturn(string? token_ws, string? TBK_TOKEN, string? token)
     {
         // Transbank sends token_ws; Flow sends token. TBK_TOKEN present (or nothing) means the user
-        // cancelled/aborted on Transbank's page.
+        // cancelled/aborted on Transbank's page before entering card data.
         var providerToken = token_ws ?? token;
         if (string.IsNullOrEmpty(providerToken))
         {
+            if (!string.IsNullOrEmpty(TBK_TOKEN))
+            {
+                await ReleasePendingSlotAsync(TBK_TOKEN, "sistema (pago cancelado por el paciente)");
+            }
             return RedirectToAction(nameof(Rejected));
         }
 
@@ -229,10 +233,33 @@ public class BookingController : Controller
         {
             // A provider error here (e.g. Flow's getStatus rejecting a token from a purchase the payer
             // anulled before ever entering card data) must not surface as a raw 500 to a paying patient -
-            // show the same "no fue aprobado" message they'd see for a declined card.
+            // show the same "no fue aprobado" message they'd see for a declined card. Still release the slot:
+            // whatever went wrong, this payment isn't going to complete through this token again.
             _logger.LogError(ex, "Error confirmando el pago con token {Token}", providerToken);
+            await ReleasePendingSlotAsync(providerToken, "sistema (error confirmando el pago)");
             return RedirectToAction(nameof(Rejected));
         }
+    }
+
+    /// <summary>Cancels the appointment tied to a payment token if it's still sitting in PendingPayment, so the
+    /// time slot becomes bookable again. Used whenever a payment definitively won't complete through this token
+    /// (patient cancelled on Webpay, or confirming the result threw). A no-op if the payment/appointment was
+    /// already resolved by another path (idempotent, since PaymentReturn and the confirmation webhook can both
+    /// land for the same payment).</summary>
+    private async Task ReleasePendingSlotAsync(string providerToken, string cancelledBy)
+    {
+        var payment = await _db.Payments.Include(p => p.Appointment)
+            .FirstOrDefaultAsync(p => p.Token == providerToken);
+        if (payment?.Appointment is null || payment.Appointment.Status != AppointmentStatus.PendingPayment)
+        {
+            return;
+        }
+
+        payment.Status = PaymentStatus.Failed;
+        payment.Appointment.Status = AppointmentStatus.Cancelled;
+        payment.Appointment.CancelledAtUtc = DateTime.UtcNow;
+        payment.Appointment.CancelledBy = cancelledBy;
+        await _db.SaveChangesAsync();
     }
 
     [HttpGet("confirmada/{id:guid}")]
@@ -329,6 +356,12 @@ public class BookingController : Controller
         }
         else
         {
+            // Declined (not merely aborted - Transbank/Flow actually processed and rejected it): free the
+            // slot immediately instead of leaving it stuck in PendingPayment forever, which otherwise makes it
+            // permanently unbookable by anyone, including the same patient trying again.
+            appointment.Status = AppointmentStatus.Cancelled;
+            appointment.CancelledAtUtc = DateTime.UtcNow;
+            appointment.CancelledBy = "sistema (pago rechazado)";
             await _db.SaveChangesAsync();
         }
 
