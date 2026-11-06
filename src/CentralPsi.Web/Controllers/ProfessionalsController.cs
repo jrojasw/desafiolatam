@@ -92,11 +92,22 @@ public class ProfessionalsController : Controller
         return View(new ProfessionalDetailsViewModel { Professional = professional, SlotGroups = groups });
     }
 
+    [HttpGet("registro")]
+    public IActionResult RegisterLegacyRedirect() => RedirectToActionPermanent(nameof(Register));
+
     [HttpGet("inscripcion")]
     public IActionResult Register()
     {
-        ViewBag.AppOptions = _appOptions;
+        LoadRegisterViewData();
         return View(new ProfessionalRegisterViewModel());
+    }
+
+    /// <summary>Shared by every action that returns the Register view (GET and every POST branch that
+    /// redisplays the form), so the view's ViewBag.AppOptions is never missing - that's what was causing the
+    /// NullReferenceException in Register.cshtml when the form was redisplayed after a validation error.</summary>
+    private void LoadRegisterViewData()
+    {
+        ViewBag.AppOptions = _appOptions;
     }
 
     [HttpGet("inicio-de-actividades")]
@@ -199,6 +210,7 @@ public class ProfessionalsController : Controller
 
         if (!ModelState.IsValid)
         {
+            LoadRegisterViewData();
             return View(model);
         }
 

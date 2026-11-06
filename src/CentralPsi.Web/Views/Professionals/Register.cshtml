@@ -11,8 +11,9 @@
         [DayOfWeek.Saturday] = "Sábado",
         [DayOfWeek.Sunday] = "Domingo",
     };
-    var appOptions = (CentralPsi.Web.Options.AppOptions)ViewBag.AppOptions;
+    var appOptions = ViewBag.AppOptions as CentralPsi.Web.Options.AppOptions ?? new CentralPsi.Web.Options.AppOptions();
     var clCulture = new System.Globalization.CultureInfo("es-CL");
+    var availability = Model?.Availability ?? CentralPsi.Web.Models.ViewModels.ProfessionalRegisterViewModel.BuildDefaultAvailability();
 }
 
 <div class="modal fade" id="cpPagoInfoModal" tabindex="-1" aria-labelledby="cpPagoInfoModalLabel" aria-hidden="true">
@@ -193,12 +194,12 @@
                         <tr><th></th><th>Día</th><th>Desde</th><th>Hasta</th></tr>
                     </thead>
                     <tbody>
-                        @for (var i = 0; i < Model.Availability.Count; i++)
+                        @for (var i = 0; i < availability.Count; i++)
                         {
                             <tr>
                                 <td><input type="checkbox" class="form-check-input" asp-for="Availability[i].Enabled" /></td>
                                 <td>
-                                    @dayNames[Model.Availability[i].DayOfWeek]
+                                    @(dayNames.TryGetValue(availability[i].DayOfWeek, out var dayLabel) ? dayLabel : availability[i].DayOfWeek.ToString())
                                     <input type="hidden" asp-for="Availability[i].DayOfWeek" />
                                 </td>
                                 <td><input type="time" class="form-control form-control-sm" asp-for="Availability[i].StartTime" /></td>
