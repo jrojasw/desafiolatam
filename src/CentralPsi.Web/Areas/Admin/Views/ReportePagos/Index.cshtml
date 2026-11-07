@@ -1,0 +1,97 @@
+@model CentralPsi.Web.Models.ViewModels.ReportePagosViewModel
+@{
+    ViewData["Title"] = "Reporte de pagos";
+}
+
+<h4 class="mb-3">Reporte de pagos</h4>
+<p class="text-muted small">
+    Solo lectura: citas y pagos de los últimos @Model.Days días, sin nombre, correo ni teléfono del paciente.
+</p>
+
+<div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Index" asp-route-days="7" class="btn btn-sm @(Model.Days == 7 ? "cp-btn-primary" : "cp-btn-outline")">7 días</a>
+        <a asp-action="Index" asp-route-days="30" class="btn btn-sm @(Model.Days == 30 ? "cp-btn-primary" : "cp-btn-outline")">30 días</a>
+        <a asp-action="Index" asp-route-days="90" class="btn btn-sm @(Model.Days == 90 ? "cp-btn-primary" : "cp-btn-outline")">90 días</a>
+    </div>
+    <div class="cp-form-card text-center py-2 px-3">
+        <div class="small text-muted">Citas de prueba (nombre/correo con "prueba", "test" o "qa")</div>
+        <div class="fs-5 fw-bold">@Model.TestAppointmentsCount</div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0">Citas y pagos</h5>
+    <a asp-action="ExportarCitasCsv" asp-route-days="@Model.Days" class="btn btn-sm cp-btn-outline">Exportar CSV</a>
+</div>
+<div class="table-responsive mb-4">
+    <table class="table table-sm table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha creación</th>
+                <th>Estado cita</th>
+                <th>Monto cita</th>
+                <th>Pasarela</th>
+                <th>Estado pago</th>
+                <th>Monto pago</th>
+                <th>Código resp.</th>
+                <th>Fecha pago</th>
+                <th>Respuesta cruda (parcial)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Rows.Count == 0)
+            {
+                <tr><td colspan="10" class="text-muted text-center py-3">Sin citas en este rango.</td></tr>
+            }
+            @foreach (var r in Model.Rows)
+            {
+                <tr>
+                    <td><code>@r.AppointmentIdShort</code></td>
+                    <td>@r.FechaCreacionUtc.ToString("yyyy-MM-dd HH:mm") UTC</td>
+                    <td>@r.EstadoCita</td>
+                    <td>$@r.MontoCita.ToString("N0")</td>
+                    <td>@(r.Pasarela ?? "—")</td>
+                    <td>@(r.EstadoPago ?? "—")</td>
+                    <td>@(r.MontoPago is decimal mp ? $"${mp:N0}" : "—")</td>
+                    <td>@(r.CodigoRespuesta?.ToString() ?? "—")</td>
+                    <td>@(r.FechaPagoUtc is DateTime fp ? $"{fp:yyyy-MM-dd HH:mm} UTC" : "—")</td>
+                    <td class="small text-muted" style="max-width:260px;word-break:break-all;">@(r.RespuestaCrudaParcial ?? "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0">Resumen</h5>
+    <a asp-action="ExportarResumenCsv" asp-route-days="@Model.Days" class="btn btn-sm cp-btn-outline">Exportar CSV</a>
+</div>
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle" style="max-width:640px;">
+        <thead>
+            <tr>
+                <th>Estado cita</th>
+                <th>Estado pago</th>
+                <th>Pasarela</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Summary.Count == 0)
+            {
+                <tr><td colspan="4" class="text-muted text-center py-3">Sin datos en este rango.</td></tr>
+            }
+            @foreach (var s in Model.Summary)
+            {
+                <tr>
+                    <td>@s.EstadoCita</td>
+                    <td>@(s.EstadoPago ?? "—")</td>
+                    <td>@(s.Pasarela ?? "—")</td>
+                    <td>@s.Total</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
