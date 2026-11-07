@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CentralPsi.Web.Data.Seed;
 using CentralPsi.Web.Options;
+using CentralPsi.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -24,17 +25,20 @@ public class GoogleCalendarController : Controller
     private readonly GoogleCalendarOptions _options;
     private readonly AppOptions _appOptions;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IGoogleCalendarService _calendarService;
     private readonly ILogger<GoogleCalendarController> _logger;
 
     public GoogleCalendarController(
         IOptions<GoogleCalendarOptions> options,
         IOptions<AppOptions> appOptions,
         IHttpClientFactory httpClientFactory,
+        IGoogleCalendarService calendarService,
         ILogger<GoogleCalendarController> logger)
     {
         _options = options.Value;
         _appOptions = appOptions.Value;
         _httpClientFactory = httpClientFactory;
+        _calendarService = calendarService;
         _logger = logger;
     }
 
@@ -111,5 +115,21 @@ public class GoogleCalendarController : Controller
 
         ViewBag.RefreshToken = refreshTokenElement.GetString();
         return View("Callback");
+    }
+
+    /// <summary>Creates and immediately deletes a short-lived test event (with a Meet link request) through the
+    /// exact same credentials CreateSessionEventAsync uses for real bookings, so the admin can verify the
+    /// connection right away instead of waiting for a real appointment to find out it's broken.</summary>
+    [HttpPost("TestConnection")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TestConnection()
+    {
+        var result = await _calendarService.TestConnectionAsync();
+
+        TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Success
+            ? "Conexión OK: se creó y eliminó un evento de prueba con enlace de Meet."
+            : $"Error de conexión ({result.ErrorType}): {result.ErrorMessage}";
+
+        return RedirectToAction(nameof(Index));
     }
 }

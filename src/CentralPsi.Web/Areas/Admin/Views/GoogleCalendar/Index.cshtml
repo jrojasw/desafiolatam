@@ -44,5 +44,13 @@
         <a asp-action="Connect" class="btn cp-btn-primary">
             @(hasRefreshToken ? "Reconectar cuenta de Google" : "Conectar cuenta de Google")
         </a>
+
+        @if (hasRefreshToken)
+        {
+            <form asp-action="TestConnection" method="post" class="mt-2">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn cp-btn-outline">Probar conexión</button>
+            </form>
+        }
     }
 </div>

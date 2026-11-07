@@ -88,6 +88,75 @@ public class GoogleCalendarService : IGoogleCalendarService
         }
     }
 
+    public async Task<CalendarConnectionTestResult> TestConnectionAsync(CancellationToken ct = default)
+    {
+        if (!IsConfigured())
+        {
+            return new CalendarConnectionTestResult(false, null, "NotConfigured",
+                "Google Calendar no está configurado (GoogleCalendar:Enabled=false o faltan credenciales).");
+        }
+
+        CalendarService service;
+        try
+        {
+            service = BuildCalendarService();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error construyendo el cliente de Google Calendar durante la prueba de conexión");
+            return new CalendarConnectionTestResult(false, null, ex.GetType().Name, ex.Message);
+        }
+
+        Event? created = null;
+        try
+        {
+            var testEvent = new Event
+            {
+                Summary = "Prueba de conexión CentralPsi",
+                Description = "Evento de prueba generado desde el panel de administración para verificar la conexión con Google Calendar. Se elimina automáticamente.",
+                Start = new EventDateTime { DateTimeDateTimeOffset = DateTimeOffset.UtcNow.AddHours(1) },
+                End = new EventDateTime { DateTimeDateTimeOffset = DateTimeOffset.UtcNow.AddHours(1).AddMinutes(15) },
+                ConferenceData = new ConferenceData
+                {
+                    CreateRequest = new CreateConferenceRequest
+                    {
+                        RequestId = Guid.NewGuid().ToString("N"),
+                        ConferenceSolutionKey = new ConferenceSolutionKey { Type = "hangoutsMeet" }
+                    }
+                }
+            };
+
+            var insertRequest = service.Events.Insert(testEvent, _options.CalendarId);
+            insertRequest.ConferenceDataVersion = 1;
+            created = await insertRequest.ExecuteAsync(ct);
+
+            var meetLink = created.HangoutLink
+                ?? created.ConferenceData?.EntryPoints?.FirstOrDefault(e => e.EntryPointType == "video")?.Uri;
+
+            _logger.LogInformation("Prueba de conexión a Google Calendar exitosa (evento de prueba {EventId} creado y será eliminado)", created.Id);
+            return new CalendarConnectionTestResult(true, meetLink, null, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error en la prueba de conexión a Google Calendar");
+            return new CalendarConnectionTestResult(false, null, ex.GetType().Name, ex.Message);
+        }
+        finally
+        {
+            if (created?.Id is not null)
+            {
+                try
+                {
+                    await service.Events.Delete(_options.CalendarId, created.Id).ExecuteAsync(ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "No se pudo eliminar el evento de prueba {EventId} de Google Calendar", created.Id);
+                }
+            }
+        }
+    }
+
     public async Task CancelSessionEventAsync(string googleEventId, CancellationToken ct = default)
     {
         if (!IsConfigured())
