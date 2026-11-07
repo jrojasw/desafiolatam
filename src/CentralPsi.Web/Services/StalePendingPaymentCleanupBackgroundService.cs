@@ -58,9 +58,13 @@ public class StalePendingPaymentCleanupBackgroundService : BackgroundService
             appointment.Status = AppointmentStatus.Cancelled;
             appointment.CancelledAtUtc = DateTime.UtcNow;
             appointment.CancelledBy = "sistema (pago abandonado)";
-            if (appointment.Payment is { Status: PaymentStatus.Initiated })
+            if (appointment.Payment is { Status: PaymentStatus.Initiated } payment)
             {
-                appointment.Payment.Status = PaymentStatus.Failed;
+                payment.Status = PaymentStatus.Failed;
+                if (string.IsNullOrWhiteSpace(payment.RawResponseJson))
+                {
+                    payment.RawResponseJson = $$"""{"reason":"Abandonado: la cita siguió en PendingPayment por más de {{StaleAfter.TotalMinutes:0}} minutos sin que el paciente volviera de la pasarela de pago"}""";
+                }
             }
         }
 

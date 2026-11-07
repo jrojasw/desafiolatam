@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CentralPsi.Web.Data;
 using CentralPsi.Web.Models.Entities;
 using CentralPsi.Web.Models.ViewModels;
@@ -156,6 +157,10 @@ public class BookingController : Controller
             PatientPhone = model.PatientPhone.Trim(),
             ScheduledStartUtc = model.StartUtc,
             ScheduledEndUtc = model.StartUtc.AddMinutes(_appOptions.SessionDurationMinutes),
+            // Explicit instead of relying on the property's default initializer: this is the single moment a
+            // booking is created, and every report/finance query downstream treats this as ground truth for
+            // "when did this happen" - it must always be DateTime.UtcNow (Kind=Utc), never left implicit.
+            CreatedAtUtc = DateTime.UtcNow,
             Amount = _appOptions.AppointmentPriceClp,
             ProfessionalPayoutAmount = _appOptions.ProfessionalPayoutClp,
             TermsAccepted = true,
@@ -187,7 +192,8 @@ public class BookingController : Controller
                 SessionId = sessionId,
                 Token = created.Token,
                 Amount = appointment.Amount,
-                Status = PaymentStatus.Initiated
+                Status = PaymentStatus.Initiated,
+                CreatedAtUtc = DateTime.UtcNow
             });
             await _db.SaveChangesAsync();
 
@@ -212,7 +218,8 @@ public class BookingController : Controller
         {
             if (!string.IsNullOrEmpty(TBK_TOKEN))
             {
-                await ReleasePendingSlotAsync(TBK_TOKEN, "sistema (pago cancelado por el paciente)");
+                await ReleasePendingSlotAsync(TBK_TOKEN, "sistema (pago cancelado por el paciente)",
+                    JsonSerializer.Serialize(new { reason = "Paciente canceló en Webpay antes de ingresar datos de pago (sin token_ws, solo TBK_TOKEN)" }));
             }
             return RedirectToAction(nameof(Rejected));
         }
@@ -236,7 +243,8 @@ public class BookingController : Controller
             // show the same "no fue aprobado" message they'd see for a declined card. Still release the slot:
             // whatever went wrong, this payment isn't going to complete through this token again.
             _logger.LogError(ex, "Error confirmando el pago con token {Token}", providerToken);
-            await ReleasePendingSlotAsync(providerToken, "sistema (error confirmando el pago)");
+            await ReleasePendingSlotAsync(providerToken, "sistema (error confirmando el pago)",
+                JsonSerializer.Serialize(new { reason = "Excepción al confirmar el pago (ver logs del servidor para el detalle completo)", errorType = ex.GetType().Name, errorMessage = ex.Message }));
             return RedirectToAction(nameof(Rejected));
         }
     }
@@ -245,8 +253,14 @@ public class BookingController : Controller
     /// time slot becomes bookable again. Used whenever a payment definitively won't complete through this token
     /// (patient cancelled on Webpay, or confirming the result threw). A no-op if the payment/appointment was
     /// already resolved by another path (idempotent, since PaymentReturn and the confirmation webhook can both
-    /// land for the same payment).</summary>
-    private async Task ReleasePendingSlotAsync(string providerToken, string cancelledBy)
+    /// land for the same payment).
+    ///
+    /// diagnosticDetail is a JSON-ish string explaining why this was called - unlike the normal decline path in
+    /// ProcessPaymentResultAsync, nothing here ever calls the provider, so there's no real Transbank/Flow
+    /// response to record. Without this, a payment released through this path used to end up with Status=Failed
+    /// but ResponseCode and RawResponseJson both null, which looks exactly like a bug in the report instead of
+    /// what it actually is: a payment that was never allowed to reach the provider at all.</summary>
+    private async Task ReleasePendingSlotAsync(string providerToken, string cancelledBy, string diagnosticDetail)
     {
         var payment = await _db.Payments.Include(p => p.Appointment)
             .FirstOrDefaultAsync(p => p.Token == providerToken);
@@ -256,6 +270,10 @@ public class BookingController : Controller
         }
 
         payment.Status = PaymentStatus.Failed;
+        if (string.IsNullOrWhiteSpace(payment.RawResponseJson))
+        {
+            payment.RawResponseJson = diagnosticDetail;
+        }
         payment.Appointment.Status = AppointmentStatus.Cancelled;
         payment.Appointment.CancelledAtUtc = DateTime.UtcNow;
         payment.Appointment.CancelledBy = cancelledBy;

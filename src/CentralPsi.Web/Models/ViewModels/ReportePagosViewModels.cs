@@ -6,6 +6,7 @@ public class ReportePagosRow
 {
     public string AppointmentIdShort { get; set; } = string.Empty;
     public DateTime FechaCreacionUtc { get; set; }
+    public DateTime FechaSesionUtc { get; set; }
     public string EstadoCita { get; set; } = string.Empty;
     public decimal MontoCita { get; set; }
     public string? Pasarela { get; set; }
@@ -14,6 +15,10 @@ public class ReportePagosRow
     public int? CodigoRespuesta { get; set; }
     public DateTime? FechaPagoUtc { get; set; }
     public string? RespuestaCrudaParcial { get; set; }
+
+    /// <summary>True when FechaCreacionUtc looks unreliable (default/too-old value) and a different date
+    /// (payment or session) had to be used to decide whether this row belongs in the selected range.</summary>
+    public bool FechaSospechosa { get; set; }
 }
 
 public class ReportePagosSummaryRow
@@ -30,4 +35,5 @@ public class ReportePagosViewModel
     public List<ReportePagosRow> Rows { get; set; } = new();
     public List<ReportePagosSummaryRow> Summary { get; set; } = new();
     public int TestAppointmentsCount { get; set; }
+    public int FechasSospechosasCount { get; set; }
 }
