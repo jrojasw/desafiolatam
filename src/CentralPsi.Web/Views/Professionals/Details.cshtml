@@ -98,6 +98,11 @@
 
 @section Scripts {
     <script>
+        if (typeof gtag === 'function') {
+            gtag('event', 'llega_seleccion_horario', {
+                professional_id: '@Model.Professional.Id'
+            });
+        }
         document.querySelectorAll('.slot-option').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.slot-option').forEach(b => b.classList.remove('active'));

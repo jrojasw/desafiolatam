@@ -44,6 +44,17 @@ public class ProfessionalRegisterViewModel
     [Display(Name = "Experiencia y forma de trabajar")]
     public string Experience { get; set; } = string.Empty;
 
+    [Display(Name = "¿A quién atiendes? (opcional, puedes marcar varias)")]
+    public List<string> TargetAudiences { get; set; } = new();
+
+    public static readonly string[] TargetAudienceOptions =
+    {
+        "Adultos",
+        "Adolescentes",
+        "Parejas",
+        "Niños"
+    };
+
     public static readonly string[] OrientationOptions =
     {
         "Cognitivo-conductual",

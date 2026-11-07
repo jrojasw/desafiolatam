@@ -22,6 +22,12 @@ public class Professional
     public string Experience { get; set; } = string.Empty;
     public string? ProfilePhotoPath { get; set; }
 
+    /// <summary>Who this professional attends - comma-separated subset of TargetAudienceOptions (e.g.
+    /// "Adultos,Parejas"). Added after launch, so existing professionals have this null/empty until they update
+    /// their profile; the public listing's audience filter only appears once at least one professional has a
+    /// value here, since filtering against an empty field everywhere would be meaningless.</summary>
+    public string? TargetAudiences { get; set; }
+
     // Documents (stored outside wwwroot, never public - served through authenticated admin action only)
     public string CedulaFrontPath { get; set; } = string.Empty;
     public string CedulaBackPath { get; set; } = string.Empty;

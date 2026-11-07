@@ -2,38 +2,82 @@
 @{
     ViewData["Title"] = "Profesionales disponibles";
     var bookingEnabled = (bool)(ViewBag.BookingEnabled ?? true);
+    var culture = new System.Globalization.CultureInfo("es-CL");
+
+    string Initials(string fullName)
+    {
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var first = parts.Length > 0 ? parts[0][0] : '?';
+        var last = parts.Length > 1 ? parts[^1][0] : (char?)null;
+        return last is null ? first.ToString().ToUpper() : $"{char.ToUpper(first)}{char.ToUpper(last.Value)}";
+    }
+
+    string[] avatarPalette = { "#2f6f6a", "#c07a3e", "#4a938c", "#7a5ca8", "#b05c6e" };
+    int ColorIndex(string seed) => Math.Abs(seed.GetHashCode()) % avatarPalette.Length;
 }
 
 <section class="cp-section">
     <div class="container">
         <h1 class="cp-section-title">Profesionales disponibles</h1>
+        <p class="cp-section-subtitle mb-2">
+            Sesiones por videollamada. Elige psicólogo/a, agenda y paga en minutos.
+        </p>
         <p class="cp-section-subtitle">
             Todos los psicólogos y psicólogas publicados en CentralPsi validaron su certificado ante la
             Superintendencia de Salud antes de aparecer en este listado.
         </p>
 
-        @if (Model.Professionals.Count == 0)
+        @if (Model.AvailableAudiences.Count > 0)
+        {
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <a asp-action="Index" class="btn btn-sm @(Model.SelectedAudience is null ? "cp-btn-primary" : "cp-btn-outline")">Todos</a>
+                @foreach (var aud in Model.AvailableAudiences)
+                {
+                    <a asp-action="Index" asp-route-audience="@aud" class="btn btn-sm @(Model.SelectedAudience == aud ? "cp-btn-primary" : "cp-btn-outline")">@aud</a>
+                }
+            </div>
+        }
+
+        @if (Model.Items.Count == 0)
         {
             <p class="text-muted">Aún no hay profesionales publicados. ¡Vuelve pronto!</p>
         }
         else
         {
             <div class="row gy-4 justify-content-center justify-content-sm-start">
-                @foreach (var professional in Model.Professionals)
+                @foreach (var item in Model.Items)
                 {
+                    var professional = item.Professional;
                     <div class="col-6 col-md-4 col-lg-3">
                         <div class="cp-card cp-professional-card">
-                            <img src="@(string.IsNullOrEmpty(professional.ProfilePhotoPath) ? Url.Content("~/images/seed/avatar-placeholder.svg") : Url.Content(professional.ProfilePhotoPath))"
-                                 class="cp-professional-photo" alt="@professional.FullName" />
+                            @if (string.IsNullOrEmpty(professional.ProfilePhotoPath))
+                            {
+                                <div class="cp-professional-photo cp-avatar-initials" style="background-color:@avatarPalette[ColorIndex(professional.Id.ToString())];">
+                                    @Initials(professional.FullName)
+                                </div>
+                            }
+                            else
+                            {
+                                <img src="@Url.Content(professional.ProfilePhotoPath)" class="cp-professional-photo" alt="@professional.FullName" />
+                            }
                             <div class="p-3">
                                 <h5 class="mb-1">@professional.FullName</h5>
                                 @if (!string.IsNullOrWhiteSpace(professional.Specialty))
                                 {
                                     <div class="text-muted small mb-1">@professional.Specialty</div>
                                 }
-                                <div class="small mb-2"><strong>Orientación:</strong> @professional.Orientation</div>
+                                <div class="small mb-1"><strong>Orientación:</strong> @professional.Orientation</div>
+                                <div class="small mb-2 fw-bold" style="color:var(--cp-primary-dark);">$@Model.PriceClp.ToString("N0", culture) CLP</div>
+                                @if (item.NextSlotLocal is DateTime next)
+                                {
+                                    <div class="cp-badge-category mb-2 d-inline-block">Próxima hora: @next.ToString("dd MMM, HH:mm", culture)</div>
+                                }
+                                else
+                                {
+                                    <div class="small text-muted mb-2">Sin horas por ahora</div>
+                                }
                                 <p class="small text-muted mb-3">@(professional.Experience.Length > 140 ? professional.Experience[..140] + "…" : professional.Experience)</p>
-                                <a asp-action="Details" asp-route-id="@professional.Id" class="btn cp-btn-primary w-100">@(bookingEnabled ? "Ver perfil y agendar" : "Ver perfil")</a>
+                                <a asp-action="Details" asp-route-id="@professional.Id" class="btn cp-btn-primary w-100 cp-track-ver-perfil" data-professional-id="@professional.Id">@(bookingEnabled ? "Ver perfil y agendar" : "Ver perfil")</a>
                             </div>
                         </div>
                     </div>
@@ -42,3 +86,19 @@
         }
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (function () {
+            document.querySelectorAll('.cp-track-ver-perfil').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'click_ver_perfil', {
+                            professional_id: link.getAttribute('data-professional-id')
+                        });
+                    }
+                });
+            });
+        })();
+    </script>
+}

@@ -3,9 +3,23 @@ using CentralPsi.Web.Models.Entities;
 
 namespace CentralPsi.Web.Models.ViewModels;
 
+public class ProfessionalListItem
+{
+    public Professional Professional { get; set; } = null!;
+
+    /// <summary>Null when the professional has no bookable slot in the lookahead window - these sort last.</summary>
+    public DateTime? NextSlotLocal { get; set; }
+}
+
 public class ProfessionalListViewModel
 {
-    public List<Professional> Professionals { get; set; } = new();
+    public List<ProfessionalListItem> Items { get; set; } = new();
+    public decimal PriceClp { get; set; }
+
+    /// <summary>Only the audiences at least one listed professional actually has, so the filter never offers an
+    /// option that would return zero results.</summary>
+    public List<string> AvailableAudiences { get; set; } = new();
+    public string? SelectedAudience { get; set; }
 }
 
 public class ProfessionalDetailsViewModel

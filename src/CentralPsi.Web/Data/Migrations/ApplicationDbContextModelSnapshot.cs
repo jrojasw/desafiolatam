@@ -633,6 +633,9 @@ namespace CentralPsi.Web.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("TargetAudiences")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("TaxComplianceAcceptedAtUtc")
                         .HasColumnType("timestamp with time zone");
 

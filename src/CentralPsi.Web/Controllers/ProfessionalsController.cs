@@ -47,17 +47,68 @@ public class ProfessionalsController : Controller
 
     [HttpGet("")]
     [HttpGet("/agenda-tu-hora")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? audience = null)
     {
         var professionals = await _db.Professionals
             .Where(p => p.Status == ProfessionalStatus.Verified)
             .OrderBy(p => p.FullName)
             .ToListAsync();
+
+        var availableAudiences = professionals
+            .SelectMany(p => (p.TargetAudiences ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Distinct()
+            .OrderBy(a => a)
+            .ToList();
+
+        if (!string.IsNullOrWhiteSpace(audience) && availableAudiences.Contains(audience))
+        {
+            professionals = professionals
+                .Where(p => (p.TargetAudiences ?? string.Empty)
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Contains(audience))
+                .ToList();
+        }
+        else
+        {
+            audience = null;
+        }
+
+        // Next-slot lookup is one GetAvailableSlotsAsync call per professional - fine at today's roster size,
+        // but would need batching/caching if the number of professionals grows a lot.
+        var items = new List<ProfessionalListItem>();
+        foreach (var professional in professionals)
+        {
+            DateTime? nextSlotLocal = null;
+            if (_appOptions.BookingEnabled)
+            {
+                var slots = await _slots.GetAvailableSlotsAsync(professional.Id);
+                var next = slots.OrderBy(s => s.StartUtc).FirstOrDefault();
+                if (next is not null)
+                {
+                    nextSlotLocal = _timeZoneService.ToLocal(next.StartUtc);
+                }
+            }
+            items.Add(new ProfessionalListItem { Professional = professional, NextSlotLocal = nextSlotLocal });
+        }
+
+        var ordered = items
+            .OrderBy(i => i.NextSlotLocal.HasValue ? 0 : 1)
+            .ThenBy(i => i.NextSlotLocal ?? DateTime.MaxValue)
+            .ThenBy(i => string.IsNullOrWhiteSpace(i.Professional.ProfilePhotoPath) ? 1 : 0)
+            .ThenBy(i => i.Professional.FullName)
+            .ToList();
+
         ViewBag.BookingEnabled = _appOptions.BookingEnabled;
         // Accesible también desde /agenda-tu-hora (mismo contenido) - siempre se declara /profesionales como
         // la URL canónica para que buscadores no la traten como contenido duplicado.
         ViewData["CanonicalPath"] = "/profesionales";
-        return View(new ProfessionalListViewModel { Professionals = professionals });
+        return View(new ProfessionalListViewModel
+        {
+            Items = ordered,
+            PriceClp = _appOptions.AppointmentPriceClp,
+            AvailableAudiences = availableAudiences,
+            SelectedAudience = audience
+        });
     }
 
     [HttpGet("{id:guid}")]
@@ -226,6 +277,7 @@ public class ProfessionalsController : Controller
             Rut = model.Rut?.Trim(),
             Specialty = string.IsNullOrWhiteSpace(model.Specialty) ? null : model.Specialty.Trim(),
             Orientation = resolvedOrientation,
+            TargetAudiences = model.TargetAudiences.Count > 0 ? string.Join(",", model.TargetAudiences) : null,
             Experience = model.Experience.Trim(),
             CertificateValidationCode = model.CertificateValidationCode.Trim(),
             Status = ProfessionalStatus.PendingVerification,

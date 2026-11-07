@@ -102,6 +102,18 @@
                     <span asp-validation-for="OrientationOther" class="text-danger small"></span>
                 </div>
                 <div class="col-12">
+                    <label class="form-label">¿A quién atiendes? (opcional, puedes marcar varias)</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        @foreach (var option in CentralPsi.Web.Models.ViewModels.ProfessionalRegisterViewModel.TargetAudienceOptions)
+                        {
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="TargetAudiences" value="@option" id="audience-@option" />
+                                <label class="form-check-label" for="audience-@option">@option</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-12">
                     <label asp-for="Experience" class="form-label"></label>
                     <div class="form-text mb-1">
                         Cuéntale a quien te va a agendar cómo trabajas: tu formación, tu enfoque en sesión, con

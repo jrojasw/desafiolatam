@@ -141,8 +141,9 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var tipsModal = new bootstrap.Modal(document.getElementById('cpSessionTipsModal'));
-            tipsModal.show();
+            // The "Antes de tu sesión" modal is opened on demand by the button above the form
+            // (data-bs-toggle="modal") - it must not also auto-open here, or it covers the booking form
+            // (nombre/correo/teléfono) the instant the page loads, on every single visit.
 
             var minorCheck = document.getElementById('isForMinorCheck');
             var minorWrapper = document.getElementById('minorFieldsWrapper');
