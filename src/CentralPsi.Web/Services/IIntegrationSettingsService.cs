@@ -5,6 +5,19 @@ namespace CentralPsi.Web.Services;
 public static class IntegrationSettingKeys
 {
     public const string GoogleCalendarRefreshToken = "GoogleCalendar:RefreshToken";
+
+    /// <summary>Timestamp (round-trip "O" format) of the last time CreateSessionEventAsync succeeded.</summary>
+    public const string GoogleCalendarLastEventSuccessAtUtc = "GoogleCalendar:LastEventSuccessAtUtc";
+
+    /// <summary>Timestamp of the last time CreateSessionEventAsync failed.</summary>
+    public const string GoogleCalendarLastEventErrorAtUtc = "GoogleCalendar:LastEventErrorAtUtc";
+
+    /// <summary>Type + message of that last failure, for display in the admin panel.</summary>
+    public const string GoogleCalendarLastEventErrorMessage = "GoogleCalendar:LastEventErrorMessage";
+
+    /// <summary>Timestamp of the last admin alert email sent for a Calendar failure - rate-limits that email
+    /// independently of how often the underlying failure itself happens.</summary>
+    public const string GoogleCalendarLastAdminAlertAtUtc = "GoogleCalendar:LastAdminAlertAtUtc";
 }
 
 public interface IIntegrationSettingsService

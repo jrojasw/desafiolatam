@@ -16,13 +16,17 @@ public record CalendarConnectionTestResult(
     int? TokenLength,
     bool? TokenStartsWithExpectedPrefix,
     bool? TokenHadWhitespace,
-    string? ClientIdLast6,
-    DateTime? TokenUpdatedAtUtc);
+    string? ClientIdFirst12,
+    DateTime? TokenUpdatedAtUtc,
+    string? ConnectedEmail);
 
 /// <summary>Non-network status snapshot, used by the Admin/GoogleCalendar index page - HasRefreshToken/TokenSource
 /// reflect whichever source (database or GoogleCalendar:RefreshToken env var) actually resolves, not just
 /// whether the env var happens to be set.</summary>
 public record GoogleCalendarStatus(bool Configured, bool HasClientCredentials, string TokenSource, DateTime? TokenUpdatedAtUtc);
+
+/// <summary>Last known outcome of CreateSessionEventAsync, for the Admin/GoogleCalendar status panel.</summary>
+public record GoogleCalendarEventHistory(DateTime? LastSuccessAtUtc, DateTime? LastErrorAtUtc, string? LastErrorMessage);
 
 public interface IGoogleCalendarService
 {
@@ -39,4 +43,6 @@ public interface IGoogleCalendarService
     Task<string?> GetConnectedAccountEmailAsync(CancellationToken ct = default);
 
     Task<GoogleCalendarStatus> GetStatusAsync(CancellationToken ct = default);
+
+    Task<GoogleCalendarEventHistory> GetEventHistoryAsync(CancellationToken ct = default);
 }

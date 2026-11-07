@@ -52,12 +52,16 @@ public class GoogleCalendarController : Controller
     public async Task<IActionResult> Index()
     {
         var status = await _calendarService.GetStatusAsync();
+        var history = await _calendarService.GetEventHistoryAsync();
         ViewBag.HasClientCredentials = status.HasClientCredentials;
         ViewBag.HasRefreshToken = status.Configured;
         ViewBag.TokenSource = status.TokenSource;
         ViewBag.TokenUpdatedAtUtc = status.TokenUpdatedAtUtc;
         ViewBag.Enabled = _options.Enabled;
         ViewBag.RedirectUri = RedirectUri;
+        ViewBag.LastEventSuccessAtUtc = history.LastSuccessAtUtc;
+        ViewBag.LastEventErrorAtUtc = history.LastErrorAtUtc;
+        ViewBag.LastEventErrorMessage = history.LastErrorMessage;
         return View();
     }
 
@@ -148,11 +152,11 @@ public class GoogleCalendarController : Controller
             (result.TokenLength is int len ? $"Largo: {len} caracteres. " : "Sin token. ") +
             (result.TokenStartsWithExpectedPrefix is bool startsOk ? $"Empieza con \"1//\": {(startsOk ? "sí" : "no")}. " : "") +
             (result.TokenHadWhitespace is bool hadWs ? $"Tenía espacios/saltos de línea: {(hadWs ? "sí" : "no")}. " : "") +
-            (result.ClientIdLast6 is not null ? $"Client ID termina en \"...{result.ClientIdLast6}\". " : "") +
+            (result.ClientIdFirst12 is not null ? $"Client ID empieza con \"{result.ClientIdFirst12}...\". " : "") +
             (result.TokenUpdatedAtUtc is DateTime updated ? $"Guardado el {updated:yyyy-MM-dd HH:mm} UTC." : "Sin fecha de guardado (viene de variable de entorno, no de la base de datos).");
 
         TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Success
-            ? $"Conexión OK: se creó y eliminó un evento de prueba con enlace de Meet. {diagnostics}"
+            ? $"Conexión OK: se creó y eliminó un evento de prueba con enlace de Meet. Conectado como {result.ConnectedEmail ?? "(correo no disponible)"}. {diagnostics}"
             : $"Error de conexión ({result.ErrorType}): {result.ErrorMessage} — {diagnostics}";
 
         return RedirectToAction(nameof(Index));

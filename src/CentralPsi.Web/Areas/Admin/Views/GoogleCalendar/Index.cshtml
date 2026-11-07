@@ -6,6 +6,9 @@
     DateTime? tokenUpdatedAtUtc = ViewBag.TokenUpdatedAtUtc;
     bool enabled = ViewBag.Enabled;
     string redirectUri = ViewBag.RedirectUri;
+    DateTime? lastEventSuccessAtUtc = ViewBag.LastEventSuccessAtUtc;
+    DateTime? lastEventErrorAtUtc = ViewBag.LastEventErrorAtUtc;
+    string? lastEventErrorMessage = ViewBag.LastEventErrorMessage;
 }
 
 <div class="cp-form-card" style="max-width:680px;">
@@ -36,6 +39,27 @@
             <tr>
                 <td>Integración habilitada (GoogleCalendar:Enabled)</td>
                 <td>@(enabled ? "✅ Sí" : "❌ No")</td>
+            </tr>
+            <tr>
+                <td>Último evento creado con éxito</td>
+                <td>@(lastEventSuccessAtUtc is DateTime s ? $"{s:yyyy-MM-dd HH:mm} UTC" : "— (ninguno registrado todavía)")</td>
+            </tr>
+            <tr>
+                <td>Último error al crear un evento</td>
+                <td>
+                    @if (lastEventErrorAtUtc is DateTime e)
+                    {
+                        <span class="text-danger">@e.ToString("yyyy-MM-dd HH:mm") UTC</span>
+                        @if (!string.IsNullOrWhiteSpace(lastEventErrorMessage))
+                        {
+                            <div class="text-muted small">@lastEventErrorMessage</div>
+                        }
+                    }
+                    else
+                    {
+                        @:— (ninguno registrado)
+                    }
+                </td>
             </tr>
         </tbody>
     </table>
