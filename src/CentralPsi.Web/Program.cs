@@ -105,6 +105,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<FlowPaymentService>();
 builder.Services.AddScoped<TransbankWebpayService>();
 builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
+builder.Services.AddScoped<IIntegrationSettingsService, IntegrationSettingsService>();
 builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 builder.Services.AddHostedService<AttendanceConfirmationBackgroundService>();
 builder.Services.AddHostedService<StalePendingPaymentCleanupBackgroundService>();

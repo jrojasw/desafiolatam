@@ -11,9 +11,10 @@ namespace CentralPsi.Web.Areas.Admin.Controllers;
 /// <summary>
 /// One-time OAuth setup so Google Calendar/Meet event creation works with a free Google account (no Workspace
 /// domain-wide delegation required). The admin clicks "Conectar", grants access, and Google redirects back here
-/// with an authorization code that gets exchanged for a refresh token - which then has to be copied into the
-/// GoogleCalendar:RefreshToken app setting (an env var in production) by hand, since this app has no writable
-/// persistent config store to save it into automatically.
+/// with an authorization code that gets exchanged for a refresh token - which Callback now saves straight to the
+/// database (encrypted, via IIntegrationSettingsService) instead of just displaying it for a human to copy into
+/// Render by hand. GoogleCalendar:RefreshToken (the env var) still works as a fallback for the very first deploy,
+/// but every reconnect after that is self-contained: no copy-paste step, nothing to get wrong.
 /// </summary>
 [Area("Admin")]
 [Authorize(Roles = DataSeeder.AdminRole)]
@@ -26,6 +27,7 @@ public class GoogleCalendarController : Controller
     private readonly AppOptions _appOptions;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IGoogleCalendarService _calendarService;
+    private readonly IIntegrationSettingsService _settings;
     private readonly ILogger<GoogleCalendarController> _logger;
 
     public GoogleCalendarController(
@@ -33,22 +35,27 @@ public class GoogleCalendarController : Controller
         IOptions<AppOptions> appOptions,
         IHttpClientFactory httpClientFactory,
         IGoogleCalendarService calendarService,
+        IIntegrationSettingsService settings,
         ILogger<GoogleCalendarController> logger)
     {
         _options = options.Value;
         _appOptions = appOptions.Value;
         _httpClientFactory = httpClientFactory;
         _calendarService = calendarService;
+        _settings = settings;
         _logger = logger;
     }
 
     private string RedirectUri => $"{_appOptions.BaseUrl}/Admin/GoogleCalendar/Callback";
 
     [HttpGet("")]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        ViewBag.HasClientCredentials = !string.IsNullOrWhiteSpace(_options.ClientId) && !string.IsNullOrWhiteSpace(_options.ClientSecret);
-        ViewBag.HasRefreshToken = !string.IsNullOrWhiteSpace(_options.RefreshToken);
+        var status = await _calendarService.GetStatusAsync();
+        ViewBag.HasClientCredentials = status.HasClientCredentials;
+        ViewBag.HasRefreshToken = status.Configured;
+        ViewBag.TokenSource = status.TokenSource;
+        ViewBag.TokenUpdatedAtUtc = status.TokenUpdatedAtUtc;
         ViewBag.Enabled = _options.Enabled;
         ViewBag.RedirectUri = RedirectUri;
         return View();
@@ -113,7 +120,17 @@ public class GoogleCalendarController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        ViewBag.RefreshToken = refreshTokenElement.GetString();
+        var refreshToken = refreshTokenElement.GetString();
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            TempData["ErrorMessage"] = "Google devolvió un refresh_token vacío.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        await _settings.SetAsync(IntegrationSettingKeys.GoogleCalendarRefreshToken, refreshToken.Trim());
+        _logger.LogInformation("Nuevo refresh token de Google Calendar guardado en la base de datos.");
+
+        ViewBag.ConnectedEmail = await _calendarService.GetConnectedAccountEmailAsync();
         return View("Callback");
     }
 
@@ -126,9 +143,17 @@ public class GoogleCalendarController : Controller
     {
         var result = await _calendarService.TestConnectionAsync();
 
+        var diagnostics =
+            $"Origen del token: {result.TokenSource}. " +
+            (result.TokenLength is int len ? $"Largo: {len} caracteres. " : "Sin token. ") +
+            (result.TokenStartsWithExpectedPrefix is bool startsOk ? $"Empieza con \"1//\": {(startsOk ? "sí" : "no")}. " : "") +
+            (result.TokenHadWhitespace is bool hadWs ? $"Tenía espacios/saltos de línea: {(hadWs ? "sí" : "no")}. " : "") +
+            (result.ClientIdLast6 is not null ? $"Client ID termina en \"...{result.ClientIdLast6}\". " : "") +
+            (result.TokenUpdatedAtUtc is DateTime updated ? $"Guardado el {updated:yyyy-MM-dd HH:mm} UTC." : "Sin fecha de guardado (viene de variable de entorno, no de la base de datos).");
+
         TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Success
-            ? "Conexión OK: se creó y eliminó un evento de prueba con enlace de Meet."
-            : $"Error de conexión ({result.ErrorType}): {result.ErrorMessage}";
+            ? $"Conexión OK: se creó y eliminó un evento de prueba con enlace de Meet. {diagnostics}"
+            : $"Error de conexión ({result.ErrorType}): {result.ErrorMessage} — {diagnostics}";
 
         return RedirectToAction(nameof(Index));
     }

@@ -1,23 +1,24 @@
 @{
     ViewData["Title"] = "Google Calendar conectado";
-    string refreshToken = ViewBag.RefreshToken;
+    string? connectedEmail = ViewBag.ConnectedEmail;
 }
 
 <div class="cp-form-card" style="max-width:680px;">
     <h4 class="mb-3">✅ Cuenta de Google conectada</h4>
+    @if (!string.IsNullOrWhiteSpace(connectedEmail))
+    {
+        <p>Conectado como <strong>@connectedEmail</strong>.</p>
+    }
+    else
+    {
+        <p class="text-muted small">
+            Quedó conectado, aunque no pudimos confirmar automáticamente el correo de la cuenta - puedes
+            verificarlo con el botón "Probar conexión" en la página anterior.
+        </p>
+    }
     <p class="text-muted small">
-        Copia este <strong>refresh token</strong> y agrégalo como variable de entorno en Render:
+        El refresh token quedó guardado de forma cifrada en la base de datos - no necesitas copiarlo ni agregarlo
+        como variable de entorno. Desde ahora las citas confirmadas deberían generar su enlace de Google Meet.
     </p>
-    <div class="p-3 mb-3" style="background:#eef6f5;border-radius:.5rem;font-family:monospace;word-break:break-all;">
-        GoogleCalendar__RefreshToken=@refreshToken
-    </div>
-    <p class="text-muted small">
-        Después de agregar esa variable, agrega también <code>GoogleCalendar__Enabled=true</code> y espera a que
-        Render redespliegue. Desde ese momento las citas confirmadas tendrán su enlace de Google Meet.
-    </p>
-    <div class="alert alert-warning small">
-        Este token no se guarda en ningún lado — si sales de esta página sin copiarlo, tendrás que volver a
-        conectar la cuenta desde el botón "Reconectar" para generar uno nuevo.
-    </div>
     <a asp-action="Index" class="btn cp-btn-outline">Volver</a>
 </div>

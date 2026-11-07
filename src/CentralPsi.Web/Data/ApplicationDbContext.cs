@@ -28,6 +28,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
     public DbSet<FinanceSettings> FinanceSettings => Set<FinanceSettings>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
+    public DbSet<IntegrationSetting> IntegrationSettings => Set<IntegrationSetting>();
     public DbSet<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey> DataProtectionKeys => Set<Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -109,6 +110,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IDataPro
         builder.Entity<ErrorLog>(e =>
         {
             e.HasIndex(x => x.OccurredAtUtc);
+        });
+
+        builder.Entity<IntegrationSetting>(e =>
+        {
+            e.HasKey(s => s.Key);
         });
     }
 }

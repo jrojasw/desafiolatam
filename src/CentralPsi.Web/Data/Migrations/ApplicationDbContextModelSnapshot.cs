@@ -362,6 +362,23 @@ namespace CentralPsi.Web.Data.Migrations
                     b.ToTable("FinanceSettings");
                 });
 
+            modelBuilder.Entity("CentralPsi.Web.Models.Entities.IntegrationSetting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EncryptedValue")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("IntegrationSettings");
+                });
+
             modelBuilder.Entity("CentralPsi.Web.Models.Entities.NewsArticle", b =>
                 {
                     b.Property<Guid>("Id")
